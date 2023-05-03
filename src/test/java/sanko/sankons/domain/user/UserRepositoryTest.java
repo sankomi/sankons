@@ -4,9 +4,11 @@ import java.util.List;
 
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.junit.jupiter.api.*; //Test, AfterAll
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
 public class UserRepositoryTest {
@@ -36,7 +38,7 @@ public class UserRepositoryTest {
 		//then
 		User user = users.get(0);
 		assertEquals(user.getUsername(), username);
-		assertEquals(user.getPassword(), password);
+		assertTrue(user.checkPassword(password));
 	}
 
 }
