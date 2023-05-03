@@ -5,11 +5,13 @@ import jakarta.persistence.*; //Entity, Table, Id, Column, GeneratedValue, Gener
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import lombok.*; //Builder, Getter, NoArgsConstructor
 
+import sanko.sankons.domain.TimedEntity;
+
 @Getter
 @NoArgsConstructor
 @Entity
 @Table(name = "users")
-public class User {
+public class User extends TimedEntity {
 
 	private static final String SECRET = "muchsecret";
 	private static final int SALT_LENGTH = 16;
