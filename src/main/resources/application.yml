@@ -6,3 +6,9 @@ spring:
   datasource:
     url: jdbc:sqlite:db/sqlite.db
     driver-class-name: org.sqlite.JDBC
+  session:
+    store-type: redis
+  data:
+    redis:
+      host: localhost
+      port: 6379
