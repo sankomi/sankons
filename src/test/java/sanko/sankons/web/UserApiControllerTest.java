@@ -4,13 +4,13 @@ import org.junit.jupiter.api.*; //Test, BeforeEach, AfterEach
 import org.springframework.beans.factory.annotation.*; //Autowired, Value
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.http.*; //HttpStatus, ResponseEntity
+import org.springframework.http.*; //HttpStatus, ResponseEntity, HttpHeaders, HttpMethod, HttpEntity
 import org.springframework.boot.test.web.client.TestRestTemplate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import sanko.sankons.web.dto.UserCreateRequestDto;
+import sanko.sankons.web.dto.*; //UserCreateRequest, UserLoginRequest
 import sanko.sankons.domain.user.UserRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -34,18 +34,53 @@ public class UserApiControllerTest {
 	@Test
 	public void testCreateUser() {
 		//given
-		String url = "http://localhost:" + port + "/api/v1/user/";
-		UserCreateRequestDto requestDto = UserCreateRequestDto.builder()
+		String url = "http://localhost:" + port + "/api/v1/user/create";
+		UserCreateRequest request = UserCreateRequest.builder()
 			.username("username")
 			.password("password")
 			.build();
 
 		//when
-		ResponseEntity<Long> response = restTemplate.postForEntity(url, requestDto, Long.class);
+		ResponseEntity<Long> response = restTemplate.postForEntity(url, request, Long.class);
 
 		//then
-		assertEquals(response.getStatusCode(), HttpStatus.OK);
-		assertTrue(response.getBody() == 1L);
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertTrue(response.getBody() > 0L);
+	}
+
+	@Test
+	public void testLogin() {
+		//given
+		String username = "login";
+		String password = "password";
+		String createUrl = "http://localhost:" + port + "/api/v1/user/create";
+		UserCreateRequest createRequest = UserCreateRequest.builder()
+			.username(username)
+			.password(password)
+			.build();
+		restTemplate.postForEntity(createUrl, createRequest, Long.class);
+
+		//when
+		String loginUrl = "http://localhost:" + port + "/api/v1/user/login";
+		UserLoginRequest loginRequest = UserLoginRequest.builder()
+			.username(username)
+			.password(password)
+			.build();
+		ResponseEntity<Boolean> loginResponse = restTemplate.postForEntity(loginUrl, loginRequest, Boolean.class);
+		String cookie = loginResponse.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
+
+		//then
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Cookie", cookie);
+		HttpEntity request = new HttpEntity(null, headers);
+		ResponseEntity<String> response = restTemplate.exchange(
+			loginUrl,
+			HttpMethod.GET,
+			request,
+			String.class
+		);
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertEquals(username, response.getBody());
 	}
 
 }

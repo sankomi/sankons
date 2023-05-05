@@ -38,7 +38,7 @@ public class UserRepositoryTest {
 
 		//then
 		User user = users.get(0);
-		assertEquals(user.getUsername(), username);
+		assertEquals( username, user.getUsername());
 		assertTrue(user.checkPassword(password));
 	}
 
