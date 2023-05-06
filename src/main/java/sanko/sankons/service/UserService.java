@@ -42,4 +42,10 @@ public class UserService {
 		return false;
 	}
 
+	public Boolean logout() {
+		httpSession.removeAttribute("user");
+		
+		return true;
+	}
+
 }

@@ -1,6 +1,6 @@
 package sanko.sankons.web;
 
-import org.springframework.web.bind.annotation.*; //RestController, RequestBody, RequestMapping, GetMapping, PostMapping
+import org.springframework.web.bind.annotation.*; //RestController, RequestBody, RequestMapping, GetMapping, PostMapping, DeleteMapping
 import lombok.RequiredArgsConstructor;
 
 import sanko.sankons.service.UserService;
@@ -26,6 +26,11 @@ public class UserApiController {
 	@PostMapping("/login")
 	public Boolean login(@RequestBody UserLoginRequest request) {
 		return userService.login(request);
+	}
+
+	@DeleteMapping("/login")
+	public Boolean logout() {
+		return userService.logout();
 	}
 
 }

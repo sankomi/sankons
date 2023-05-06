@@ -73,6 +73,7 @@ public class UserApiControllerTest {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("Cookie", cookie);
 		HttpEntity request = new HttpEntity(null, headers);
+		
 		ResponseEntity<String> response = restTemplate.exchange(
 			loginUrl,
 			HttpMethod.GET,
@@ -81,6 +82,49 @@ public class UserApiControllerTest {
 		);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals(username, response.getBody());
+	}
+
+	@Test
+	public void testLogout() {
+		//given
+		String username = "logout";
+		String password = "password";
+		String createUrl = "http://localhost:" + port + "/api/v1/user/create";
+		UserCreateRequest createRequest = UserCreateRequest.builder()
+			.username(username)
+			.password(password)
+			.build();
+		restTemplate.postForEntity(createUrl, createRequest, Long.class);
+
+		String loginUrl = "http://localhost:" + port + "/api/v1/user/login";
+		UserLoginRequest loginRequest = UserLoginRequest.builder()
+			.username(username)
+			.password(password)
+			.build();
+		ResponseEntity<Boolean> loginResponse = restTemplate.postForEntity(loginUrl, loginRequest, Boolean.class);
+		String cookie = loginResponse.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
+		
+		//when
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Cookie", cookie);
+		HttpEntity request = new HttpEntity(null, headers);
+		
+		ResponseEntity<Boolean> logoutResponse = restTemplate.exchange(
+			loginUrl,
+			HttpMethod.DELETE,
+			request,
+			Boolean.class
+		);
+
+		//then
+		ResponseEntity<String> response = restTemplate.exchange(
+			loginUrl,
+			HttpMethod.GET,
+			request,
+			String.class
+		);
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertEquals(null, response.getBody());
 	}
 
 }
