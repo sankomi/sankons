@@ -57,7 +57,7 @@ public class UserApiControllerTest {
 			.password("password")
 			.build();
 		UserCreateRequest noPassword = UserCreateRequest.builder()
-			.username("password")
+			.username("nopassword")
 			.password(null)
 			.build();
 
@@ -67,7 +67,33 @@ public class UserApiControllerTest {
 
 		//then
 		assertEquals(HttpStatus.BAD_REQUEST, usernameResponse.getStatusCode());
+		assertEquals(null, usernameResponse.getBody());
 		assertEquals(HttpStatus.BAD_REQUEST, passwordResponse.getStatusCode());
+		assertEquals(null, passwordResponse.getBody());
+	}
+
+	@Test
+	public void testInvalidUser() {
+		//given
+		String url = "http://localhost:" + port + "/api/v1/user/create";
+		UserCreateRequest blankUsername = UserCreateRequest.builder()
+			.username("  ")
+			.password("password")
+			.build();
+		UserCreateRequest emptyPassword = UserCreateRequest.builder()
+			.username("emptypassword")
+			.password("")
+			.build();
+
+		//when
+		ResponseEntity<Long> usernameResponse = restTemplate.postForEntity(url, blankUsername, Long.class);
+		ResponseEntity<Long> passwordResponse = restTemplate.postForEntity(url, emptyPassword, Long.class);
+
+		//then
+		assertEquals(HttpStatus.BAD_REQUEST, usernameResponse.getStatusCode());
+		assertEquals(null, usernameResponse.getBody());
+		assertEquals(HttpStatus.BAD_REQUEST, passwordResponse.getStatusCode());
+		assertEquals(null, passwordResponse.getBody());
 	}
 
 	@Test
@@ -85,6 +111,7 @@ public class UserApiControllerTest {
 
 		//then
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertEquals(null, response.getBody());
 	}
 
 	@Test
@@ -121,6 +148,30 @@ public class UserApiControllerTest {
 		);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals(username, response.getBody());
+	}
+
+	@Test
+	public void testInvalidLogin() {
+		//given
+		String loginUrl = "http://localhost:" + port + "/api/v1/user/login";
+		UserLoginRequest blankUsername = UserLoginRequest.builder()
+			.username(" ")
+			.password("password")
+			.build();
+		UserLoginRequest emptyPassword = UserLoginRequest.builder()
+			.username("username")
+			.password("")
+			.build();
+
+		//when
+		ResponseEntity<Boolean> usernameResponse = restTemplate.postForEntity(loginUrl, blankUsername, Boolean.class);
+		ResponseEntity<Boolean> passwordResponse = restTemplate.postForEntity(loginUrl, emptyPassword, Boolean.class);
+
+		//then
+		assertEquals(HttpStatus.BAD_REQUEST, usernameResponse.getStatusCode());
+		assertEquals(false, usernameResponse.getBody());
+		assertEquals(HttpStatus.BAD_REQUEST, passwordResponse.getStatusCode());
+		assertEquals(false, passwordResponse.getBody());
 	}
 
 	@Test

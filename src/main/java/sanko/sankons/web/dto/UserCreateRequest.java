@@ -1,5 +1,7 @@
 package sanko.sankons.web.dto;
 
+import jakarta.validation.constraints.*; //NotBlank, NotEmpty
+
 import lombok.*; //Getter, NoArgsConstructor, Builder
 
 import sanko.sankons.domain.user.User;
@@ -8,7 +10,10 @@ import sanko.sankons.domain.user.User;
 @NoArgsConstructor
 public class UserCreateRequest {
 
+	@NotBlank
 	private String username;
+
+	@NotEmpty
 	private String password;
 
 	@Builder
