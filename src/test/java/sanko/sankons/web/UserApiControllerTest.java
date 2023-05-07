@@ -62,14 +62,12 @@ public class UserApiControllerTest {
 			.build();
 
 		//when
-		ResponseEntity<Long> usernameResponse = restTemplate.postForEntity(url, noUsername, Long.class);
-		ResponseEntity<Long> passwordResponse = restTemplate.postForEntity(url, noPassword, Long.class);
+		ResponseEntity<Object> usernameResponse = restTemplate.postForEntity(url, noUsername, Object.class);
+		ResponseEntity<Object> passwordResponse = restTemplate.postForEntity(url, noPassword, Object.class);
 
 		//then
 		assertEquals(HttpStatus.BAD_REQUEST, usernameResponse.getStatusCode());
-		assertEquals(null, usernameResponse.getBody());
 		assertEquals(HttpStatus.BAD_REQUEST, passwordResponse.getStatusCode());
-		assertEquals(null, passwordResponse.getBody());
 	}
 
 	@Test
@@ -86,14 +84,12 @@ public class UserApiControllerTest {
 			.build();
 
 		//when
-		ResponseEntity<Long> usernameResponse = restTemplate.postForEntity(url, blankUsername, Long.class);
-		ResponseEntity<Long> passwordResponse = restTemplate.postForEntity(url, emptyPassword, Long.class);
+		ResponseEntity<Object> usernameResponse = restTemplate.postForEntity(url, blankUsername, Object.class);
+		ResponseEntity<Object> passwordResponse = restTemplate.postForEntity(url, emptyPassword, Object.class);
 
 		//then
 		assertEquals(HttpStatus.BAD_REQUEST, usernameResponse.getStatusCode());
-		assertEquals(null, usernameResponse.getBody());
 		assertEquals(HttpStatus.BAD_REQUEST, passwordResponse.getStatusCode());
-		assertEquals(null, passwordResponse.getBody());
 	}
 
 	@Test
@@ -107,11 +103,10 @@ public class UserApiControllerTest {
 		restTemplate.postForEntity(url, request, Long.class);
 
 		//when
-		ResponseEntity<Long> response = restTemplate.postForEntity(url, request, Long.class);
+		ResponseEntity<Object> response = restTemplate.postForEntity(url, request, Object.class);
 
 		//then
-		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-		assertEquals(null, response.getBody());
+		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
 	}
 
 	@Test
@@ -164,14 +159,12 @@ public class UserApiControllerTest {
 			.build();
 
 		//when
-		ResponseEntity<Boolean> usernameResponse = restTemplate.postForEntity(loginUrl, blankUsername, Boolean.class);
-		ResponseEntity<Boolean> passwordResponse = restTemplate.postForEntity(loginUrl, emptyPassword, Boolean.class);
+		ResponseEntity<Object> usernameResponse = restTemplate.postForEntity(loginUrl, blankUsername, Object.class);
+		ResponseEntity<Object> passwordResponse = restTemplate.postForEntity(loginUrl, emptyPassword, Object.class);
 
 		//then
 		assertEquals(HttpStatus.BAD_REQUEST, usernameResponse.getStatusCode());
-		assertEquals(false, usernameResponse.getBody());
 		assertEquals(HttpStatus.BAD_REQUEST, passwordResponse.getStatusCode());
-		assertEquals(false, passwordResponse.getBody());
 	}
 
 	@Test

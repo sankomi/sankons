@@ -7,6 +7,7 @@ import org.springframework.http.*; //ResponseEntity, HttpStatus
 import org.springframework.validation.Errors;
 import lombok.RequiredArgsConstructor;
 
+import sanko.sankons.domain.user.User;
 import sanko.sankons.service.UserService;
 import sanko.sankons.web.dto.*; //UserCreateRequest, UserLoginRequest
 
@@ -18,18 +19,14 @@ public class UserApiController {
 	private final UserService userService;
 
 	@PostMapping("/create")
-	public ResponseEntity<Long> create(@Valid @RequestBody UserCreateRequest request, Errors errors) {
-		if (errors.hasErrors()) {
-			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+	public Long create(@Valid @RequestBody UserCreateRequest request) throws Exception {
+		User user = userService.create(request);
+
+		if (user == null) {
+			throw new Exception("Could not create user");
 		}
 
-		Long id = userService.create(request);
-
-		if (id == null) {
-			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-		}
-
-		return new ResponseEntity<>(id, HttpStatus.OK);
+		return user.getId();
 	}
 
 	@GetMapping("/login")
@@ -38,12 +35,8 @@ public class UserApiController {
 	}
 
 	@PostMapping("/login")
-	public ResponseEntity<Boolean> login(@Valid @RequestBody UserLoginRequest request, Errors errors) {
-		if (errors.hasErrors()) {
-			return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
-		}
-
-		return new ResponseEntity<>(userService.login(request), HttpStatus.OK);
+	public Boolean login(@Valid @RequestBody UserLoginRequest request) {
+		return userService.login(request);
 	}
 
 	@DeleteMapping("/login")

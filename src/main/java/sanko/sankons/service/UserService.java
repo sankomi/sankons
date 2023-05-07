@@ -17,9 +17,9 @@ public class UserService {
 	private final HttpSession httpSession;
 	private final UserRepository userRepository;
 
-	public Long create(UserCreateRequest request) {
+	public User create(UserCreateRequest request) {
 		try {
-			return userRepository.save(request.toEntity()).getId();
+			return userRepository.save(request.toEntity());
 		} catch (Exception e) {
 			return null;
 		}

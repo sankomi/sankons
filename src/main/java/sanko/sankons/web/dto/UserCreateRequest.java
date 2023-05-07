@@ -10,10 +10,10 @@ import sanko.sankons.domain.user.User;
 @NoArgsConstructor
 public class UserCreateRequest {
 
-	@NotBlank
+	@NotBlank(message = "Username can't be blank")
 	private String username;
 
-	@NotEmpty
+	@NotEmpty(message = "Password can't be empty")
 	private String password;
 
 	@Builder
