@@ -49,6 +49,45 @@ public class UserApiControllerTest {
 	}
 
 	@Test
+	public void testEmptyUser() {
+		//given
+		String url = "http://localhost:" + port + "/api/v1/user/create";
+		UserCreateRequest noUsername = UserCreateRequest.builder()
+			.username(null)
+			.password("password")
+			.build();
+		UserCreateRequest noPassword = UserCreateRequest.builder()
+			.username("password")
+			.password(null)
+			.build();
+
+		//when
+		ResponseEntity<Long> usernameResponse = restTemplate.postForEntity(url, noUsername, Long.class);
+		ResponseEntity<Long> passwordResponse = restTemplate.postForEntity(url, noPassword, Long.class);
+
+		//then
+		assertEquals(HttpStatus.BAD_REQUEST, usernameResponse.getStatusCode());
+		assertEquals(HttpStatus.BAD_REQUEST, passwordResponse.getStatusCode());
+	}
+
+	@Test
+	public void testUniqueUser() {
+		//given
+		String url = "http://localhost:" + port + "/api/v1/user/create";
+		UserCreateRequest request = UserCreateRequest.builder()
+			.username("unique")
+			.password("password")
+			.build();
+		restTemplate.postForEntity(url, request, Long.class);
+
+		//when
+		ResponseEntity<Long> response = restTemplate.postForEntity(url, request, Long.class);
+
+		//then
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+	}
+
+	@Test
 	public void testLogin() {
 		//given
 		String username = "login";

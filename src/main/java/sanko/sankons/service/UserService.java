@@ -17,16 +17,19 @@ public class UserService {
 	private final HttpSession httpSession;
 	private final UserRepository userRepository;
 
-	@Transactional
 	public Long create(UserCreateRequest request) {
-		return userRepository.save(request.toEntity()).getId();
+		try {
+			return userRepository.save(request.toEntity()).getId();
+		} catch (Exception e) {
+			return null;
+		}
 	}
 
 	public String checkLogin() {
 		SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
 
 		if (sessionUser == null) return null;
-		
+
 		return sessionUser.getUsername();
 	}
 

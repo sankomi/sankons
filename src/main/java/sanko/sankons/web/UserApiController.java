@@ -1,6 +1,7 @@
 package sanko.sankons.web;
 
 import org.springframework.web.bind.annotation.*; //RestController, RequestBody, RequestMapping, GetMapping, PostMapping, DeleteMapping
+import org.springframework.http.*; //ResponseEntity, HttpStatus
 import lombok.RequiredArgsConstructor;
 
 import sanko.sankons.service.UserService;
@@ -14,8 +15,14 @@ public class UserApiController {
 	private final UserService userService;
 
 	@PostMapping("/create")
-	public Long create(@RequestBody UserCreateRequest request) {
-		return userService.create(request);
+	public ResponseEntity<Long> create(@RequestBody UserCreateRequest request) {
+		Long id = userService.create(request);
+
+		if (id == null) {
+			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+		}
+
+		return new ResponseEntity<>(id, HttpStatus.OK);
 	}
 
 	@GetMapping("/login")
