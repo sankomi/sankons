@@ -3,8 +3,6 @@ package sanko.sankons.web;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.*; //RestController, RequestBody, RequestMapping, GetMapping, PostMapping, DeleteMapping
-import org.springframework.http.*; //ResponseEntity, HttpStatus
-import org.springframework.validation.Errors;
 import lombok.RequiredArgsConstructor;
 
 import sanko.sankons.domain.user.User;
