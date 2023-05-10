@@ -31,6 +31,7 @@ public class PostRepositoryTest {
 		//given
 		String username = "poster";
 		String password = "password";
+		String file = "file.txt";
 		String content = "content";
 
 		User user = userRepository.save(User.builder()
@@ -41,6 +42,7 @@ public class PostRepositoryTest {
 		//when
 		postRepository.save(Post.builder()
 			.poster(user)
+			.image(file)
 			.content(content)
 			.build());
 		List<Post> posts = postRepository.findAll();
@@ -48,6 +50,7 @@ public class PostRepositoryTest {
 		//then
 		Post post = posts.get(0);
 		assertEquals(user.getId(), post.getPoster().getId());
+		assertEquals(file, post.getImage());
 		assertEquals(content, post.getContent());
 	}
 

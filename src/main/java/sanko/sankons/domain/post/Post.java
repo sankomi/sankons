@@ -22,12 +22,16 @@ public class Post extends TimedEntity {
 	@ManyToOne
 	private User poster;
 
+	@Column(name = "image")
+	private String image;
+
 	@Column(name = "content")
 	private String content;
 
 	@Builder
-	public Post(User poster, String content) {
+	public Post(User poster, String image, String content) {
 		this.poster = poster;
+		this.image = image;
 		this.content = content;
 	}
 
