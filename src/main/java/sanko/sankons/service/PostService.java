@@ -1,6 +1,8 @@
 package sanko.sankons.service;
 
 import java.io.File;
+import java.util.List;
+import java.util.stream.Collectors;
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Service;
@@ -12,6 +14,8 @@ import sanko.sankons.domain.user.UserRepository;
 import sanko.sankons.domain.post.Post;
 import sanko.sankons.domain.post.PostRepository;
 import sanko.sankons.web.dto.PostPostRequest;
+import sanko.sankons.web.dto.PostListRequest;
+import sanko.sankons.web.dto.PostViewResponse;
 import sanko.sankons.web.dto.SessionUser;
 
 @RequiredArgsConstructor
@@ -30,11 +34,7 @@ public class PostService {
 		}
 
 		User user = userRepository.findById(sessionUser.getId())
-			.orElse(null);
-
-		if (user == null) {
-			throw new Exception("Invalid user");
-		}
+			.orElseThrow(() -> new Exception("Invalid user"));
 
 		String filename = file.getOriginalFilename();
 		File path = new File("files");
@@ -55,6 +55,20 @@ public class PostService {
 			.image(filename)
 			.content(request.getContent())
 			.build());
+	}
+
+	public PostViewResponse view(Long id) throws Exception {
+		Post post = postRepository.findById(id)
+			.orElseThrow(() -> new Exception("Could not find post"));
+
+		return new PostViewResponse(post);
+	}
+
+	public List<PostViewResponse> list(PostListRequest request) {
+		return postRepository.findAll()
+			.stream()
+			.map(PostViewResponse::new)
+			.collect(Collectors.toList());
 	}
 
 }
