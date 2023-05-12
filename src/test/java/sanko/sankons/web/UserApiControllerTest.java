@@ -133,7 +133,7 @@ public class UserApiControllerTest {
 		//then
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(HttpHeaders.COOKIE, cookie);
-		HttpEntity request = new HttpEntity(null, headers);
+		HttpEntity<Object> request = new HttpEntity<>(null, headers);
 		
 		ResponseEntity<String> response = restTemplate.exchange(
 			loginUrl,
@@ -190,7 +190,7 @@ public class UserApiControllerTest {
 		//when
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(HttpHeaders.COOKIE, cookie);
-		HttpEntity request = new HttpEntity(null, headers);
+		HttpEntity<Object> request = new HttpEntity<>(null, headers);
 		
 		ResponseEntity<Boolean> logoutResponse = restTemplate.exchange(
 			loginUrl,

@@ -1,72 +1,100 @@
 package sanko.sankons.web;
 
-import org.junit.jupiter.api.*; //Test, BeforeEach, AfterEach
-import org.springframework.beans.factory.annotation.*; //Autowired, Value
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.http.*; //HttpStatus, ResponseEntity, HttpHeaders, HttpMethod, HttpEntity, MediaType
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.junit.jupiter.api.*; //Test, BeforeAll
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.mockito.ArgumentMatchers.any;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.hamcrest.Matchers.is;
 
-import sanko.sankons.web.dto.*; //UserCreateRequest, UserLoginRequest, PostPostRequest
+import sanko.sankons.domain.user.User;
+import sanko.sankons.domain.post.Post;
+import sanko.sankons.service.PostService;
+import sanko.sankons.web.dto.PostPostRequest;
+import sanko.sankons.web.dto.PostViewResponse;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@WebMvcTest(PostApiController.class)
 public class PostApiControllerTest {
 
-	@Value("${local.server.port}")
-	private int port;
-
 	@Autowired
-	private TestRestTemplate restTemplate;
+	private MockMvc mockMvc;
 
-	@Test
-	public void testPostPost() {
-		/*
-		//given
-		String username = "postpost";
-		String password = "password";
+	@MockBean
+	private PostService postService;
 
-		String createUrl = "http://localhost:" + port + "/api/v1/user/create";
-		UserCreateRequest createRequest = UserCreateRequest.builder()
+	private static final String username = "username";
+	private static final String password = "password";
+	private static final String image = "image.jpg";
+	private static final String content = "content";
+
+	private static User user;
+	private static Post post;
+
+	@BeforeAll
+	public static void beforeAll() {
+		user = User.builder()
 			.username(username)
 			.password(password)
 			.build();
-		restTemplate.postForEntity(createUrl, createRequest, Long.class);
 
-		String loginUrl = "http://localhost:" + port + "/api/v1/user/login";
-		UserLoginRequest loginRequest = UserLoginRequest.builder()
-			.username(username)
-			.password(password)
-			.build();
-		ResponseEntity<Boolean> loginResponse = restTemplate.postForEntity(loginUrl, loginRequest, Boolean.class);
-		String cookie = loginResponse.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
-
-		//when
-		String content = "content";
-
-		String postUrl = "http://localhost:" + port + "/api/v1/post/post";
-		PostPostRequest postRequest = PostPostRequest.builder()
+		post = Post.builder()
+			.poster(user)
+			.image(image)
 			.content(content)
 			.build();
+	}
 
-		HttpHeaders headers = new HttpHeaders();
-		headers.add(HttpHeaders.COOKIE, cookie);
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		HttpEntity request = new HttpEntity(postRequest, headers);
+	@Test
+	public void testPostPost() throws Exception {
+		when(postService.post(any(PostPostRequest.class), any(MultipartFile.class)))
+			.thenReturn(post);
 
-		ResponseEntity<Long> postResponse = restTemplate.exchange(
-			postUrl,
-			HttpMethod.POST,
-			request,
-			Long.class
+		MultipartFile multipartFile = mock(MultipartFile.class);
+		when(multipartFile.getOriginalFilename()).thenReturn(image);
+		MockMultipartFile file = new MockMultipartFile("file", multipartFile.getInputStream());
+
+		PostPostRequest postPostRequest = PostPostRequest.builder()
+			.content(content)
+			.build();
+		String json = new ObjectMapper().writeValueAsString(postPostRequest);
+		MockMultipartFile request = new MockMultipartFile(
+			"request",
+			"request",
+			MediaType.APPLICATION_JSON_VALUE,
+			json.getBytes()
 		);
 
-		//then
-		assertEquals(HttpStatus.OK, postResponse.getStatusCode());
-		assertTrue(postResponse.getBody() > 0L);
-		*/
+		mockMvc.perform(
+			multipart("/api/v1/post/post")
+				.file(file)
+				.file(request)
+		)
+			.andExpect(status().isOk());
+	}
+
+	@Test
+	public void testPostView() throws Exception {
+		Long postId = 1L;
+
+		when(postService.view(postId)).thenReturn(new PostViewResponse(post));
+
+		mockMvc.perform(get("/api/v1/post/" + postId))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.image", is(image)))
+			.andExpect(jsonPath("$.content", is(content)))
+			.andExpect(jsonPath("$.poster.username", is(username)));
 	}
 
 }

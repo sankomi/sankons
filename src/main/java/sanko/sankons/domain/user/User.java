@@ -3,6 +3,7 @@ package sanko.sankons.domain.user;
 import jakarta.persistence.*; //Entity, Table, Id, Column, GeneratedValue, GenerationType
 
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
+import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder.SecretKeyFactoryAlgorithm;
 import lombok.*; //Builder, Getter, NoArgsConstructor
 
 import sanko.sankons.domain.TimedEntity;
@@ -16,7 +17,6 @@ public class User extends TimedEntity {
 	private static final String SECRET = "muchsecret";
 	private static final int SALT_LENGTH = 16;
 	private static final int ITERATIONS = 65536;
-	private static final int HASH_WIDTH = 256;
 
 	@Id
 	@Column(name = "id")
@@ -36,12 +36,12 @@ public class User extends TimedEntity {
 	}
 
 	private String encodePassword(String password) {
-		Pbkdf2PasswordEncoder encoder = new Pbkdf2PasswordEncoder(SECRET, SALT_LENGTH, ITERATIONS, HASH_WIDTH);
+		Pbkdf2PasswordEncoder encoder = new Pbkdf2PasswordEncoder(SECRET, SALT_LENGTH, ITERATIONS, SecretKeyFactoryAlgorithm.PBKDF2WithHmacSHA256);
 		return encoder.encode(password);
 	}
 
 	public boolean checkPassword(String password) {
-		Pbkdf2PasswordEncoder encoder = new Pbkdf2PasswordEncoder(SECRET, SALT_LENGTH, ITERATIONS, HASH_WIDTH);
+		Pbkdf2PasswordEncoder encoder = new Pbkdf2PasswordEncoder(SECRET, SALT_LENGTH, ITERATIONS, SecretKeyFactoryAlgorithm.PBKDF2WithHmacSHA256);
 		return encoder.matches(password, this.password);
 	}
 
