@@ -4,6 +4,7 @@ import java.util.List;
 import java.time.LocalDateTime;
 
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.junit.jupiter.api.*; //Test, AfterAll
@@ -11,7 +12,10 @@ import org.junit.jupiter.api.*; //Test, AfterAll
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import sanko.sankons.Config;
+
 @DataJpaTest
+@Import(Config.class)
 public class UserRepositoryTest {
 
 	@Autowired
