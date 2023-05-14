@@ -1,6 +1,6 @@
 package sanko.sankons.web;
 
-import org.junit.jupiter.api.*; //Test, BeforeAll
+import org.junit.jupiter.api.*; //Test, BeforeAll, BeforeEach
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -38,6 +38,7 @@ public class PostApiControllerTest {
 	private static final String password = "password";
 	private static final String image = "image.jpg";
 	private static final String content = "content";
+	private static final Long postId = 1L;
 
 	private static User user;
 	private static Post post;
@@ -56,11 +57,16 @@ public class PostApiControllerTest {
 			.build();
 	}
 
-	@Test
-	public void testPostPost() throws Exception {
+	@BeforeEach
+	public void mockPostService() throws Exception {
 		when(postService.post(any(PostPostRequest.class), any(MultipartFile.class)))
 			.thenReturn(post);
 
+		when(postService.view(postId)).thenReturn(new PostViewResponse(post));
+	}
+
+	@Test
+	public void testPostPost() throws Exception {
 		MultipartFile multipartFile = mock(MultipartFile.class);
 		when(multipartFile.getOriginalFilename()).thenReturn(image);
 		MockMultipartFile file = new MockMultipartFile("file", multipartFile.getInputStream());
@@ -86,10 +92,6 @@ public class PostApiControllerTest {
 
 	@Test
 	public void testPostView() throws Exception {
-		Long postId = 1L;
-
-		when(postService.view(postId)).thenReturn(new PostViewResponse(post));
-
 		mockMvc.perform(get("/api/v1/post/" + postId))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.image", is(image)))

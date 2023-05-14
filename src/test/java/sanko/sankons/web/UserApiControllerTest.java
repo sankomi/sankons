@@ -1,6 +1,6 @@
 package sanko.sankons.web;
 
-import org.junit.jupiter.api.*; //Test, BeforeAll
+import org.junit.jupiter.api.*; //Test, BeforeAll, BeforeEach
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -34,6 +34,9 @@ public class UserApiControllerTest {
 	@MockBean
 	private UserService userService;
 
+	private static final String createUrl = "/api/v1/user/create";
+	private static final String loginUrl = "/api/v1/user/login";
+
 	private static final String username = "username";
 	private static final String password = "password";
 
@@ -50,6 +53,30 @@ public class UserApiControllerTest {
 		objectMapper = new ObjectMapper();
 	}
 
+	@BeforeEach
+	public void mockUserService() throws Exception {
+		when(userService.create(any(UserCreateRequest.class)))
+			.thenAnswer(invocation -> {
+				UserCreateRequest request = invocation.getArgument(0, UserCreateRequest.class);
+				return User.builder()
+					.username(request.getUsername())
+					.password(request.getPassword())
+					.build();
+			});
+
+		when(userService.checkLogin()).thenReturn(username);
+
+		when(userService.login(any(UserLoginRequest.class)))
+			.thenAnswer(invocation -> {
+				UserLoginRequest request = invocation.getArgument(0, UserLoginRequest.class);
+				if (!request.getUsername().equals(username)) return false;
+				if (!user.checkPassword(request.getPassword())) return false;
+				return true;
+			});
+
+		when(userService.logout()).thenReturn(true);
+	}
+
 	private static byte[] bytify(Object object) throws Exception {
 		return objectMapper.writeValueAsBytes(object);
 	}
@@ -64,84 +91,84 @@ public class UserApiControllerTest {
 
 	@Test
 	public void testUserCreate() throws Exception {
-		when(userService.create(any(UserCreateRequest.class)))
-			.thenReturn(user);
-
-		String url = "/api/v1/user/create";
-
 		UserCreateRequest request = UserCreateRequest.builder()
 			.username(username)
 			.password(password)
 			.build();
-		mockPost(url, request).andExpect(status().isOk());
 
+		mockPost(createUrl, request).andExpect(status().isOk());
+	}
+
+	@Test
+	public void testUserCreateEmptyUsername() throws Exception {
 		UserCreateRequest emptyUsername = UserCreateRequest.builder()
 			.username("  ")
 			.password(password)
 			.build();
-		mockPost(url, emptyUsername).andExpect(status().isBadRequest());
 
+		mockPost(createUrl, emptyUsername).andExpect(status().isBadRequest());
+	}
+
+	@Test
+	public void testUserCreateBlankPassword() throws Exception {
 		UserCreateRequest blankPassword = UserCreateRequest.builder()
 			.username(username)
 			.password("")
 			.build();
-		mockPost(url, blankPassword).andExpect(status().isBadRequest());
+
+		mockPost(createUrl, blankPassword).andExpect(status().isBadRequest());
 	}
 
 	@Test
 	public void testUserCheckLogin() throws Exception {
-		when(userService.checkLogin()).thenReturn(username);
-
-		mockMvc.perform(get("/api/v1/user/login"))
+		mockMvc.perform(get(loginUrl))
 			.andExpect(status().isOk())
 			.andExpect(content().string(username));
 	}
 
 	@Test
 	public void testUserLogin() throws Exception {
-		when(userService.login(any(UserLoginRequest.class)))
-			.thenAnswer(invocation -> {
-				UserLoginRequest request = invocation.getArgument(0, UserLoginRequest.class);
-				if (!request.getUsername().equals(username)) return false;
-				if (!user.checkPassword(request.getPassword())) return false;
-				return true;
-			});
-
-		String url = "/api/v1/user/login";
-
 		UserLoginRequest request = UserLoginRequest.builder()
 			.username(username)
 			.password(password)
 			.build();
-		mockPost(url, request)
+
+		mockPost(loginUrl, request)
 			.andExpect(status().isOk())
 			.andExpect(content().string("true"));
+	}
 
+	@Test void testUserLoginWrongPassword() throws Exception {
 		UserLoginRequest wrongPassword = UserLoginRequest.builder()
 			.username(username)
 			.password("narpassword")
 			.build();
-		mockPost(url, wrongPassword)
+
+		mockPost(loginUrl, wrongPassword)
 			.andExpect(status().isOk())
 			.andExpect(content().string("false"));
+	}
 
+	@Test void testUserLoginEmptyUsername() throws Exception {
 		UserLoginRequest emptyUsername = UserLoginRequest.builder()
 			.username("  ")
 			.password(password)
 			.build();
-		mockPost(url, emptyUsername).andExpect(status().isBadRequest());
 
+		mockPost(loginUrl, emptyUsername).andExpect(status().isBadRequest());
+	}
+
+	@Test void testUserLoginBlankPassword() throws Exception {
 		UserLoginRequest blankPassword = UserLoginRequest.builder()
 			.username(username)
 			.password("")
 			.build();
-		mockPost(url, blankPassword).andExpect(status().isBadRequest());
+
+		mockPost(loginUrl, blankPassword).andExpect(status().isBadRequest());
 	}
 
 	@Test
 	public void testLogout() throws Exception {
-		when(userService.logout()).thenReturn(true);
-
 		mockMvc.perform(delete("/api/v1/user/login"))
 			.andExpect(status().isOk())
 			.andExpect(content().string("true"));
