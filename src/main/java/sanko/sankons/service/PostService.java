@@ -3,6 +3,8 @@ package sanko.sankons.service;
 import java.io.File;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Service;
@@ -37,7 +39,7 @@ public class PostService {
 			.orElseThrow(() -> new Exception("Invalid user"));
 
 		String filename = file.getOriginalFilename();
-		File path = new File("files");
+		File path = new File(Paths.get("files", user.getId().toString()).toString());
 		if (!path.exists() && !path.mkdirs()) {
 			throw new Exception("Could not find upload path");
 		}
@@ -69,6 +71,16 @@ public class PostService {
 			.stream()
 			.map(PostViewResponse::new)
 			.collect(Collectors.toList());
+	}
+
+	public File getImage(Long id) throws Exception {
+		Post post = postRepository.findById(id)
+			.orElseThrow(() -> new Exception("Could not find post"));
+
+		Long userId = post.getPoster().getId();
+		Path path = Paths.get("files", userId.toString(), post.getImage());
+
+		return path.toFile();
 	}
 
 }

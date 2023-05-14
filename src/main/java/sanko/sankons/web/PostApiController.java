@@ -1,10 +1,16 @@
 package sanko.sankons.web;
 
 import java.util.List;
+import java.io.*; //File, FileInputStream
+import java.net.URLConnection;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.*; //RestController, RequestMapping, PostMapping, ResponsePart, GetMapping, PathVariable
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.*; //ResponseEntity, MediaType
+import org.springframework.core.io.InputStreamResource;
 import lombok.RequiredArgsConstructor;
 
 import sanko.sankons.domain.post.Post;
@@ -46,6 +52,18 @@ public class PostApiController {
 			.end(0)
 			.posts(posts)
 			.build();
+	}
+
+	@GetMapping("/{id}/image")
+	public ResponseEntity<InputStreamResource> getImage(@PathVariable Long id) throws Exception {
+		File file = postService.getImage(id);
+
+		String mimeType = URLConnection.guessContentTypeFromName(file.getName());
+		InputStream inputStream = new FileInputStream(file);
+
+		return ResponseEntity.ok()
+			.contentType(MediaType.valueOf(mimeType))
+			.body(new InputStreamResource(inputStream));
 	}
 
 }
