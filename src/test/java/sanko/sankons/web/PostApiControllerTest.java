@@ -60,7 +60,7 @@ public class PostApiControllerTest {
 	@BeforeEach
 	public void mockPostService() throws Exception {
 		when(postService.post(any(PostPostRequest.class), any(MultipartFile.class)))
-			.thenReturn(post);
+			.thenReturn(1L);
 
 		when(postService.view(postId)).thenReturn(new PostViewResponse(post));
 	}

@@ -29,13 +29,13 @@ public class PostApiController {
 
 	@PostMapping("/post")
 	public Long post(@Valid @RequestPart PostPostRequest request, @RequestPart MultipartFile file) throws Exception {
-		Post post = postService.post(request, file);
+		Long id = postService.post(request, file);
 
-		if (post == null) {
+		if (id == null) {
 			throw new Exception("Could not post post");
 		}
 
-		return post.getId();
+		return id;
 	}
 
 	@GetMapping("/{id}")
@@ -45,13 +45,7 @@ public class PostApiController {
 
 	@GetMapping("/list")
 	public PostListResponse list(PostListRequest request) {
-		List<PostViewResponse> posts = postService.list(request);
-
-		return PostListResponse.builder()
-			.start(0)
-			.end(0)
-			.posts(posts)
-			.build();
+		return postService.list(request);
 	}
 
 	@GetMapping("/{id}/image")

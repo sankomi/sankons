@@ -15,10 +15,7 @@ import sanko.sankons.domain.user.User;
 import sanko.sankons.domain.user.UserRepository;
 import sanko.sankons.domain.post.Post;
 import sanko.sankons.domain.post.PostRepository;
-import sanko.sankons.web.dto.PostPostRequest;
-import sanko.sankons.web.dto.PostListRequest;
-import sanko.sankons.web.dto.PostViewResponse;
-import sanko.sankons.web.dto.SessionUser;
+import sanko.sankons.web.dto.*; //PostPostRequest, PostViewResponse, PostListRequest, PostListResponse, SessionUser
 
 @RequiredArgsConstructor
 @Service
@@ -28,7 +25,7 @@ public class PostService {
 	private final PostRepository postRepository;
 	private final UserRepository userRepository;
 
-	public Post post(PostPostRequest request, MultipartFile file) throws Exception {
+	public Long post(PostPostRequest request, MultipartFile file) throws Exception {
 		SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
 
 		if (sessionUser == null) {
@@ -56,7 +53,7 @@ public class PostService {
 			.poster(user)
 			.image(filename)
 			.content(request.getContent())
-			.build());
+			.build()).getId();
 	}
 
 	public PostViewResponse view(Long id) throws Exception {
@@ -66,11 +63,14 @@ public class PostService {
 		return new PostViewResponse(post);
 	}
 
-	public List<PostViewResponse> list(PostListRequest request) {
-		return postRepository.findAll()
-			.stream()
-			.map(PostViewResponse::new)
-			.collect(Collectors.toList());
+	public PostListResponse list(PostListRequest request) {
+		List<Post> posts = postRepository.findAll();
+
+		return PostListResponse.builder()
+			.start(0)
+			.end(0)
+			.posts(posts)
+			.build();
 	}
 
 	public File getImage(Long id) throws Exception {

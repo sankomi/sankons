@@ -56,13 +56,7 @@ public class UserApiControllerTest {
 	@BeforeEach
 	public void mockUserService() throws Exception {
 		when(userService.create(any(UserCreateRequest.class)))
-			.thenAnswer(invocation -> {
-				UserCreateRequest request = invocation.getArgument(0, UserCreateRequest.class);
-				return User.builder()
-					.username(request.getUsername())
-					.password(request.getPassword())
-					.build();
-			});
+			.thenReturn(1L);
 
 		when(userService.checkLogin()).thenReturn(username);
 

@@ -18,13 +18,13 @@ public class UserApiController {
 
 	@PostMapping("/create")
 	public Long create(@Valid @RequestBody UserCreateRequest request) throws Exception {
-		User user = userService.create(request);
+		Long id = userService.create(request);
 
-		if (user == null) {
+		if (id == null) {
 			throw new Exception("Could not create user");
 		}
 
-		return user.getId();
+		return id;
 	}
 
 	@GetMapping("/login")
