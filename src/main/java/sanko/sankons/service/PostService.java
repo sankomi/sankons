@@ -11,10 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
 
-import sanko.sankons.domain.user.User;
-import sanko.sankons.domain.user.UserRepository;
-import sanko.sankons.domain.post.Post;
-import sanko.sankons.domain.post.PostRepository;
+import sanko.sankons.domain.user.*; //User, UserRepository
+import sanko.sankons.domain.post.*; //Post, PostRepository
 import sanko.sankons.web.dto.*; //PostPostRequest, PostViewResponse, PostListRequest, PostListResponse, SessionUser
 
 @RequiredArgsConstructor

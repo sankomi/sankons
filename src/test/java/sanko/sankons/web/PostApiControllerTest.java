@@ -22,8 +22,7 @@ import static org.hamcrest.Matchers.is;
 import sanko.sankons.domain.user.User;
 import sanko.sankons.domain.post.Post;
 import sanko.sankons.service.PostService;
-import sanko.sankons.web.dto.PostPostRequest;
-import sanko.sankons.web.dto.PostViewResponse;
+import sanko.sankons.web.dto.*; //PostPostRequest, PostViewResponse
 
 @WebMvcTest(PostApiController.class)
 public class PostApiControllerTest {
