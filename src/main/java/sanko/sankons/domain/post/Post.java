@@ -1,11 +1,14 @@
 package sanko.sankons.domain.post;
 
-import jakarta.persistence.*; //Entity, Table, Id, Column, GeneratedValue, GenerationType, JoinColumn, ManyToOne
+import java.util.Set;
+
+import jakarta.persistence.*; //Entity, Table, Id, Column, GeneratedValue, GenerationType, JoinColumn, ManyToOne, OneToMany
 
 import lombok.*; //Getter, NoArgsConstructor, Builder
 
 import sanko.sankons.domain.TimedEntity;
 import sanko.sankons.domain.user.User;
+import sanko.sankons.domain.comment.Comment;
 
 @Getter
 @NoArgsConstructor
@@ -27,6 +30,9 @@ public class Post extends TimedEntity {
 
 	@Column(name = "content")
 	private String content;
+
+	@OneToMany(mappedBy = "post")
+	private Set<Comment> comments;
 
 	@Builder
 	public Post(User poster, String image, String content) {
