@@ -5,6 +5,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.util.ReflectionTestUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.http.MediaType;
@@ -37,6 +38,7 @@ public class UserApiControllerTest {
 	private static final String createUrl = "/api/v1/user/create";
 	private static final String loginUrl = "/api/v1/user/login";
 
+	private static final Long id = 1L;
 	private static final String username = "username";
 	private static final String password = "password";
 
@@ -49,6 +51,7 @@ public class UserApiControllerTest {
 			.username(username)
 			.password(password)
 			.build();
+		ReflectionTestUtils.setField(user, "id", id);
 
 		objectMapper = new ObjectMapper();
 	}
@@ -56,7 +59,7 @@ public class UserApiControllerTest {
 	@BeforeEach
 	public void mockUserService() throws Exception {
 		when(userService.create(any(UserCreateRequest.class)))
-			.thenReturn(1L);
+			.thenReturn(id);
 
 		when(userService.checkLogin()).thenReturn(username);
 
@@ -90,7 +93,9 @@ public class UserApiControllerTest {
 			.password(password)
 			.build();
 
-		mockPost(createUrl, request).andExpect(status().isOk());
+		mockPost(createUrl, request)
+			.andExpect(status().isOk())
+			.andExpect(content().string(id.toString()));
 	}
 
 	@Test

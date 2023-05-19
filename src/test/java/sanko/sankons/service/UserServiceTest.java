@@ -9,8 +9,6 @@ import org.junit.jupiter.api.*; //Test, BeforeAll, BeforeEach
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.http.MediaType;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -21,8 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import sanko.sankons.domain.user.User;
 import sanko.sankons.domain.user.UserRepository;
 import sanko.sankons.web.dto.SessionUser;
-import sanko.sankons.web.dto.UserCreateRequest;
-import sanko.sankons.web.dto.UserLoginRequest;
+import sanko.sankons.web.dto.*; //UserCreateRequest, UserLoginRequest
 
 @ExtendWith(SpringExtension.class)
 @Import(UserService.class)
@@ -52,7 +49,7 @@ public class UserServiceTest {
 	}
 
 	@BeforeEach
-	public void mockUserRepository() {
+	public void beforeEach() {
 		when(userRepository.save(any(User.class)))
 			.thenAnswer(invocation -> {
 				ReflectionTestUtils.setField(user, "id", id);

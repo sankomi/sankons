@@ -5,6 +5,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.http.MediaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -13,6 +14,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.hamcrest.Matchers.is;
 
 import sanko.sankons.domain.user.User;
@@ -29,10 +31,13 @@ public class CommentApiControllerTest {
 	@MockBean
 	private CommentService commentService;
 
+	private static final Long userId = 1L;
 	private static final String username = "username";
 	private static final String password = "password";
+	private static final Long postId = 2L;
 	private static final String image = "image";
 	private static final String postContent = "post content";
+	private static final Long commentId = 3L;
 	private static final String commentContent = "comment content";
 
 	private static User user;
@@ -45,12 +50,14 @@ public class CommentApiControllerTest {
 			.username(username)
 			.password(password)
 			.build();
+		ReflectionTestUtils.setField(user, "id", userId);
 
 		post = Post.builder()
 			.poster(user)
 			.image(image)
 			.content(postContent)
 			.build();
+		ReflectionTestUtils.setField(post, "id", postId);
 
 		objectMapper = new ObjectMapper();
 	}
@@ -58,13 +65,13 @@ public class CommentApiControllerTest {
 	@BeforeEach
 	public void mockCommentService() throws Exception {
 		when(commentService.add(any(CommentAddRequest.class)))
-			.thenReturn(1L);
+			.thenReturn(commentId);
 	}
 
 	@Test
 	public void testCommentAdd() throws Exception {
 		CommentAddRequest request = CommentAddRequest.builder()
-			.post(1L)
+			.post(postId)
 			.content(commentContent)
 			.build();
 
@@ -73,7 +80,8 @@ public class CommentApiControllerTest {
 				.contentType(MediaType.APPLICATION_JSON_VALUE)
 				.content(objectMapper.writeValueAsBytes(request))
 		)
-			.andExpect(status().isOk());
+			.andExpect(status().isOk())
+			.andExpect(content().string(commentId.toString()));
 	}
 
 }

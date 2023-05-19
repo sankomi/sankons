@@ -1,12 +1,13 @@
 package sanko.sankons.web.dto;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.*; //List, Set
 import java.util.stream.Collectors;
 
 import lombok.Getter;
 
 import sanko.sankons.domain.post.Post;
+import sanko.sankons.domain.comment.Comment;
 
 @Getter
 public class PostViewResponse {
@@ -22,10 +23,15 @@ public class PostViewResponse {
 		this.content = post.getContent();
 		this.poster = new UserInfoResponse(post.getPoster());
 		this.posted = post.getCreated();
-		this.comments = post.getComments()
-			.stream()
-			.map(CommentResponse::new)
-			.collect(Collectors.toList());
+		Set<Comment> comments = post.getComments();
+		if (comments == null) {
+			this.comments = null;
+		} else {
+			this.comments = post.getComments()
+				.stream()
+				.map(CommentResponse::new)
+				.collect(Collectors.toList());
+		}
 	}
 
 }

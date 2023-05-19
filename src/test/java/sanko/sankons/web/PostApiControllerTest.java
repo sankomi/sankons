@@ -5,6 +5,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -16,6 +17,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.hamcrest.Matchers.is;
 
@@ -33,11 +35,12 @@ public class PostApiControllerTest {
 	@MockBean
 	private PostService postService;
 
+	private static final Long userId = 1L;
 	private static final String username = "username";
 	private static final String password = "password";
+	private static final Long postId = 1L;
 	private static final String image = "image.jpg";
 	private static final String content = "content";
-	private static final Long postId = 1L;
 
 	private static User user;
 	private static Post post;
@@ -48,18 +51,20 @@ public class PostApiControllerTest {
 			.username(username)
 			.password(password)
 			.build();
+		ReflectionTestUtils.setField(user, "id", userId);
 
 		post = Post.builder()
 			.poster(user)
 			.image(image)
 			.content(content)
 			.build();
+		ReflectionTestUtils.setField(post, "id", postId);
 	}
 
 	@BeforeEach
 	public void mockPostService() throws Exception {
 		when(postService.post(any(PostPostRequest.class), any(MultipartFile.class)))
-			.thenReturn(1L);
+			.thenReturn(postId);
 
 		when(postService.view(postId)).thenReturn(new PostViewResponse(post));
 	}
@@ -86,14 +91,15 @@ public class PostApiControllerTest {
 				.file(file)
 				.file(request)
 		)
-			.andExpect(status().isOk());
+			.andExpect(status().isOk())
+			.andExpect(content().string(postId.toString()));
 	}
 
 	@Test
 	public void testPostView() throws Exception {
 		mockMvc.perform(get("/api/v1/post/" + postId))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.image", is(image)))
+			.andExpect(jsonPath("$.id", is(postId), Long.class))
 			.andExpect(jsonPath("$.content", is(content)))
 			.andExpect(jsonPath("$.poster.username", is(username)));
 	}
