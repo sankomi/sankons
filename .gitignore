@@ -2,3 +2,4 @@ target
 config/application.yml
 db
 files
+vue3.3.4.js

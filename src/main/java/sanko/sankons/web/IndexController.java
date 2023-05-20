@@ -11,7 +11,7 @@ public class IndexController {
 
 	private final HttpSession httpSession;
 
-	@GetMapping("/")
+	@GetMapping("/test")
 	public String index() {
 		httpSession.setAttribute("test", String.valueOf(Math.random()));
 
