@@ -17,8 +17,6 @@ public class CommentApiController {
 
 	@PostMapping("/add")
 	public Long add(@Valid @RequestBody CommentAddRequest request) throws Exception {
-		System.out.println(request.getPost());
-		System.out.println(request.getContent());
 		return commentService.add(request);
 	}
 
