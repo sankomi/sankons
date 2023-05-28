@@ -56,6 +56,23 @@ const app = createApp({
 			</form>
 		</div>
 		<div v-if="loginUser">
+			<form @submit.prevent="postPost">
+				<div>
+					<label>
+						image
+						<input type="file" @change="setPostImage" ref="imageInput"/>
+					</label>
+				</div>
+				<div>
+					<label>
+						content
+						<input v-model="postContent"/>
+					</label>
+				</div>
+				<div>
+					<button>post</button>
+				</div>
+			</form>
 			<form @submit.prevent="logout">
 				<div>
 					<button>logout</button>
@@ -70,6 +87,9 @@ const app = createApp({
 
 			posts: null,
 			comment: null,
+
+			postImage: null,
+			postContent: null,
 
 			loginCheck: false,
 			loginUser: null,
@@ -109,6 +129,29 @@ const app = createApp({
 				.then(res => res.text())
 				.then(text => {
 					this.comment = null;
+					this.fetchPosts();
+				})
+				.catch(console.error);
+		},
+		setPostImage(event) {
+			this.postImage = event.target.files[0];
+		},
+		postPost() {
+			const formData = new FormData();
+			formData.append("file", this.postImage);
+			formData.append("request", new Blob(
+				[JSON.stringify({content: this.postContent})],
+				{type: "application/json"},
+			));
+			fetch("/api/v1/post/post", {
+				method: "POST",
+				body: formData,
+			})
+				.then(res => res.text())
+				.then(text => {
+					this.postImage = null;
+					this.postContent = null;
+					this.$refs.imageInput.value = null;
 					this.fetchPosts();
 				})
 				.catch(console.error);
