@@ -5,3 +5,70 @@
 html {
 	font-family: monospace;
 }
+body {
+	max-width: 40rem;
+	padding: 1rem;
+	margin: 0 auto;
+}
+img {
+	max-width: 100%;
+}
+
+.post__image {
+	display: block;
+	width: 100%;
+}
+
+.single {
+	position: fixed;
+	left: 50%;
+	top: 0;
+	
+	width: 100%;
+	max-width: 40rem;
+	height: 100%;
+	padding: 4rem 0 1rem;
+
+	background-color: white;
+
+	transform: translateX(-50%);
+}
+.single__inner {
+	max-width: 40rem;
+	height: 100%;
+	padding: 0 1rem;
+	margin: 0 auto;
+
+	overflow-y: auto;
+}
+.single__close {
+	position: absolute;
+	right: 1rem;
+	top: 1rem;
+
+	display: block;
+	width: 2rem;
+	height: 2rem;
+	border: none;
+
+	background-color: transparent;
+
+	cursor: pointer;
+}
+.single__close > span {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+
+	display: block;
+	width: 60%;
+	height: 1px;
+
+	background-color: black;
+}
+.single__close > span:nth-of-type(1) {
+	transform: translate(-50%, -50%) rotate(45deg);
+}
+.single__close > span:nth-of-type(2) {
+	transform: translate(-50%, -50%) rotate(-45deg);
+}

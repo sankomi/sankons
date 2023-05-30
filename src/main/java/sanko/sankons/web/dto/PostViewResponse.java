@@ -12,6 +12,8 @@ import sanko.sankons.domain.comment.Comment;
 @Getter
 public class PostViewResponse {
 
+	private static final int COMMENTS_LIMIT = 3;
+
 	private Long id;
 	private String content;
 	private UserInfoResponse poster;
@@ -29,6 +31,7 @@ public class PostViewResponse {
 		} else {
 			this.comments = post.getComments()
 				.stream()
+				.limit(COMMENTS_LIMIT)
 				.map(CommentResponse::new)
 				.collect(Collectors.toList());
 		}

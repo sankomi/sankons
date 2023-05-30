@@ -11,22 +11,38 @@ const app = createApp({
 			fetching posts...
 		</div>
 		<div v-else-if="posts.length">
-			<div v-for="post in posts">
-				<img :src="'/api/v1/post/' + post.id + '/image'" width="300">
-				<div>{{post.content}}</div>
-				<form @submit.prevent="addComment(post.id)">
-					<div>
-						<label>
-							comment
-							<input v-model="comment"/>
-						</label>
-					</div>
-					<div>
-						<button>add</button>
-					</div>
-				</form>
-				<ul v-if="post.comments">
-					<li v-for="comment in post.comments">
+			<div class="post single" v-if="post">
+				<div class="single__inner">
+					<button class="single__close" @click="closePost">
+						<span></span>
+						<span></span>
+					</button>
+					<img class="post__image" :src="'/api/v1/post/' + post.id + '/image'">
+					<div class="post__content">{{post.content}}</div>
+					<ul class="comments post__comments" v-if="post.comments">
+						<li class="comments__comment" v-for="comment in post.comments">
+							{{comment.commenter.username}}: {{comment.content}}
+						</li>
+					</ul>
+					<form class="form post__form" v-if="loginUser" @submit.prevent="addComment(post)">
+						<div class="form__row">
+							<label>
+								comment
+								<input v-model="comment"/>
+							</label>
+						</div>
+						<div class="form__row">
+							<button class="form__button">add</button>
+						</div>
+					</form>
+				</div>
+			</div>
+
+			<div class="post" v-for="post in posts" @click.prevent="viewPost(post)">
+				<img class="post__image" :src="'/api/v1/post/' + post.id + '/image'">
+				<div class="post__content">{{post.content}}</div>
+				<ul class="comments post__comments"v-if="post.comments">
+					<li class="comments__comment" v-for="comment in post.comments.slice(0, 2)">
 						{{comment.commenter.username}}: {{comment.content}}
 					</li>
 				</ul>
@@ -85,6 +101,8 @@ const app = createApp({
 			message: null,
 			messageTimeout: null,
 
+			post: null,
+
 			posts: null,
 			comment: null,
 
@@ -115,6 +133,14 @@ const app = createApp({
 				})
 				.catch(console.error);
 		},
+		fetchPost(id) {
+			fetch(`/api/v1/post/${id}`)
+				.then(res => res.json())
+				.then(json => {
+					this.post = json;
+				})
+				.catch(console.error);
+		},
 		addComment(post) {
 			fetch("/api/v1/comment/add", {
 				method: "POST",
@@ -122,16 +148,22 @@ const app = createApp({
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify({
-					post,
+					post: post.id,
 					content: this.comment,
 				}),
 			})
 				.then(res => res.text())
 				.then(text => {
 					this.comment = null;
-					this.fetchPosts();
+					this.fetchPost(post.id);
 				})
 				.catch(console.error);
+		},
+		viewPost(post) {
+			this.fetchPost(post.id);
+		},
+		closePost() {
+			this.post = null;
 		},
 		setPostImage(event) {
 			this.postImage = event.target.files[0];
