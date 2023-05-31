@@ -41,12 +41,18 @@ const app = createApp({
 			<div class="post" v-for="post in posts" @click.prevent="viewPost(post)">
 				<img class="post__image" :src="'/api/v1/post/' + post.id + '/image'">
 				<div class="post__content">{{post.content}}</div>
-				<ul class="comments post__comments"v-if="post.comments">
+				<ul class="comments post__comments" v-if="post.comments">
 					<li class="comments__comment" v-for="comment in post.comments.slice(0, 2)">
 						{{comment.commenter.username}}: {{comment.content}}
 					</li>
 				</ul>
 			</div>
+
+			<form @click.prevent="fetchPosts">
+				<div>
+					<button>more</button>
+				</div>
+			</form>
 		</div>
 		<div v-else>
 			no posts
@@ -102,9 +108,11 @@ const app = createApp({
 			messageTimeout: null,
 
 			post: null,
+			comment: null,
 
 			posts: null,
-			comment: null,
+			page: 0,
+			size: 2,
 
 			postImage: null,
 			postContent: null,
@@ -126,12 +134,20 @@ const app = createApp({
 			this.messageTimeout = setTimeout(() => this.message = null, 2000);
 		},
 		fetchPosts() {
-			fetch("/api/v1/post/list")
+			fetch("/api/v1/post/list?" + new URLSearchParams({
+				page: this.page,
+				size: this.size
+			}))
 				.then(res => res.json())
 				.then(json => {
-					this.posts = json.posts;
+					if (this.posts) {
+						this.posts.push(...json.posts);
+					} else {
+						this.posts = json.posts;
+					}
 				})
-				.catch(console.error);
+				.catch(console.error)
+				.finally(() => this.page++);
 		},
 		fetchPost(id) {
 			fetch(`/api/v1/post/${id}`)

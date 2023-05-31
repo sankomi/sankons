@@ -10,14 +10,14 @@ import sanko.sankons.domain.post.Post;
 @Getter
 public class PostListResponse {
 
-	private int start;
-	private int end;
+	private int page;
+	private int size;
 	private List<PostViewResponse> posts;
 
 	@Builder
-	public PostListResponse(int start, int end, List<Post> posts) {
-		this.start = start;
-		this.end = end;
+	public PostListResponse(int page, int size, List<Post> posts) {
+		this.page = page;
+		this.size = size;
 		this.posts = posts.stream()
 			.map(PostViewResponse::new)
 			.collect(Collectors.toList());

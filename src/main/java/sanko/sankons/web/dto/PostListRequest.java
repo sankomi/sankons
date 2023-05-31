@@ -1,12 +1,12 @@
 package sanko.sankons.web.dto;
 
-import lombok.*; //NoArgsConstructor, Getter
+import lombok.*; //AllArgsConstructor, Getter
 
-@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 public class PostListRequest {
 
-	private int start;
-	private int end;
+	private int page;
+	private int size;
 
 }
