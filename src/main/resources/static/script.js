@@ -111,8 +111,7 @@ const app = createApp({
 			comment: null,
 
 			posts: null,
-			page: 0,
-			size: 2,
+			current: 0,
 
 			postImage: null,
 			postContent: null,
@@ -135,19 +134,19 @@ const app = createApp({
 		},
 		fetchPosts() {
 			fetch("/api/v1/post/list?" + new URLSearchParams({
-				page: this.page,
-				size: this.size
+				start: this.current,
 			}))
 				.then(res => res.json())
 				.then(json => {
+					this.current = json.end;
+
 					if (this.posts) {
 						this.posts.push(...json.posts);
 					} else {
 						this.posts = json.posts;
 					}
 				})
-				.catch(console.error)
-				.finally(() => this.page++);
+				.catch(console.error);
 		},
 		fetchPost(id) {
 			fetch(`/api/v1/post/${id}`)

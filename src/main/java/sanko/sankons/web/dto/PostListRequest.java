@@ -6,6 +6,6 @@ import lombok.*; //AllArgsConstructor, Getter
 @Getter
 public class PostListRequest {
 
-	private Integer start;
+	private int start;
 
 }

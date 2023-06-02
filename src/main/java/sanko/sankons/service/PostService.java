@@ -62,13 +62,17 @@ public class PostService {
 	}
 
 	public PostListResponse list(PostListRequest request) {
-		List<Post> posts = postRepository.findAll();
+		int start = request.getStart();
 
-		SessionPostList sessionPosts = new SessionPostList(posts);
+		SessionPostList sessionPosts = (SessionPostList) httpSession.getAttribute("postList");
 
-		httpSession.setAttribute("postList", sessionPosts);
+		if (sessionPosts == null || start == 0) {
+			List<Post> posts = postRepository.findAll();
+			sessionPosts = new SessionPostList(posts);
+			httpSession.setAttribute("postList", sessionPosts);
+		}
 
-		return sessionPosts.toResponse();
+		return sessionPosts.toResponse(start, 2);
 	}
 
 	public File getImage(Long id) throws Exception {

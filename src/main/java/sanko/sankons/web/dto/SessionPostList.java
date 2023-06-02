@@ -21,12 +21,16 @@ public class SessionPostList implements Serializable {
 			.collect(Collectors.toList());
 	}
 
-	public PostListResponse toResponse() {
+	public PostListResponse toResponse(int start, int length) {
 		List<PostViewResponse> postViews = posts.stream()
+			.skip(start)
+			.limit(length)
 			.map(PostViewResponse::new)
 			.collect(Collectors.toList());
+
+		int end = start + postViews.size();
 		
-		return new PostListResponse(postViews);
+		return new PostListResponse(end, postViews);
 	}
 
 }

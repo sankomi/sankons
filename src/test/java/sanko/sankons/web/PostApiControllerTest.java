@@ -48,8 +48,8 @@ public class PostApiControllerTest {
 
 	private static final List<Post> posts = new ArrayList();
 
-	private static final int page = 0;
-	private static final int size = 2;
+	private static final int start = 0;
+	private static final int length = 2;
 
 	private static User user;
 	private static Post post;
@@ -69,7 +69,7 @@ public class PostApiControllerTest {
 			.build();
 		ReflectionTestUtils.setField(post, "id", postId);
 
-		for (int i = 0; i < size; i++) {
+		for (int i = 0; i < length; i++) {
 			Post post = Post.builder()
 				.poster(user)
 				.image(image)
@@ -91,7 +91,7 @@ public class PostApiControllerTest {
 				List<PostViewResponse> postViews = posts.stream()
 					.map(PostViewResponse::new)
 					.collect(Collectors.toList());
-				return new PostListResponse(postViews);
+				return new PostListResponse(length, postViews);
 			});
 
 		when(postService.view(postId)).thenReturn(new PostViewResponse(post));
@@ -127,6 +127,7 @@ public class PostApiControllerTest {
 	public void testPostList() throws Exception {
 		mockMvc.perform(get("/api/v1/post/list?start=0"))
 			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.end", is(start + length)))
 			.andExpect(jsonPath("$.posts[0].id", is(0)))
 			.andExpect(jsonPath("$.posts[0].content", is(content)))
 			.andExpect(jsonPath("$.posts[0].poster.username", is(username)));
