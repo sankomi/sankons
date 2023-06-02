@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.data.domain.*; //Page, Pageable
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -23,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import sanko.sankons.domain.user.User;
 import sanko.sankons.domain.user.UserRepository;
 import sanko.sankons.domain.post.Post;
-import sanko.sankons.domain.post.*; //PostRepository, PostPagingRepository
+import sanko.sankons.domain.post.PostRepository;
 import sanko.sankons.web.dto.SessionUser;
 import sanko.sankons.web.dto.*; //PostPostRequest, PostListRequest, PostViewResponse, PostListResponse
 
@@ -39,9 +38,6 @@ public class PostServiceTest {
 
 	@MockBean
 	private PostRepository postRepository;
-
-	@MockBean
-	private PostPagingRepository postPagingRepository;
 
 	@MockBean
 	private HttpSession httpSession;
@@ -104,15 +100,8 @@ public class PostServiceTest {
 		when(postRepository.findById(postId))
 			.thenReturn(Optional.of(post));
 
-		Page<Post> postPage = mock(Page.class);
-		when(postPage.getContent()).thenReturn(
-			posts.stream()
-				.limit(size)
-				.collect(Collectors.toList())
-
-		);
-		when(postPagingRepository.findAll(any(Pageable.class)))
-			.thenReturn(postPage);
+		when(postRepository.findAll())
+			.thenReturn(posts);
 	}
 
 	@Test
@@ -146,15 +135,12 @@ public class PostServiceTest {
 	@Test
 	public void testPostList() throws Exception {
 		//given
-		PostListRequest request = new PostListRequest(page, size);
+		PostListRequest request = new PostListRequest(0);
 
 		//when
 		PostListResponse response = postService.list(request);
 
 		//then
-		assertEquals(page, response.getPage());
-		assertEquals(size, response.getSize());
-		assertEquals(size, response.getPosts().size());
 		assertEquals(content, response.getPosts().get(0).getContent());
 		assertEquals(username, response.getPosts().get(0).getPoster().getUsername());
 	}

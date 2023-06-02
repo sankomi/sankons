@@ -6,7 +6,6 @@ import lombok.*; //AllArgsConstructor, Getter
 @Getter
 public class PostListRequest {
 
-	private int page;
-	private int size;
+	private Integer start;
 
 }

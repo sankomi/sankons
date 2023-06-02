@@ -37,4 +37,10 @@ public class PostViewResponse {
 		}
 	}
 
+	public PostViewResponse(SessionPost sessionPost) {
+		this.id = sessionPost.getId();
+		this.content = sessionPost.getContent();
+		this.poster = new UserInfoResponse(sessionPost.getPoster());	
+	}
+
 }

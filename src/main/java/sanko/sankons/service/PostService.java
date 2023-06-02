@@ -9,11 +9,10 @@ import jakarta.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.data.domain.*; //Pageable, PageRequest
 import lombok.RequiredArgsConstructor;
 
 import sanko.sankons.domain.user.*; //User, UserRepository
-import sanko.sankons.domain.post.*; //Post, PostRepository, PostPagingRepository
+import sanko.sankons.domain.post.*; //Post, PostRepository
 import sanko.sankons.web.dto.*; //PostPostRequest, PostViewResponse, PostListRequest, PostListResponse, SessionUser
 
 @RequiredArgsConstructor
@@ -22,7 +21,6 @@ public class PostService {
 
 	private final HttpSession httpSession;
 	private final PostRepository postRepository;
-	private final PostPagingRepository postPagingRepository;
 	private final UserRepository userRepository;
 
 	public Long post(PostPostRequest request, MultipartFile file) throws Exception {
@@ -64,18 +62,13 @@ public class PostService {
 	}
 
 	public PostListResponse list(PostListRequest request) {
-		// List<Post> posts = postRepository.findAll();
+		List<Post> posts = postRepository.findAll();
 
-		int page = request.getPage();
-		int size = request.getSize();
-		Pageable pageable = PageRequest.of(page, size);
-		List<Post> posts = postPagingRepository.findAll(pageable).getContent();
+		SessionPostList sessionPosts = new SessionPostList(posts);
 
-		return PostListResponse.builder()
-			.page(page)
-			.size(size)
-			.posts(posts)
-			.build();
+		httpSession.setAttribute("postList", sessionPosts);
+
+		return sessionPosts.toResponse();
 	}
 
 	public File getImage(Long id) throws Exception {

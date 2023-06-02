@@ -1,6 +1,7 @@
 package sanko.sankons.web;
 
 import java.util.*; //List, ArrayList;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.*; //Test, BeforeAll, BeforeEach
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -26,7 +27,7 @@ import static org.hamcrest.Matchers.is;
 import sanko.sankons.domain.user.User;
 import sanko.sankons.domain.post.Post;
 import sanko.sankons.service.PostService;
-import sanko.sankons.web.dto.*; //PostPostRequest, PostViewResponse, PostListRequest, PostViewResponse
+import sanko.sankons.web.dto.*; //PostPostRequest, PostViewResponse, PostListRequest, PostListResponse
 
 @WebMvcTest(PostApiController.class)
 public class PostApiControllerTest {
@@ -87,11 +88,10 @@ public class PostApiControllerTest {
 		when(postService.list(any(PostListRequest.class)))
 			.thenAnswer(invocation -> {
 				PostListRequest request = invocation.getArgument(0, PostListRequest.class);
-				return PostListResponse.builder()
-					.page(request.getPage())
-					.size(request.getSize())
-					.posts(posts)
-					.build();
+				List<PostViewResponse> postViews = posts.stream()
+					.map(PostViewResponse::new)
+					.collect(Collectors.toList());
+				return new PostListResponse(postViews);
 			});
 
 		when(postService.view(postId)).thenReturn(new PostViewResponse(post));
@@ -125,7 +125,7 @@ public class PostApiControllerTest {
 
 	@Test
 	public void testPostList() throws Exception {
-		mockMvc.perform(get("/api/v1/post/list?page=0&size=2"))
+		mockMvc.perform(get("/api/v1/post/list?start=0"))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.posts[0].id", is(0)))
 			.andExpect(jsonPath("$.posts[0].content", is(content)))

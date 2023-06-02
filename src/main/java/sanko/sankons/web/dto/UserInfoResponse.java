@@ -15,4 +15,9 @@ public class UserInfoResponse {
 		this.username = user.getUsername();
 	}
 
+	public UserInfoResponse(SessionUser sessionUser) {
+		this.id = sessionUser.getId();
+		this.username = sessionUser.getUsername();
+	}
+
 }
