@@ -41,6 +41,11 @@ public class PostViewResponse {
 		this.id = sessionPost.getId();
 		this.content = sessionPost.getContent();
 		this.poster = new UserInfoResponse(sessionPost.getPoster());	
+		this.comments = sessionPost.getComments()
+			.stream()
+			.limit(COMMENTS_LIMIT)
+			.map(CommentResponse::new)
+			.collect(Collectors.toList());
 	}
 
 }

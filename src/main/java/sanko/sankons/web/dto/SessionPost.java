@@ -1,6 +1,8 @@
 package sanko.sankons.web.dto;
 
+import java.util.List;
 import java.io.Serializable;
+import java.util.stream.Collectors;
 
 import lombok.Getter;
 
@@ -13,11 +15,16 @@ public class SessionPost implements Serializable {
 	private Long id;
 	private SessionUser poster;
 	private String content;
+	private List<SessionComment> comments;
 	
 	public SessionPost(Post post) {
 		this.id = post.getId();
 		this.poster = new SessionUser(post.getPoster());
 		this.content = post.getContent();
+		this.comments = post.getComments()
+			.stream()
+			.map(SessionComment::new)
+			.collect(Collectors.toList());
 	}
 
 }

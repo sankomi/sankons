@@ -51,6 +51,7 @@ public class PostService {
 			.poster(user)
 			.image(filename)
 			.content(request.getContent())
+			.comments(null)
 			.build()).getId();
 	}
 

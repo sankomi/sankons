@@ -1,6 +1,6 @@
 package sanko.sankons.service;
 
-import java.util.*; //List, ArrayList, Optional;
+import java.util.*; //List, ArrayList, Optional, LinkedHashSet
 import java.util.stream.Collectors;
 import jakarta.servlet.http.HttpSession;
 
@@ -23,6 +23,7 @@ import sanko.sankons.domain.user.User;
 import sanko.sankons.domain.user.UserRepository;
 import sanko.sankons.domain.post.Post;
 import sanko.sankons.domain.post.PostRepository;
+import sanko.sankons.domain.comment.Comment;
 import sanko.sankons.web.dto.SessionUser;
 import sanko.sankons.web.dto.*; //PostPostRequest, PostListRequest, PostViewResponse, PostListResponse
 
@@ -50,6 +51,8 @@ public class PostServiceTest {
 	private static final String image = "image";
 	private static final String content = "content";
 
+	private static final String commentContent = "comment content";
+
 	private static final int page = 0;
 	private static final int size = 2;
 
@@ -73,12 +76,25 @@ public class PostServiceTest {
 			.build();
 
 		for (int i = 0; i < 5; i++) {
+			Set<Comment> comments = new LinkedHashSet();
+			for (int j = 0; j < 5; j++) {
+				Comment comment = Comment.builder()
+					.commenter(user)
+					.content(commentContent)
+					.build();
+				ReflectionTestUtils.setField(comment, "id", Long.valueOf(i * 10 + j));
+
+				comments.add(comment);
+			}
+
 			Post post = Post.builder()
 				.poster(user)
 				.image(image)
 				.content(content)
+				.comments(comments)
 				.build();
 			ReflectionTestUtils.setField(post, "id", Long.valueOf(i));
+
 			posts.add(post);
 		}
 	}
@@ -143,6 +159,8 @@ public class PostServiceTest {
 		//then
 		assertEquals(content, response.getPosts().get(0).getContent());
 		assertEquals(username, response.getPosts().get(0).getPoster().getUsername());
+		assertEquals(username, response.getPosts().get(0).getComments().get(0).getCommenter().getUsername());
+		assertEquals(commentContent, response.getPosts().get(0).getComments().get(0).getContent());
 	}
 
 }

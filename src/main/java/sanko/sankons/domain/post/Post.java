@@ -36,10 +36,11 @@ public class Post extends TimedEntity {
 	private Set<Comment> comments;
 
 	@Builder
-	public Post(User poster, String image, String content) {
+	public Post(User poster, String image, String content, Set<Comment> comments) {
 		this.poster = poster;
 		this.image = image;
 		this.content = content;
+		this.comments = comments;
 	}
 
 }

@@ -18,4 +18,10 @@ public class CommentResponse {
 		this.content = comment.getContent();
 	}
 
+	public CommentResponse(SessionComment sessionComment) {
+		this.id = sessionComment.getId();
+		this.commenter = new UserInfoResponse(sessionComment.getCommenter());
+		this.content = sessionComment.getContent();
+	}
+
 }
