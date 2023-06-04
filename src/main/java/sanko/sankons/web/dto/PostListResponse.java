@@ -13,9 +13,13 @@ public class PostListResponse {
 	private int end;
 	private List<PostViewResponse> posts;
 
-	public PostListResponse(int end, List<PostViewResponse> postViews) {
-		this.end = end;
-		this.posts = postViews;
+	public PostListResponse(List<Post> posts, int start, int length) {
+		this.posts = posts.stream()
+			.skip(start)
+			.limit(length)
+			.map(PostViewResponse::new)
+			.collect(Collectors.toList());
+		this.end = start + this.posts.size();
 	}
 
 }

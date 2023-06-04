@@ -1,7 +1,6 @@
 package sanko.sankons.web;
 
-import java.util.*; //List, ArrayList;
-import java.util.stream.Collectors;
+import java.util.*; //List, ArrayList, LinkedHashSet
 
 import org.junit.jupiter.api.*; //Test, BeforeAll, BeforeEach
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -26,6 +25,7 @@ import static org.hamcrest.Matchers.is;
 
 import sanko.sankons.domain.user.User;
 import sanko.sankons.domain.post.Post;
+import sanko.sankons.domain.comment.Comment;
 import sanko.sankons.service.PostService;
 import sanko.sankons.web.dto.*; //PostPostRequest, PostViewResponse, PostListRequest, PostListResponse
 
@@ -45,6 +45,8 @@ public class PostApiControllerTest {
 	private static final Long postId = 1L;
 	private static final String image = "image.jpg";
 	private static final String content = "content";
+
+	private static final String commentContent = "comment content";
 
 	private static final List<Post> posts = new ArrayList();
 
@@ -70,10 +72,22 @@ public class PostApiControllerTest {
 		ReflectionTestUtils.setField(post, "id", postId);
 
 		for (int i = 0; i < length; i++) {
+			Set<Comment> comments = new LinkedHashSet<>();
+			for (int j = 0; j < 2; j++) {
+				Comment comment = Comment.builder()
+					.commenter(user)
+					.content(commentContent)
+					.build();
+				ReflectionTestUtils.setField(comment, "id", Long.valueOf(i * 10 + j));
+
+				comments.add(comment);
+			}
+
 			Post post = Post.builder()
 				.poster(user)
 				.image(image)
 				.content(content)
+				.comments(comments)
 				.build();
 			ReflectionTestUtils.setField(post, "id", Long.valueOf(i));
 			posts.add(post);
@@ -88,10 +102,7 @@ public class PostApiControllerTest {
 		when(postService.list(any(PostListRequest.class)))
 			.thenAnswer(invocation -> {
 				PostListRequest request = invocation.getArgument(0, PostListRequest.class);
-				List<PostViewResponse> postViews = posts.stream()
-					.map(PostViewResponse::new)
-					.collect(Collectors.toList());
-				return new PostListResponse(length, postViews);
+				return new PostListResponse(posts, request.getStart(), 2);
 			});
 
 		when(postService.view(postId)).thenReturn(new PostViewResponse(post));
@@ -130,7 +141,9 @@ public class PostApiControllerTest {
 			.andExpect(jsonPath("$.end", is(start + length)))
 			.andExpect(jsonPath("$.posts[0].id", is(0)))
 			.andExpect(jsonPath("$.posts[0].content", is(content)))
-			.andExpect(jsonPath("$.posts[0].poster.username", is(username)));
+			.andExpect(jsonPath("$.posts[0].poster.username", is(username)))
+			.andExpect(jsonPath("$.posts[0].comments[0].commenter.username", is(username)))
+			.andExpect(jsonPath("$.posts[0].comments[0].content", is(commentContent)));
 	}
 
 	@Test
