@@ -24,6 +24,9 @@ const app = createApp({
 							{{comment.commenter.username}}: {{comment.content}}
 						</li>
 					</ul>
+					<form @click.prevent="fetchComments(post.id)">
+						<button>more</button>
+					</form>
 					<form class="form post__form" v-if="loginUser" @submit.prevent="addComment(post)">
 						<div class="form__row">
 							<label>
@@ -109,9 +112,10 @@ const app = createApp({
 
 			post: null,
 			comment: null,
+			currentComment: 0,
 
 			posts: null,
-			current: 0,
+			currentPost: 0,
 
 			postImage: null,
 			postContent: null,
@@ -134,11 +138,11 @@ const app = createApp({
 		},
 		fetchPosts() {
 			fetch("/api/v1/post/list?" + new URLSearchParams({
-				start: this.current,
+				start: this.currentPost,
 			}))
 				.then(res => res.json())
 				.then(json => {
-					this.current = json.end;
+					this.currentPost = json.end;
 
 					if (this.posts) {
 						this.posts.push(...json.posts);
@@ -153,6 +157,20 @@ const app = createApp({
 				.then(res => res.json())
 				.then(json => {
 					this.post = json;
+					this.currentComment = this.post.comments.length;
+				})
+				.catch(console.error);
+		},
+		fetchComments(postId) {
+			fetch("api/v1/comment/list?" + new URLSearchParams({
+				post: postId,
+				start: this.currentComment,
+			}))
+				.then(res => res.json())
+				.then(json => {
+					this.currentComment = json.end;
+
+					this.post.comments.push(...json.comments);
 				})
 				.catch(console.error);
 		},
