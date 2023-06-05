@@ -1,5 +1,6 @@
 package sanko.sankons.service;
 
+import java.util.List;
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Service;
@@ -38,6 +39,14 @@ public class CommentService {
 			.content(request.getContent())
 			.build()
 		).getId();
+	}
+
+	public CommentListResponse list(CommentListRequest request) {
+		int start = request.getStart();
+
+		List<Comment> comments = commentRepository.findAllByPostIdOrderByIdDesc(request.getPost());
+
+		return new CommentListResponse(request.getPost(), comments, start, 2);
 	}
 
 }

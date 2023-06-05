@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*; //RestController, RequestMappi
 import lombok.RequiredArgsConstructor;
 
 import sanko.sankons.service.CommentService;
-import sanko.sankons.web.dto.CommentAddRequest;
+import sanko.sankons.web.dto.*; //CommentAddRequest, CommentListRequest, CommentListResponse
 
 @RequiredArgsConstructor
 @RestController
@@ -18,6 +18,11 @@ public class CommentApiController {
 	@PostMapping("/add")
 	public Long add(@Valid @RequestBody CommentAddRequest request) throws Exception {
 		return commentService.add(request);
+	}
+
+	@GetMapping("/list")
+	public CommentListResponse list(CommentListRequest request) {
+		return commentService.list(request);
 	}
 
 }

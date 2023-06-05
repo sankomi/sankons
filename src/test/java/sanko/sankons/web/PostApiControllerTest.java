@@ -48,7 +48,7 @@ public class PostApiControllerTest {
 
 	private static final String commentContent = "comment content";
 
-	private static final List<Post> posts = new ArrayList();
+	private static final List<Post> posts = new ArrayList<>();
 
 	private static final int start = 0;
 	private static final int length = 2;
@@ -136,7 +136,7 @@ public class PostApiControllerTest {
 
 	@Test
 	public void testPostList() throws Exception {
-		mockMvc.perform(get("/api/v1/post/list?start=0"))
+		mockMvc.perform(get("/api/v1/post/list?start=" + start))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.end", is(start + length)))
 			.andExpect(jsonPath("$.posts[0].id", is(0)))
