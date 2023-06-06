@@ -2,13 +2,11 @@ const createApp = Vue.createApp;
 
 const app = createApp({
 	template: `
-		<h1 v-if="loginUser">hello, {{loginUser}}!</h1>
-		<h1 v-else>hello, world!</h1>
-
-		<div v-if="message">{{message}}</div>
+		<h1 class="title" v-if="loginUser">hello, {{loginUser}}!</h1>
+		<h1 class="title" v-else>hello, world!</h1>
 
 		<div v-if="!posts">
-			fetching posts...
+			<p>fetching posts...</p>
 		</div>
 		<div v-else-if="posts.length">
 			<div class="post single" v-if="post">
@@ -17,90 +15,92 @@ const app = createApp({
 						<span></span>
 						<span></span>
 					</button>
-					<img class="post__image" :src="'/api/v1/post/' + post.id + '/image'">
-					<div class="post__content">{{post.content}}</div>
+					<figure class="single__image post__image">
+						<img :src="'/api/v1/post/' + post.id + '/image'">
+					</figure>
+					<div class="post__content">
+						<p>{{post.content}}</p>
+					</div>
+					<ul class="comments single__comments post__comments" v-if="post.comments">
+						<li class="comments__comment" v-for="comment in post.comments">
+							{{comment.commenter.username}}: {{comment.content}}
+						</li>
+					</ul>
+					<form class="form form--more"@click.prevent="fetchComments(post.id)">
+						<div class="form__row">
+							<button class="button form__button">more</button>
+						</div>
+					</form>
+					<form class="form single__form" v-if="loginUser" @submit.prevent="addComment(post)">
+						<div class="form__row">
+							<label for="comment">comment</label>
+							<input id="comment" v-model="comment"/>
+						</div>
+						<div class="form__row">
+							<button class="button form__button">add</button>
+						</div>
+					</form>
+				</div>
+			</div>
+
+			<div class="posts">
+				<div class="post posts__post" v-for="post in posts" @click.prevent="viewPost(post)">
+					<figure class="post__image">
+						<img :src="'/api/v1/post/' + post.id + '/image'">
+					</figure>
+					<div class="post__content">
+						<p>{{post.content}}</p>
+					</div>
 					<ul class="comments post__comments" v-if="post.comments">
 						<li class="comments__comment" v-for="comment in post.comments">
 							{{comment.commenter.username}}: {{comment.content}}
 						</li>
 					</ul>
-					<form @click.prevent="fetchComments(post.id)">
-						<button>more</button>
-					</form>
-					<form class="form post__form" v-if="loginUser" @submit.prevent="addComment(post)">
-						<div class="form__row">
-							<label>
-								comment
-								<input v-model="comment"/>
-							</label>
-						</div>
-						<div class="form__row">
-							<button class="form__button">add</button>
-						</div>
-					</form>
 				</div>
 			</div>
 
-			<div class="post" v-for="post in posts" @click.prevent="viewPost(post)">
-				<img class="post__image" :src="'/api/v1/post/' + post.id + '/image'">
-				<div class="post__content">{{post.content}}</div>
-				<ul class="comments post__comments" v-if="post.comments">
-					<li class="comments__comment" v-for="comment in post.comments.slice(0, 2)">
-						{{comment.commenter.username}}: {{comment.content}}
-					</li>
-				</ul>
-			</div>
-
-			<form @click.prevent="fetchPosts">
-				<div>
-					<button>more</button>
+			<form class="form form--more" @click.prevent="fetchPosts">
+				<div class="form__row">
+					<button class="button form__button">more</button>
 				</div>
 			</form>
 		</div>
 		<div v-else>
-			no posts
+			<p>no posts</p>
 		</div>
 
 		<div v-if="loginCheck && !loginUser">
-			<form @submit.prevent="login">
-				<div>
-					<label>
-						username
-						<input v-model="username"/>
-					</label>
+			<form class="form" @submit.prevent="login">
+				<div class="form__row">
+					<label for="username">username</label>
+					<input id="username" v-model="username"/>
 				</div>
-				<div>
-					<label>
-						password
-						<input type="password" v-model="password"/>
-					</label>
+				<div class="form__row">
+					<label for="password">password</label>
+					<input id="password" type="password" v-model="password"/>
 				</div>
-				<div>
-					<button>login</button>
+				<div class="form__row">
+					<button class="button form__button">login</button>
 				</div>
 			</form>
 		</div>
 		<div v-if="loginUser">
-			<form @submit.prevent="postPost">
-				<div>
-					<label>
-						image
-						<input type="file" @change="setPostImage" ref="imageInput"/>
-					</label>
+			<form class="form" @submit.prevent="postPost">
+				<div class="form__row">
+					<label for="image">image</label>
+					<input id="image" type="file" @change="setPostImage" ref="imageInput"/>
 				</div>
-				<div>
-					<label>
-						content
-						<input v-model="postContent"/>
-					</label>
+				<div class="form__row">
+					<label for="content">content</label>
+					<input id="content" v-model="postContent"/>
 				</div>
-				<div>
-					<button>post</button>
+				<div class="form__row">
+					<button class="button form__button">post</button>
 				</div>
 			</form>
-			<form @submit.prevent="logout">
-				<div>
-					<button>logout</button>
+			<form class="form" @submit.prevent="logout">
+				<div class="form__row">
+					<button class="button form__button">logout</button>
 				</div>
 			</form>
 		</div>
