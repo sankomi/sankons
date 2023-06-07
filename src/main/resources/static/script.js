@@ -69,40 +69,43 @@ const app = createApp({
 			<p>no posts</p>
 		</div>
 
-		<div v-if="loginCheck && !loginUser">
-			<form class="form" @submit.prevent="login">
-				<div class="form__row">
-					<label for="username">username</label>
-					<input id="username" v-model="username"/>
-				</div>
-				<div class="form__row">
-					<label for="password">password</label>
-					<input id="password" type="password" v-model="password"/>
-				</div>
-				<div class="form__row">
-					<button class="button form__button">login</button>
-				</div>
-			</form>
-		</div>
-		<div v-if="loginUser">
-			<form class="form" @submit.prevent="postPost">
-				<div class="form__row">
-					<label for="image">image</label>
-					<input id="image" type="file" @change="setPostImage" ref="imageInput"/>
-				</div>
-				<div class="form__row">
-					<label for="content">content</label>
-					<input id="content" v-model="postContent"/>
-				</div>
-				<div class="form__row">
-					<button class="button form__button">post</button>
-				</div>
-			</form>
-			<form class="form" @submit.prevent="logout">
-				<div class="form__row">
-					<button class="button form__button">logout</button>
-				</div>
-			</form>
+		<div class="menu" :class="{'menu--show': showMenu}">
+			<button class="button menu__toggle" @click="toggleMenu">{{showMenu? "v close v": "^ menu ^"}}</button>
+			<div class="menu__inner" v-if="loginCheck && !loginUser">
+				<form class="form menu__form" @submit.prevent="login">
+					<div class="form__row">
+						<label for="username">username</label>
+						<input id="username" v-model="username"/>
+					</div>
+					<div class="form__row">
+						<label for="password">password</label>
+						<input id="password" type="password" v-model="password"/>
+					</div>
+					<div class="form__row">
+						<button class="button form__button">login</button>
+					</div>
+				</form>
+			</div>
+			<div class="menu__inner" v-if="loginUser">
+				<form class="form menu__form" @submit.prevent="postPost">
+					<div class="form__row">
+						<label for="image">image</label>
+						<input id="image" type="file" @change="setPostImage" ref="imageInput"/>
+					</div>
+					<div class="form__row">
+						<label for="content">content</label>
+						<input id="content" v-model="postContent"/>
+					</div>
+					<div class="form__row">
+						<button class="button form__button">post</button>
+					</div>
+				</form>
+				<form class="form menu__form" @submit.prevent="logout">
+					<div class="form__row">
+						<button class="button form__button">logout</button>
+					</div>
+				</form>
+			</div>
 		</div>
 	`,
 	data() {
@@ -120,6 +123,7 @@ const app = createApp({
 			postImage: null,
 			postContent: null,
 
+			showMenu: false,
 			loginCheck: false,
 			loginUser: null,
 			username: null,
@@ -233,6 +237,9 @@ const app = createApp({
 					this.loginCheck = true;
 				})
 				.catch(console.error);
+		},
+		toggleMenu() {
+			this.showMenu = !this.showMenu;
 		},
 		login() {
 			fetch("/api/v1/user/login", {

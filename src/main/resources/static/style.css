@@ -7,9 +7,12 @@ html {
 	font-family: monospace;
 }
 body {
-	max-width: 40rem;
+	max-width: calc(40rem + 3rem);
 	padding: 0 1.5rem;
 	margin: 0 auto;
+}
+#app {
+	padding-bottom: 4rem;
 }
 img {
 	max-width: 100%;
@@ -150,6 +153,8 @@ input::file-selector-button {
 	flex-shrink: 0;
 }
 .single__comments{
+	min-height: 10rem;
+
 	overflow-y: auto;
 }
 .single .single__form {
@@ -186,4 +191,46 @@ input::file-selector-button {
 }
 .form--more .form__row {
 	margin: 0;
+}
+
+.menu {
+	position: fixed;
+	left: 50%;
+	top: calc(100% - 3rem);
+
+	width: calc(100% - 3rem);
+	max-width: 40rem;
+	padding: 4rem 1.5rem 1.5rem;
+	border: 1px solid #eee;
+
+	background-color: white;
+	border-radius: 0.5rem;
+
+	transform: translate(-50%, 0);
+	transition: transform 0.5s;
+}
+.menu--show {
+	transform: translate(-50%, calc(-100% + 3rem));
+}
+.menu__inner {
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+}
+.menu__toggle {
+	position: absolute;
+	left: 0;
+	top: 0;
+
+	display: block;
+	width: 100%;
+	height: 3rem;
+	border: none;
+
+	background-color: transparent;
+}
+.menu__form {
+	padding: 0;
+	margin: 0;
+	border: none;
 }
