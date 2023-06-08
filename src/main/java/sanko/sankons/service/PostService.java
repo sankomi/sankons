@@ -64,10 +64,12 @@ public class PostService {
 
 	public PostListResponse list(PostListRequest request) {
 		int start = request.getStart();
+		int length = request.getLength();
+		int commentLength = request.getCommentLength();
 
 		List<Post> posts = postRepository.findAll();
 
-		return new PostListResponse(posts, start, 2);
+		return new PostListResponse(posts, start, length, commentLength);
 	}
 
 	public File getImage(Long id) throws Exception {

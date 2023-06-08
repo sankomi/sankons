@@ -12,15 +12,13 @@ import sanko.sankons.domain.comment.Comment;
 @Getter
 public class PostViewResponse {
 
-	private static final int COMMENTS_LIMIT = 3;
-
 	private Long id;
 	private String content;
 	private UserInfoResponse poster;
 	private LocalDateTime posted;
 	private List<CommentResponse> comments;
 
-	public PostViewResponse(Post post) {
+	public PostViewResponse(Post post, int commentLength) {
 		this.id = post.getId();
 		this.content = post.getContent();
 		this.poster = new UserInfoResponse(post.getPoster());
@@ -31,10 +29,14 @@ public class PostViewResponse {
 		} else {
 			this.comments = post.getComments()
 				.stream()
-				.limit(COMMENTS_LIMIT)
+				.limit(commentLength)
 				.map(CommentResponse::new)
 				.collect(Collectors.toList());
 		}
+	}
+
+	public PostViewResponse(Post post) {
+		this(post, 0);
 	}
 
 }

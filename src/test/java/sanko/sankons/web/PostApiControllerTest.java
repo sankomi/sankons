@@ -22,6 +22,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.number.OrderingComparison.lessThanOrEqualTo;
 
 import sanko.sankons.domain.user.User;
 import sanko.sankons.domain.post.Post;
@@ -51,7 +54,8 @@ public class PostApiControllerTest {
 	private static final List<Post> posts = new ArrayList<>();
 
 	private static final int start = 0;
-	private static final int length = 2;
+	private static final int length = 5;
+	private static final int commentLength = 5;
 
 	private static User user;
 	private static Post post;
@@ -102,7 +106,7 @@ public class PostApiControllerTest {
 		when(postService.list(any(PostListRequest.class)))
 			.thenAnswer(invocation -> {
 				PostListRequest request = invocation.getArgument(0, PostListRequest.class);
-				return new PostListResponse(posts, request.getStart(), 2);
+				return new PostListResponse(posts, request.getStart(), request.getLength(), request.getCommentLength());
 			});
 
 		when(postService.view(postId)).thenReturn(new PostViewResponse(post));
@@ -136,12 +140,13 @@ public class PostApiControllerTest {
 
 	@Test
 	public void testPostList() throws Exception {
-		mockMvc.perform(get("/api/v1/post/list?start=" + start))
+		mockMvc.perform(get("/api/v1/post/list?start=" + start + "&length=" + length + "&commentLength=" + commentLength))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.end", is(start + length)))
 			.andExpect(jsonPath("$.posts[0].id", is(0)))
 			.andExpect(jsonPath("$.posts[0].content", is(content)))
 			.andExpect(jsonPath("$.posts[0].poster.username", is(username)))
+			.andExpect(jsonPath("$.posts[0].comments", hasSize(lessThanOrEqualTo(commentLength))))
 			.andExpect(jsonPath("$.posts[0].comments[0].commenter.username", is(username)))
 			.andExpect(jsonPath("$.posts[0].comments[0].content", is(commentContent)));
 	}
@@ -152,6 +157,7 @@ public class PostApiControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.id", is(postId), Long.class))
 			.andExpect(jsonPath("$.content", is(content)))
+			.andExpect(jsonPath("$.comments", is(nullValue())))
 			.andExpect(jsonPath("$.poster.username", is(username)));
 	}
 

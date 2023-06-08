@@ -9,28 +9,36 @@ const app = createApp({
 			<p>fetching posts...</p>
 		</div>
 		<div v-else-if="posts.length">
-			<div class="post single" v-if="post">
-				<div class="single__inner">
-					<button class="single__close" @click="closePost">
-						<span></span>
-						<span></span>
-					</button>
+			<div class="single" v-if="post">
+				<div class="post single__inner">
+					<div class="single__user post__user">
+						{{post.poster.username}}
+						<button class="single__close" @click="closePost">
+							<span></span>
+							<span></span>
+						</button>
+					</div>
 					<figure class="single__image post__image">
 						<img :src="'/api/v1/post/' + post.id + '/image'">
 					</figure>
 					<div class="post__content">
 						<p>{{post.content}}</p>
 					</div>
-					<ul class="comments single__comments post__comments" v-if="post.comments">
-						<li class="comments__comment" v-for="comment in post.comments">
-							{{comment.commenter.username}}: {{comment.content}}
-						</li>
-					</ul>
-					<form class="form form--more"@click.prevent="fetchComments(post.id)">
-						<div class="form__row">
-							<button class="button form__button">more</button>
-						</div>
-					</form>
+					<div v-if="post.comments.length" class="single__comment-outer post__comment-outer">
+						<ul class="single__comments comments post__comments" v-if="post.comments">
+							<li class="comments__comment" v-for="comment in post.comments">
+								{{comment.commenter.username}}: {{comment.content}}
+							</li>
+						</ul>
+						<form class="single__comment-form form form--more" @click.prevent="fetchComments(post.id)">
+							<div class="form__row">
+								<button class="button form__button">more</button>
+							</div>
+						</form>
+					</div>
+					<div v-else class="post__comment-outer">
+						no comments
+					</div>
 					<form class="form single__form" v-if="loginUser" @submit.prevent="addComment(post)">
 						<div class="form__row">
 							<label for="comment">comment</label>
@@ -45,17 +53,23 @@ const app = createApp({
 
 			<div class="posts">
 				<div class="post posts__post" v-for="post in posts" @click.prevent="viewPost(post)">
+					<div class="post__user">{{post.poster.username}}</div>
 					<figure class="post__image">
 						<img :src="'/api/v1/post/' + post.id + '/image'">
 					</figure>
 					<div class="post__content">
 						<p>{{post.content}}</p>
 					</div>
-					<ul class="comments post__comments" v-if="post.comments">
-						<li class="comments__comment" v-for="comment in post.comments">
-							{{comment.commenter.username}}: {{comment.content}}
-						</li>
-					</ul>
+					<div v-if="post.comments.length" class="post__comment-outer">
+						<ul class="comments post__comments" v-if="post.comments">
+							<li class="comments__comment" v-for="comment in post.comments">
+								{{comment.commenter.username}}: {{comment.content}}
+							</li>
+						</ul>
+					</div>
+					<div v-else class="post__comment-outer">
+						no comments
+					</div>
 				</div>
 			</div>
 
@@ -143,6 +157,8 @@ const app = createApp({
 		fetchPosts() {
 			fetch("/api/v1/post/list?" + new URLSearchParams({
 				start: this.currentPost,
+				length: 5,
+				commentLength: 5,
 			}))
 				.then(res => res.json())
 				.then(json => {
@@ -162,6 +178,8 @@ const app = createApp({
 				.then(json => {
 					this.post = json;
 					this.currentComment = this.post.comments.length;
+
+					this.fetchComments(id);
 				})
 				.catch(console.error);
 		},

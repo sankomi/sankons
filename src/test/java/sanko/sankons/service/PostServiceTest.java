@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import sanko.sankons.domain.user.User;
 import sanko.sankons.domain.user.UserRepository;
@@ -53,8 +54,9 @@ public class PostServiceTest {
 
 	private static final String commentContent = "comment content";
 
-	private static final int page = 0;
-	private static final int size = 2;
+	private static final int start = 0;
+	private static final int length = 5;
+	private static final int commentLength = 5;
 
 	private static final List<Post> posts = new ArrayList<>();
 
@@ -144,6 +146,7 @@ public class PostServiceTest {
 		//then
 		assertEquals(postId, view.getId());
 		assertEquals(content, view.getContent());
+		assertEquals(null, view.getComments());
 		assertEquals(userId, view.getPoster().getId());
 		assertEquals(username, view.getPoster().getUsername());
 	}
@@ -151,7 +154,7 @@ public class PostServiceTest {
 	@Test
 	public void testPostList() throws Exception {
 		//given
-		PostListRequest request = new PostListRequest(0);
+		PostListRequest request = new PostListRequest(start, length, commentLength);
 
 		//when
 		PostListResponse response = postService.list(request);
@@ -160,6 +163,7 @@ public class PostServiceTest {
 		assertEquals(content, response.getPosts().get(0).getContent());
 		assertEquals(username, response.getPosts().get(0).getPoster().getUsername());
 		assertEquals(username, response.getPosts().get(0).getComments().get(0).getCommenter().getUsername());
+		assertTrue(commentLength >= response.getPosts().get(0).getComments().size());
 		assertEquals(commentContent, response.getPosts().get(0).getComments().get(0).getContent());
 	}
 
