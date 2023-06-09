@@ -228,6 +228,23 @@ input::file-selector-button {
 	border: none;
 }
 
+.single-enter-active,
+.single-leave-active {
+	transition: top 0.5s;
+}
+.single-enter-from {
+	top: 100%;
+}
+.single-enter-to {
+	top: 0;
+}
+.single-leave-from {
+	top: 0;
+}
+.single-leave-to {
+	top: 100%;
+}
+
 .form {
 	padding: 1.5rem;
 	margin: 2rem 0;

@@ -9,47 +9,49 @@ const app = createApp({
 			<p>fetching posts...</p>
 		</div>
 		<div v-else-if="posts.length">
-			<div class="single" v-if="post">
-				<div class="post single__inner">
-					<div class="single__user post__user">
-						{{post.poster.username}}
-						<button class="single__close" @click="closePost">
-							<span></span>
-							<span></span>
-						</button>
-					</div>
-					<figure class="single__image post__image">
-						<img :src="'/api/v1/post/' + post.id + '/image'">
-					</figure>
-					<div class="post__content">
-						<p>{{post.content}}</p>
-					</div>
-					<div v-if="post.comments.length" class="single__comment-outer post__comment-outer">
-						<ul class="single__comments comments post__comments" v-if="post.comments">
-							<li class="comments__comment" v-for="comment in post.comments">
-								{{comment.commenter.username}}: {{comment.content}}
-							</li>
-						</ul>
-						<form class="single__comment-form form form--more" @click.prevent="fetchComments(post.id)">
+			<Transition name="single">
+				<div class="single" v-if="post">
+					<div class="post single__inner">
+						<div class="single__user post__user">
+							{{post.poster.username}}
+							<button class="single__close" @click="closePost">
+								<span></span>
+								<span></span>
+							</button>
+						</div>
+						<figure class="single__image post__image">
+							<img :src="'/api/v1/post/' + post.id + '/image'">
+						</figure>
+						<div class="post__content">
+							<p>{{post.content}}</p>
+						</div>
+						<div v-if="post.comments.length" class="single__comment-outer post__comment-outer">
+							<ul class="single__comments comments post__comments" v-if="post.comments">
+								<li class="comments__comment" v-for="comment in post.comments">
+									{{comment.commenter.username}}: {{comment.content}}
+								</li>
+							</ul>
+							<form class="single__comment-form form form--more" @click.prevent="fetchComments(post.id)">
+								<div class="form__row">
+									<button class="button form__button">more</button>
+								</div>
+							</form>
+						</div>
+						<div v-else class="post__comment-outer">
+							no comments
+						</div>
+						<form class="form single__form" v-if="loginUser" @submit.prevent="addComment(post)">
 							<div class="form__row">
-								<button class="button form__button">more</button>
+								<label for="comment">comment</label>
+								<input id="comment" v-model="comment"/>
+							</div>
+							<div class="form__row">
+								<button class="button form__button">add</button>
 							</div>
 						</form>
 					</div>
-					<div v-else class="post__comment-outer">
-						no comments
-					</div>
-					<form class="form single__form" v-if="loginUser" @submit.prevent="addComment(post)">
-						<div class="form__row">
-							<label for="comment">comment</label>
-							<input id="comment" v-model="comment"/>
-						</div>
-						<div class="form__row">
-							<button class="button form__button">add</button>
-						</div>
-					</form>
 				</div>
-			</div>
+			</Transition>
 
 			<div class="posts">
 				<div class="post posts__post" v-for="post in posts" @click.prevent="viewPost(post)">
@@ -215,6 +217,8 @@ const app = createApp({
 				.catch(console.error);
 		},
 		viewPost(post) {
+			if (this.post) return;
+
 			this.fetchPost(post.id);
 		},
 		closePost() {
