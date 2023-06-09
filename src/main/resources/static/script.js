@@ -31,7 +31,7 @@ const app = createApp({
 									{{comment.commenter.username}}: {{comment.content}}
 								</li>
 							</ul>
-							<form class="single__comment-form form form--more" @click.prevent="fetchComments(post.id)">
+							<form v-if="moreComments" class="single__comment-form form form--more" @click.prevent="fetchComments(post.id)">
 								<div class="form__row">
 									<button class="button form__button">more</button>
 								</div>
@@ -75,7 +75,7 @@ const app = createApp({
 				</div>
 			</div>
 
-			<form class="form form--more" @click.prevent="fetchPosts">
+			<form v-if="morePosts" class="form form--more" @click.prevent="fetchPosts">
 				<div class="form__row">
 					<button class="button form__button">more</button>
 				</div>
@@ -132,9 +132,11 @@ const app = createApp({
 			post: null,
 			comment: null,
 			currentComment: 0,
+			moreComments: true,
 
 			posts: null,
 			currentPost: 0,
+			morePosts: true,
 
 			postImage: null,
 			postContent: null,
@@ -164,6 +166,7 @@ const app = createApp({
 			}))
 				.then(res => res.json())
 				.then(json => {
+					this.morePosts = this.currentPost + 5 <= json.end;
 					this.currentPost = json.end;
 
 					if (this.posts) {
@@ -181,6 +184,7 @@ const app = createApp({
 					this.post = json;
 					this.currentComment = this.post.comments.length;
 
+					this.moreComments = true;
 					this.fetchComments(id);
 				})
 				.catch(console.error);
@@ -189,9 +193,11 @@ const app = createApp({
 			fetch("api/v1/comment/list?" + new URLSearchParams({
 				post: postId,
 				start: this.currentComment,
+				length: 10,
 			}))
 				.then(res => res.json())
 				.then(json => {
+					this.moreComments = this.currentComment + 10 <= json.end;
 					this.currentComment = json.end;
 
 					this.post.comments.push(...json.comments);
@@ -212,7 +218,10 @@ const app = createApp({
 				.then(res => res.text())
 				.then(text => {
 					this.comment = null;
-					this.fetchPost(post.id);
+					this.post.comments.length = 0;
+					this.currentComment = 0;
+					this.moreComments = true;
+					this.fetchComments(post.id);
 				})
 				.catch(console.error);
 		},
@@ -243,6 +252,8 @@ const app = createApp({
 					this.postImage = null;
 					this.postContent = null;
 					this.$refs.imageInput.value = null;
+
+					this.morePosts = true;
 					this.fetchPosts();
 				})
 				.catch(console.error);

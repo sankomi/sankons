@@ -20,6 +20,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.number.OrderingComparison.lessThanOrEqualTo;
 
 import sanko.sankons.domain.user.User;
 import sanko.sankons.domain.post.Post;
@@ -50,7 +52,7 @@ public class CommentApiControllerTest {
 	private static final List<Comment> comments = new ArrayList<>();
 
 	private static final int start = 0;
-	private static final int length = 2;
+	private static final int length = 5;
 
 	private static User user;
 	private static Post post;
@@ -119,9 +121,10 @@ public class CommentApiControllerTest {
 
 	@Test
 	public void testCommentList() throws Exception {
-		mockMvc.perform(get("/api/v1/comment/list?post=" + postId + "&start=" + start))
+		mockMvc.perform(get("/api/v1/comment/list?post=" + postId + "&start=" + start + "&length=" + length))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.end", is(start + length)))
+			.andExpect(jsonPath("$.comments", hasSize(lessThanOrEqualTo(length))))
 			.andExpect(jsonPath("$.comments[0].id", is(1)))
 			.andExpect(jsonPath("$.comments[0].content", is(commentContent)))
 			.andExpect(jsonPath("$.comments[0].commenter.username", is(username)));

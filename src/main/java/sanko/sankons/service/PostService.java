@@ -67,7 +67,7 @@ public class PostService {
 		int length = request.getLength();
 		int commentLength = request.getCommentLength();
 
-		List<Post> posts = postRepository.findAll();
+		List<Post> posts = postRepository.findAllByOrderByModifiedDesc();
 
 		return new PostListResponse(posts, start, length, commentLength);
 	}

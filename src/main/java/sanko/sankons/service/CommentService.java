@@ -43,10 +43,11 @@ public class CommentService {
 
 	public CommentListResponse list(CommentListRequest request) {
 		int start = request.getStart();
+		int length = request.getLength();
 
 		List<Comment> comments = commentRepository.findAllByPostIdOrderByIdDesc(request.getPost());
 
-		return new CommentListResponse(request.getPost(), comments, start, 2);
+		return new CommentListResponse(request.getPost(), comments, start, length);
 	}
 
 }

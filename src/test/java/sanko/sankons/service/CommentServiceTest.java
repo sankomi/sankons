@@ -16,6 +16,7 @@ import static org.mockito.Mockito.anyLong;
 import static org.mockito.ArgumentMatchers.any;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import sanko.sankons.domain.user.User;
 import sanko.sankons.domain.user.UserRepository;
@@ -56,11 +57,9 @@ public class CommentServiceTest {
 	private static final Long commentId = 6L;
 	private static final String commentContent = "comment content";
 
-	private static final int page = 0;
-	private static final int size = 2;
-
 	private static final List<Comment> comments = new ArrayList<>();
 	private static final int start = 2;
+	private static final int length = 5;
 
 	private static User user;
 	private static Post post;
@@ -88,7 +87,7 @@ public class CommentServiceTest {
 			.build();
 		ReflectionTestUtils.setField(comment, "id", commentId);
 
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < 10; i++) {
 			Comment comment = Comment.builder()
 				.post(post)
 				.commenter(user)
@@ -139,13 +138,14 @@ public class CommentServiceTest {
 		CommentListRequest request = CommentListRequest.builder()
 			.post(postId)
 			.start(start)
+			.length(length)
 			.build();
 
 		//when
 		CommentListResponse response = commentService.list(request);
 
 		//then
-		assertEquals(2, response.getComments().size());
+		assertTrue(length >= response.getComments().size());
 		assertEquals(postId, response.getPost());
 		assertEquals(commentContent, response.getComments().get(0).getContent());
 		assertEquals(userId, response.getComments().get(0).getCommenter().getId());
