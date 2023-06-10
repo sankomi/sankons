@@ -51,6 +51,7 @@ public class PostServiceTest {
 	private static final Long postId = 2L;
 	private static final String image = "image";
 	private static final String content = "content";
+	private static final int views = 10;
 
 	private static final String commentContent = "comment content";
 
@@ -96,6 +97,7 @@ public class PostServiceTest {
 				.comments(comments)
 				.build();
 			ReflectionTestUtils.setField(post, "id", Long.valueOf(i));
+			ReflectionTestUtils.setField(post, "views", views);
 
 			posts.add(post);
 		}
@@ -118,7 +120,7 @@ public class PostServiceTest {
 		when(postRepository.findById(postId))
 			.thenReturn(Optional.of(post));
 
-		when(postRepository.findAll())
+		when(postRepository.findAllByOrderByCreatedDesc())
 			.thenReturn(posts);
 	}
 
@@ -147,6 +149,7 @@ public class PostServiceTest {
 		assertEquals(postId, view.getId());
 		assertEquals(content, view.getContent());
 		assertEquals(null, view.getComments());
+		assertEquals(0, view.getViews());
 		assertEquals(userId, view.getPoster().getId());
 		assertEquals(username, view.getPoster().getUsername());
 	}
@@ -161,6 +164,7 @@ public class PostServiceTest {
 
 		//then
 		assertEquals(content, response.getPosts().get(0).getContent());
+		assertEquals(views, response.getPosts().get(0).getViews());
 		assertEquals(username, response.getPosts().get(0).getPoster().getUsername());
 		assertEquals(username, response.getPosts().get(0).getComments().get(0).getCommenter().getUsername());
 		assertTrue(commentLength >= response.getPosts().get(0).getComments().size());

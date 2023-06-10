@@ -35,12 +35,19 @@ public class Post extends TimedEntity {
 	@OrderBy("id DESC")
 	private Set<Comment> comments;
 
+	@Column(name = "views", columnDefinition = "INTEGER DEFAULT 0")
+	private int views;
+
 	@Builder
 	public Post(User poster, String image, String content, Set<Comment> comments) {
 		this.poster = poster;
 		this.image = image;
 		this.content = content;
 		this.comments = comments;
+	}
+
+	public void view() {
+		this.views++;
 	}
 
 }

@@ -59,6 +59,9 @@ public class PostService {
 		Post post = postRepository.findById(id)
 			.orElseThrow(() -> new Exception("Could not find post"));
 
+		post.view();
+		postRepository.save(post);
+
 		return new PostViewResponse(post);
 	}
 
@@ -67,7 +70,7 @@ public class PostService {
 		int length = request.getLength();
 		int commentLength = request.getCommentLength();
 
-		List<Post> posts = postRepository.findAllByOrderByModifiedDesc();
+		List<Post> posts = postRepository.findAllByOrderByCreatedDesc();
 
 		return new PostListResponse(posts, start, length, commentLength);
 	}

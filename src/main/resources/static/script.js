@@ -22,6 +22,9 @@ const app = createApp({
 						<figure class="single__image post__image">
 							<img :src="'/api/v1/post/' + post.id + '/image'">
 						</figure>
+						<div class="post__stats">
+							views {{post.views}}
+						</div>
 						<div class="post__content">
 							<p>{{post.content}}</p>
 						</div>
@@ -59,6 +62,9 @@ const app = createApp({
 					<figure class="post__image">
 						<img :src="'/api/v1/post/' + post.id + '/image'">
 					</figure>
+					<div class="post__stats">
+						views {{post.views}}
+					</div>
 					<div class="post__content">
 						<p>{{post.content}}</p>
 					</div>

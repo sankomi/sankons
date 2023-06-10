@@ -28,6 +28,9 @@ body {
 img {
 	max-width: 100%;
 }
+p, li {
+	line-height: 1.5;
+}
 
 input, button, .button,
 input::file-selector-button {
@@ -115,10 +118,13 @@ input::file-selector-button {
 
 	object-fit: cover;
 }
+.post__stats {
+	margin: 1rem 0 0;
+}
 .post__content {
 	flex-shrink: 0;
 
-	margin: 1rem 0;
+	margin: 1rem 0 0;
 }
 .post__content > :first-child {
 	margin-top: 0;
@@ -132,6 +138,7 @@ input::file-selector-button {
 	display: flex;
 	flex-direction: column;
 	gap: 1rem;
+	margin: 1rem 0 0;
 
 	overflow-y: auto;
 }

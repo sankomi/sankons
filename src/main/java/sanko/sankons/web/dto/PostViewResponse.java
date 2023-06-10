@@ -17,6 +17,7 @@ public class PostViewResponse {
 	private UserInfoResponse poster;
 	private LocalDateTime posted;
 	private List<CommentResponse> comments;
+	private int views;
 
 	public PostViewResponse(Post post, int commentLength) {
 		this.id = post.getId();
@@ -33,6 +34,7 @@ public class PostViewResponse {
 				.map(CommentResponse::new)
 				.collect(Collectors.toList());
 		}
+		this.views = post.getViews();
 	}
 
 	public PostViewResponse(Post post) {
