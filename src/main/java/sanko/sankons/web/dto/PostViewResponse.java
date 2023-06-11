@@ -18,6 +18,7 @@ public class PostViewResponse {
 	private LocalDateTime posted;
 	private List<CommentResponse> comments;
 	private int views;
+	private int likes;
 
 	public PostViewResponse(Post post, int commentLength) {
 		this.id = post.getId();
@@ -35,6 +36,7 @@ public class PostViewResponse {
 				.collect(Collectors.toList());
 		}
 		this.views = post.getViews();
+		this.likes = post.getLikes().size();
 	}
 
 	public PostViewResponse(Post post) {

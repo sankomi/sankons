@@ -1,7 +1,4 @@
-package sanko.sankons.domain.post;
-
-import java.util.List;
-import java.time.LocalDateTime;
+package sanko.sankons.domain.like;
 
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,25 +8,29 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import sanko.sankons.domain.user.*; //User, UserRepository
+import sanko.sankons.domain.post.*; //Post, PostRepository
 
 @DataJpaTest
-public class PostRepositoryTest {
+public class LikeRepositoryTest {
+
+	@Autowired
+	private UserRepository userRepository;
 
 	@Autowired
 	private PostRepository postRepository;
 
 	@Autowired
-	private UserRepository userRepository;
+	private LikeRepository likeRepository;
 
 	@AfterEach
 	public void after() {
-		postRepository.deleteAll();
+		likeRepository.deleteAll();
 	}
 
 	@Test
-	public void testPost() {
+	public void testLike() {
 		//given
-		String username = "poster";
+		String username = "liker";
 		String password = "password";
 		String file = "file.txt";
 		String content = "content";
@@ -39,19 +40,23 @@ public class PostRepositoryTest {
 			.password(password)
 			.build());
 
-		//when
-		postRepository.save(Post.builder()
+		Post post = postRepository.save(Post.builder()
 			.poster(user)
 			.image(file)
 			.content(content)
 			.build());
-		List<Post> posts = postRepository.findAll();
+
+		//when
+		likeRepository.save(Like.builder()
+			.liker(user)
+			.post(post)
+			.build());
 
 		//then
-		Post post = posts.get(0);
-		assertEquals(user.getId(), post.getPoster().getId());
-		assertEquals(file, post.getImage());
-		assertEquals(content, post.getContent());
+		Like like = likeRepository.findByLikerAndPost(user, post);
+		assertTrue(like != null);
+		assertEquals(username, like.getLiker().getUsername());
+		assertEquals(content, like.getPost().getContent());
 	}
 
 }

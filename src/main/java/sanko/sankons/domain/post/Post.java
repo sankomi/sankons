@@ -9,6 +9,7 @@ import lombok.*; //Getter, NoArgsConstructor, Builder
 import sanko.sankons.domain.TimedEntity;
 import sanko.sankons.domain.user.User;
 import sanko.sankons.domain.comment.Comment;
+import sanko.sankons.domain.like.Like;
 
 @Getter
 @NoArgsConstructor
@@ -37,6 +38,9 @@ public class Post extends TimedEntity {
 
 	@Column(name = "views", columnDefinition = "INTEGER DEFAULT 0")
 	private int views;
+
+	@OneToMany(mappedBy = "post")
+	private Set<Like> likes;
 
 	@Builder
 	public Post(User poster, String image, String content, Set<Comment> comments) {

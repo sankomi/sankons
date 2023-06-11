@@ -13,7 +13,8 @@ import lombok.RequiredArgsConstructor;
 
 import sanko.sankons.domain.user.*; //User, UserRepository
 import sanko.sankons.domain.post.*; //Post, PostRepository
-import sanko.sankons.web.dto.*; //PostPostRequest, PostViewResponse, PostListRequest, PostListResponse, SessionUser
+import sanko.sankons.domain.like.*; //Like, LikeRepository
+import sanko.sankons.web.dto.*; //PostPostRequest, PostViewResponse, PostListRequest, PostListResponse, SessionUser, PostLikeRequest, PostLikeResponse
 
 @RequiredArgsConstructor
 @Service
@@ -22,6 +23,7 @@ public class PostService {
 	private final HttpSession httpSession;
 	private final PostRepository postRepository;
 	private final UserRepository userRepository;
+	private final LikeRepository likeRepository;
 
 	public Long post(PostPostRequest request, MultipartFile file) throws Exception {
 		SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
@@ -83,6 +85,61 @@ public class PostService {
 		Path path = Paths.get("files", userId.toString(), post.getImage());
 
 		return path.toFile();
+	}
+
+	public PostLikeResponse checkLike(Long id) throws Exception {
+		SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
+
+		if (sessionUser == null) {
+			throw new Exception("Not logged in");
+		}
+
+		User user = userRepository.findById(sessionUser.getId())
+			.orElseThrow(() -> new Exception("Invalid user"));
+
+		Post post = postRepository.findById(id)
+			.orElseThrow(() -> new Exception("Post not found"));
+
+		Like like = likeRepository.findByLikerAndPost(user, post);
+
+		return PostLikeResponse.builder()
+			.liked(like != null)
+			.likes(post.getLikes().size())
+			.build();
+	}
+
+	public PostLikeResponse like(PostLikeRequest request) throws Exception {
+		SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
+
+		if (sessionUser == null) {
+			throw new Exception("Not logged in");
+		}
+
+		User user = userRepository.findById(sessionUser.getId())
+			.orElseThrow(() -> new Exception("Invalid user"));
+
+		Post post = postRepository.findById(request.getPost())
+			.orElseThrow(() -> new Exception("Post not found"));
+
+		Like like = likeRepository.findByLikerAndPost(user, post);
+
+		if (like == null) {
+			like = Like.builder()
+				.liker(user)
+				.post(post)
+				.build();
+			likeRepository.save(like);
+			return PostLikeResponse.builder()
+				.liked(true)
+				.likes(post.getLikes().size())
+				.build();
+		} else {
+			likeRepository.delete(like);
+			return PostLikeResponse.builder()
+				.liked(false)
+				.likes(post.getLikes().size())
+				.build();
+		}
 	}
 
 }

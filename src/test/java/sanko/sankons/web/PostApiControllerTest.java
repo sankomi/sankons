@@ -28,6 +28,7 @@ import static org.hamcrest.number.OrderingComparison.lessThanOrEqualTo;
 
 import sanko.sankons.domain.user.User;
 import sanko.sankons.domain.post.Post;
+import sanko.sankons.domain.like.Like;
 import sanko.sankons.domain.comment.Comment;
 import sanko.sankons.service.PostService;
 import sanko.sankons.web.dto.*; //PostPostRequest, PostViewResponse, PostListRequest, PostListResponse
@@ -52,13 +53,13 @@ public class PostApiControllerTest {
 	private static final String commentContent = "comment content";
 
 	private static final List<Post> posts = new ArrayList<>();
-
 	private static final int start = 0;
 	private static final int length = 5;
 	private static final int commentLength = 5;
 
 	private static User user;
 	private static Post post;
+	private static Like like;
 
 	@BeforeAll
 	public static void beforeAll() {
@@ -68,12 +69,18 @@ public class PostApiControllerTest {
 			.build();
 		ReflectionTestUtils.setField(user, "id", userId);
 
+		like = Like.builder()
+			.liker(user)
+			.post(post)
+			.build();
+
 		post = Post.builder()
 			.poster(user)
 			.image(image)
 			.content(content)
 			.build();
 		ReflectionTestUtils.setField(post, "id", postId);
+		ReflectionTestUtils.setField(post, "likes", Set.of(like));
 
 		for (int i = 0; i < length; i++) {
 			Set<Comment> comments = new LinkedHashSet<>();
@@ -94,6 +101,8 @@ public class PostApiControllerTest {
 				.comments(comments)
 				.build();
 			ReflectionTestUtils.setField(post, "id", Long.valueOf(i));
+			ReflectionTestUtils.setField(post, "likes", Set.of(like));
+
 			posts.add(post);
 		}
 	}

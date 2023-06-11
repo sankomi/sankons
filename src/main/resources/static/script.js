@@ -24,6 +24,10 @@ const app = createApp({
 						</figure>
 						<div class="post__stats">
 							views {{post.views}}
+							<button class="post__like" :class="{'post__like--liked': post.like}" @click="like(post)">
+								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><path d="M4 7.33l2.952-2.954c.918-.918.9-2.256.066-3.087A2.134 2.134 0 0 0 4 1.29a2.132 2.132 0 0 0-3.015-.01C.15 2.12.13 3.46 1.05 4.372L4 7.33z"/></svg>
+							</button>
+							likes {{post.likes}}
 						</div>
 						<div class="post__content">
 							<p>{{post.content}}</p>
@@ -34,7 +38,7 @@ const app = createApp({
 									{{comment.commenter.username}}: {{comment.content}}
 								</li>
 							</ul>
-							<form v-if="moreComments" class="single__comment-form form form--more" @click.prevent="fetchComments(post.id)">
+							<form v-if="moreComments" class="single__comment-form form form--more" @click.prevent="fetchComments(post)">
 								<div class="form__row">
 									<button class="button form__button">more</button>
 								</div>
@@ -64,6 +68,10 @@ const app = createApp({
 					</figure>
 					<div class="post__stats">
 						views {{post.views}}
+						<button class="post__like" :class="{'post__like--liked': post.like}" @click.stop="like(post)">
+							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><path d="M4 7.33l2.952-2.954c.918-.918.9-2.256.066-3.087A2.134 2.134 0 0 0 4 1.29a2.132 2.132 0 0 0-3.015-.01C.15 2.12.13 3.46 1.05 4.372L4 7.33z"/></svg>
+						</button>
+						likes {{post.likes}}
 					</div>
 					<div class="post__content">
 						<p>{{post.content}}</p>
@@ -175,29 +183,46 @@ const app = createApp({
 					this.morePosts = this.currentPost + 5 <= json.end;
 					this.currentPost = json.end;
 
+					let from = 0;
+
 					if (this.posts) {
+						from = this.posts.length;
 						this.posts.push(...json.posts);
 					} else {
 						this.posts = json.posts;
 					}
+
+					this.posts.filter((post, index) => {
+						return index >= from;
+					}).forEach(this.checkLike);
 				})
 				.catch(console.error);
 		},
-		fetchPost(id) {
-			fetch(`/api/v1/post/${id}`)
+		fetchPost(post) {
+			fetch(`/api/v1/post/${post.id}`)
 				.then(res => res.json())
 				.then(json => {
 					this.post = json;
 					this.currentComment = this.post.comments.length;
 
 					this.moreComments = true;
-					this.fetchComments(id);
+					this.fetchComments(this.post);
+					this.checkLike(this.post);
 				})
 				.catch(console.error);
 		},
-		fetchComments(postId) {
-			fetch("api/v1/comment/list?" + new URLSearchParams({
-				post: postId,
+		checkLike(post) {
+			fetch(`/api/v1/post/${post.id}/like`)
+				.then(res => res.json())
+				.then(json => {
+					post.like = json.liked;
+					post.likes = json.likes;
+				})
+				.catch(console.error);
+		},
+		fetchComments(post) {
+			fetch("/api/v1/comment/list?" + new URLSearchParams({
+				post: post.id,
 				start: this.currentComment,
 				length: 10,
 			}))
@@ -207,6 +232,23 @@ const app = createApp({
 					this.currentComment = json.end;
 
 					this.post.comments.push(...json.comments);
+				})
+				.catch(console.error);
+		},
+		like(post) {
+			fetch("/api/v1/post/like", {
+				method: "PUT",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					post: post.id,
+				}),
+			})
+				.then(res => res.json())
+				.then(json => {
+					post.like = json.liked;
+					post.likes = json.likes;
 				})
 				.catch(console.error);
 		},
@@ -227,14 +269,14 @@ const app = createApp({
 					this.post.comments.length = 0;
 					this.currentComment = 0;
 					this.moreComments = true;
-					this.fetchComments(post.id);
+					this.fetchComments(post);
 				})
 				.catch(console.error);
 		},
 		viewPost(post) {
 			if (this.post) return;
 
-			this.fetchPost(post.id);
+			this.fetchPost(post);
 		},
 		closePost() {
 			this.post = null;

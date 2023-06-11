@@ -20,13 +20,12 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import sanko.sankons.domain.user.User;
-import sanko.sankons.domain.user.UserRepository;
-import sanko.sankons.domain.post.Post;
-import sanko.sankons.domain.post.PostRepository;
+import sanko.sankons.domain.user.*; //User, UserRepository
+import sanko.sankons.domain.post.*; //Post, PostRepository
 import sanko.sankons.domain.comment.Comment;
+import sanko.sankons.domain.like.*; //Like, LikeRepository
 import sanko.sankons.web.dto.SessionUser;
-import sanko.sankons.web.dto.*; //PostPostRequest, PostListRequest, PostViewResponse, PostListResponse
+import sanko.sankons.web.dto.*; //PostPostRequest, PostListRequest, PostViewResponse, PostListResponse, PostLikeRequest, PostLikeResponse
 
 @ExtendWith(SpringExtension.class)
 @Import(PostService.class)
@@ -42,6 +41,9 @@ public class PostServiceTest {
 	private PostRepository postRepository;
 
 	@MockBean
+	private LikeRepository likeRepository;
+
+	@MockBean
 	private HttpSession httpSession;
 
 	private static final Long userId = 1L;
@@ -55,6 +57,8 @@ public class PostServiceTest {
 
 	private static final String commentContent = "comment content";
 
+	private static final int likes = 5;
+
 	private static final int start = 0;
 	private static final int length = 5;
 	private static final int commentLength = 5;
@@ -63,6 +67,7 @@ public class PostServiceTest {
 
 	private static User user;
 	private static Post post;
+	private static Like like;
 
 	@BeforeAll
 	public static void beforeAll() {
@@ -72,11 +77,17 @@ public class PostServiceTest {
 			.build();
 		ReflectionTestUtils.setField(user, "id", userId);
 
+		like = Like.builder()
+			.liker(user)
+			.post(post)
+			.build();
+
 		post = Post.builder()
 			.poster(user)
 			.image(image)
 			.content(content)
 			.build();
+		ReflectionTestUtils.setField(post, "likes", Set.of(like));
 
 		for (int i = 0; i < 5; i++) {
 			Set<Comment> comments = new LinkedHashSet();
@@ -98,6 +109,7 @@ public class PostServiceTest {
 				.build();
 			ReflectionTestUtils.setField(post, "id", Long.valueOf(i));
 			ReflectionTestUtils.setField(post, "views", views);
+			ReflectionTestUtils.setField(post, "likes", Set.of(like));
 
 			posts.add(post);
 		}
@@ -122,6 +134,9 @@ public class PostServiceTest {
 
 		when(postRepository.findAllByOrderByCreatedDesc())
 			.thenReturn(posts);
+
+		when(likeRepository.findByLikerAndPost(user, post))
+			.thenReturn(like);
 	}
 
 	@Test
@@ -149,7 +164,7 @@ public class PostServiceTest {
 		assertEquals(postId, view.getId());
 		assertEquals(content, view.getContent());
 		assertEquals(null, view.getComments());
-		assertEquals(0, view.getViews());
+		assertEquals(1, view.getViews());
 		assertEquals(userId, view.getPoster().getId());
 		assertEquals(username, view.getPoster().getUsername());
 	}

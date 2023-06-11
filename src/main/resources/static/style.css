@@ -119,7 +119,30 @@ input::file-selector-button {
 	object-fit: cover;
 }
 .post__stats {
+	display: flex;
+	align-items: center;
+	gap: 1ch;
 	margin: 1rem 0 0;
+}
+.post__like {
+	display: inline-block;
+	padding: 0;
+	margin: 0;
+	border: none;
+
+	color: #888;
+	background-color: transparent;
+
+	transition: color 0.5s;
+}
+.post__like > svg {
+	display: block;
+	height: 1rem;
+
+	fill: currentcolor;
+}
+.post__like--liked {
+	color: red;
 }
 .post__content {
 	flex-shrink: 0;
