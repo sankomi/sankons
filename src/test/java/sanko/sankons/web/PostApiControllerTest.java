@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -31,7 +32,7 @@ import sanko.sankons.domain.post.Post;
 import sanko.sankons.domain.like.Like;
 import sanko.sankons.domain.comment.Comment;
 import sanko.sankons.service.PostService;
-import sanko.sankons.web.dto.*; //PostPostRequest, PostViewResponse, PostListRequest, PostListResponse
+import sanko.sankons.web.dto.*; //PostPostRequest, PostViewResponse, PostListRequest, PostListResponse, PostLikeRequest, PostLikeResponse
 
 @WebMvcTest(PostApiController.class)
 public class PostApiControllerTest {
@@ -56,6 +57,8 @@ public class PostApiControllerTest {
 	private static final int start = 0;
 	private static final int length = 5;
 	private static final int commentLength = 5;
+
+	private static final int likes = 14;
 
 	private static User user;
 	private static Post post;
@@ -119,6 +122,18 @@ public class PostApiControllerTest {
 			});
 
 		when(postService.view(postId)).thenReturn(new PostViewResponse(post));
+
+		when(postService.checkLike(postId))
+			.thenReturn(PostLikeResponse.builder()
+				.liked(true)
+				.likes(likes)
+				.build());
+
+		when(postService.like(any(PostLikeRequest.class)))
+			.thenReturn(PostLikeResponse.builder()
+				.liked(true)
+				.likes(likes)
+				.build());
 	}
 
 	@Test
@@ -168,6 +183,28 @@ public class PostApiControllerTest {
 			.andExpect(jsonPath("$.content", is(content)))
 			.andExpect(jsonPath("$.comments", is(nullValue())))
 			.andExpect(jsonPath("$.poster.username", is(username)));
+	}
+
+	@Test
+	public void testCheckLike() throws Exception {
+		mockMvc.perform(get("/api/v1/post/" + postId + "/like"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.liked", is(true), Boolean.class))
+			.andExpect(jsonPath("$.likes", is(likes), Integer.class));
+	}
+
+	@Test
+	public void testLike() throws Exception {
+		PostLikeRequest request = new PostLikeRequest(postId);
+
+		mockMvc.perform(
+			put("/api/v1/post/like")
+				.contentType(MediaType.APPLICATION_JSON_VALUE)
+				.content(new ObjectMapper().writeValueAsBytes(request))
+		)
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.liked", is(true), Boolean.class))
+			.andExpect(jsonPath("$.likes", is(likes), Integer.class));
 	}
 
 }

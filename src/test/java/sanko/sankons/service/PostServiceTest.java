@@ -186,4 +186,27 @@ public class PostServiceTest {
 		assertEquals(commentContent, response.getPosts().get(0).getComments().get(0).getContent());
 	}
 
+	@Test
+	public void testCheckLike() throws Exception {
+		//when
+		PostLikeResponse response = postService.checkLike(postId);
+
+		//then
+		assertEquals(true, response.isLiked());
+		assertEquals(1, response.getLikes());
+	}
+
+	@Test
+	public void testLike() throws Exception {
+		//given
+		PostLikeRequest request = new PostLikeRequest(postId);
+
+		//when
+		PostLikeResponse response = postService.like(request);
+
+		//then
+		assertEquals(false, response.isLiked());
+		assertEquals(1, response.getLikes());
+	}
+
 }
