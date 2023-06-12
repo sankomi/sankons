@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 import sanko.sankons.domain.user.*; //User, UserRepository
 import sanko.sankons.domain.post.*; //Post, PostRepository
 import sanko.sankons.domain.like.*; //Like, LikeRepository
-import sanko.sankons.web.dto.*; //PostPostRequest, PostViewResponse, PostListRequest, PostListResponse, SessionUser, PostLikeRequest, PostLikeResponse
+import sanko.sankons.web.dto.*; //PostPostRequest, PostViewResponse, PostListRequest, PostListResponse, SessionUser, PostCheckLikeRequest, PostCheckLikeResponse, PostLikeRequest, PostLikeResponse
 
 @RequiredArgsConstructor
 @Service
@@ -87,7 +87,7 @@ public class PostService {
 		return path.toFile();
 	}
 
-	public PostLikeResponse checkLike(Long id) throws Exception {
+	public PostCheckLikeResponse checkLike(PostCheckLikeRequest request) throws Exception {
 		SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
 
 		if (sessionUser == null) {
@@ -97,15 +97,18 @@ public class PostService {
 		User user = userRepository.findById(sessionUser.getId())
 			.orElseThrow(() -> new Exception("Invalid user"));
 
-		Post post = postRepository.findById(id)
-			.orElseThrow(() -> new Exception("Post not found"));
+		List<Like> likes = likeRepository.findAllByLikerAndPostIdIn(user, request.getPosts());
 
-		Like like = likeRepository.findByLikerAndPost(user, post);
+		List<PostLikeResponse> responses = likes.stream()
+			.map(like -> {
+				return PostLikeResponse.builder()
+					.post(like.getPost().getId())
+					.liked(true)
+					.likes(like.getPost().getLikes().size())
+					.build();
+			}).collect(Collectors.toList());
 
-		return PostLikeResponse.builder()
-			.liked(like != null)
-			.likes(post.getLikes().size())
-			.build();
+		return new PostCheckLikeResponse(responses);
 	}
 
 	public PostLikeResponse like(PostLikeRequest request) throws Exception {
@@ -130,12 +133,14 @@ public class PostService {
 				.build();
 			likeRepository.save(like);
 			return PostLikeResponse.builder()
+				.post(post.getId())
 				.liked(true)
 				.likes(post.getLikes().size())
 				.build();
 		} else {
 			likeRepository.delete(like);
 			return PostLikeResponse.builder()
+				.post(post.getId())
 				.liked(false)
 				.likes(post.getLikes().size())
 				.build();

@@ -1,6 +1,6 @@
 package sanko.sankons.web;
 
-import java.util.*; //List, ArrayList, LinkedHashSet
+import java.util.*; //List, ArrayList, LinkedHashSet, Arrays
 
 import org.junit.jupiter.api.*; //Test, BeforeAll, BeforeEach
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -32,7 +32,7 @@ import sanko.sankons.domain.post.Post;
 import sanko.sankons.domain.like.Like;
 import sanko.sankons.domain.comment.Comment;
 import sanko.sankons.service.PostService;
-import sanko.sankons.web.dto.*; //PostPostRequest, PostViewResponse, PostListRequest, PostListResponse, PostLikeRequest, PostLikeResponse
+import sanko.sankons.web.dto.*; //PostPostRequest, PostViewResponse, PostListRequest, PostListResponse, PostCheckLikeRequest, PostCheckLikeResponse, PostLikeRequest, PostLikeResponse
 
 @WebMvcTest(PostApiController.class)
 public class PostApiControllerTest {
@@ -123,14 +123,19 @@ public class PostApiControllerTest {
 
 		when(postService.view(postId)).thenReturn(new PostViewResponse(post));
 
-		when(postService.checkLike(postId))
-			.thenReturn(PostLikeResponse.builder()
-				.liked(true)
-				.likes(likes)
-				.build());
+		when(postService.checkLike(any(PostCheckLikeRequest.class)))
+			.thenReturn(new PostCheckLikeResponse(
+				Arrays.asList(
+					PostLikeResponse.builder()
+						.post(postId)
+						.liked(true)
+						.likes(likes)
+						.build()))
+			);
 
 		when(postService.like(any(PostLikeRequest.class)))
 			.thenReturn(PostLikeResponse.builder()
+				.post(postId)
 				.liked(true)
 				.likes(likes)
 				.build());
@@ -187,10 +192,10 @@ public class PostApiControllerTest {
 
 	@Test
 	public void testCheckLike() throws Exception {
-		mockMvc.perform(get("/api/v1/post/" + postId + "/like"))
+		mockMvc.perform(get("/api/v1/post/like?posts=" + postId))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.liked", is(true), Boolean.class))
-			.andExpect(jsonPath("$.likes", is(likes), Integer.class));
+			.andExpect(jsonPath("$.likes[0].liked", is(true), Boolean.class))
+			.andExpect(jsonPath("$.likes[0].likes", is(likes), Integer.class));
 	}
 
 	@Test

@@ -1,6 +1,6 @@
 package sanko.sankons.service;
 
-import java.util.*; //List, ArrayList, Optional, LinkedHashSet
+import java.util.*; //List, ArrayList, Optional, LinkedHashSet, Arrays
 import java.util.stream.Collectors;
 import jakarta.servlet.http.HttpSession;
 
@@ -77,15 +77,16 @@ public class PostServiceTest {
 			.build();
 		ReflectionTestUtils.setField(user, "id", userId);
 
-		like = Like.builder()
-			.liker(user)
-			.post(post)
-			.build();
-
 		post = Post.builder()
 			.poster(user)
 			.image(image)
 			.content(content)
+			.build();
+		ReflectionTestUtils.setField(post, "id", postId);
+
+		like = Like.builder()
+			.liker(user)
+			.post(post)
 			.build();
 		ReflectionTestUtils.setField(post, "likes", Set.of(like));
 
@@ -134,6 +135,9 @@ public class PostServiceTest {
 
 		when(postRepository.findAllByOrderByCreatedDesc())
 			.thenReturn(posts);
+
+		when(likeRepository.findAllByLikerAndPostIdIn(any(User.class), any(List.class)))
+			.thenReturn(Arrays.asList(like));
 
 		when(likeRepository.findByLikerAndPost(user, post))
 			.thenReturn(like);
@@ -188,12 +192,17 @@ public class PostServiceTest {
 
 	@Test
 	public void testCheckLike() throws Exception {
+		//given
+		PostCheckLikeRequest request = PostCheckLikeRequest.builder()
+			.posts(Arrays.asList(postId))
+			.build();
+
 		//when
-		PostLikeResponse response = postService.checkLike(postId);
+		PostCheckLikeResponse response = postService.checkLike(request);
 
 		//then
-		assertEquals(true, response.isLiked());
-		assertEquals(1, response.getLikes());
+		assertEquals(true, response.getLikes().get(0).isLiked());
+		assertEquals(1, response.getLikes().get(0).getLikes());
 	}
 
 	@Test
@@ -205,6 +214,7 @@ public class PostServiceTest {
 		PostLikeResponse response = postService.like(request);
 
 		//then
+		assertEquals(postId, response.getPost());
 		assertEquals(false, response.isLiked());
 		assertEquals(1, response.getLikes());
 	}

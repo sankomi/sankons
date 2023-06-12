@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 import sanko.sankons.domain.post.Post;
 import sanko.sankons.service.PostService;
-import sanko.sankons.web.dto.*; //PostPostRequest, PostListRequest, PostListResponse, PostViewResponse, PostLikeRequest, PostLikeResponse
+import sanko.sankons.web.dto.*; //PostPostRequest, PostListRequest, PostListResponse, PostViewResponse, PostCheckLikeRequest, PostCheckLikeResponse, PostLikeRequest, PostLikeResponse
 
 @RequiredArgsConstructor
 @RestController
@@ -57,9 +57,9 @@ public class PostApiController {
 			.body(new InputStreamResource(inputStream));
 	}
 
-	@GetMapping("/{id}/like")
-	public PostLikeResponse checkLike(@PathVariable Long id) throws Exception {
-		return postService.checkLike(id);
+	@GetMapping("/like")
+	public PostCheckLikeResponse checkLike(PostCheckLikeRequest request) throws Exception {
+		return postService.checkLike(request);
 	}
 
 	@PutMapping("/like")

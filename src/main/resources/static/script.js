@@ -192,9 +192,9 @@ const app = createApp({
 						this.posts = json.posts;
 					}
 
-					this.posts.filter((post, index) => {
+					this.checkLike(this.posts.filter((post, index) => {
 						return index >= from;
-					}).forEach(this.checkLike);
+					}));
 				})
 				.catch(console.error);
 		},
@@ -207,16 +207,32 @@ const app = createApp({
 
 					this.moreComments = true;
 					this.fetchComments(this.post);
-					this.checkLike(this.post);
+					this.checkLike([this.post]);
+
+					const p = this.posts.find(p => p.id === post.id);
+					p.views = json.views;
 				})
 				.catch(console.error);
 		},
-		checkLike(post) {
-			fetch(`/api/v1/post/${post.id}/like`)
-				.then(res => res.json())
+		checkLike(posts) {
+			if (!posts) return;
+
+			fetch("/api/v1/post/like?" + new URLSearchParams({
+				posts: posts.map(post => post.id),
+			}))
+				.then(res => {
+					if (res.status === 200) return res.json();
+
+					this.posts.forEach(post => post.like = false);
+				})
 				.then(json => {
-					post.like = json.liked;
-					post.likes = json.likes;
+					if (!json) return;
+
+					json.likes.forEach(like => {
+						const post = posts.find(post => post.id === like.post);
+						post.like = like.liked;
+						post.likes = like.likes;
+					});
 				})
 				.catch(console.error);
 		},
@@ -249,6 +265,10 @@ const app = createApp({
 				.then(json => {
 					post.like = json.liked;
 					post.likes = json.likes;
+
+					const p = this.posts.find(post => post.id === json.post);
+					p.like = json.liked;
+					p.likes = json.likes;
 				})
 				.catch(console.error);
 		},
@@ -302,6 +322,7 @@ const app = createApp({
 					this.$refs.imageInput.value = null;
 
 					this.morePosts = true;
+					this.currentPost = 0;
 					this.fetchPosts();
 				})
 				.catch(console.error);
@@ -315,6 +336,7 @@ const app = createApp({
 					} else {
 						this.loginUser = null;
 					}
+					this.checkLike(this.posts);
 					this.loginCheck = true;
 				})
 				.catch(console.error);
