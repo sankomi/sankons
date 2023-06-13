@@ -5,6 +5,12 @@ const app = createApp({
 		<h1 class="title" v-if="loginUser">hello, {{loginUser}}!</h1>
 		<h1 class="title" v-else>hello, world!</h1>
 
+		<div v-if="messageTimeout" class="message">
+			<Transition name="message">
+				<p class="message__text" @click="hideMessage">{{message}}</p>
+			</Transition>
+		</div>
+
 		<div v-if="!posts">
 			<p>fetching posts...</p>
 		</div>
@@ -101,8 +107,34 @@ const app = createApp({
 
 		<div class="menu" :class="{'menu--show': showMenu}">
 			<button class="button menu__toggle" @click="toggleMenu">{{showMenu? "v close v": "^ menu ^"}}</button>
-			<div class="menu__inner" v-if="loginCheck && !loginUser">
+			<div class="menu__inner" v-if="loginCheck && !loginUser && menu === 'create'">
+				<form class="form menu__form" @submit.prevent="create">
+					<div class="form__row">
+						new user
+					</div>
+					<div class="form__row">
+						<label for="createUsername">username</label>
+						<input id="createUsername" v-model="createUsername"/>
+					</div>
+					<div class="form__row">
+						<label for="createPassword">password</label>
+						<input id="createPassword" type="password" v-model="createPassword"/>
+					</div>
+					<div class="form__row">
+						<label for="createConfirm">confirm</label>
+						<input id="createConfirm" type="password" v-model="createConfirm"/>
+					</div>
+					<div class="form__row">
+						<button class="button form__button">create</button>
+						<button class="button form__button" @click.stop="changeMenu('login')">login</button>
+					</div>
+				</form>
+			</div>
+			<div class="menu__inner" v-else-if="loginCheck && !loginUser">
 				<form class="form menu__form" @submit.prevent="login">
+					<div class="form__row">
+						login
+					</div>
 					<div class="form__row">
 						<label for="username">username</label>
 						<input id="username" v-model="username"/>
@@ -113,10 +145,11 @@ const app = createApp({
 					</div>
 					<div class="form__row">
 						<button class="button form__button">login</button>
+						<button class="button form__button" @click.stop="changeMenu('create')">create</button>
 					</div>
 				</form>
 			</div>
-			<div class="menu__inner" v-if="loginUser">
+			<div class="menu__inner" v-else-if="loginUser">
 				<form class="form menu__form" @submit.prevent="postPost">
 					<div class="form__row">
 						<label for="image">image</label>
@@ -140,6 +173,8 @@ const app = createApp({
 	`,
 	data() {
 		return {
+			menu: null,
+
 			message: null,
 			messageTimeout: null,
 
@@ -160,6 +195,9 @@ const app = createApp({
 			loginUser: null,
 			username: null,
 			password: null,
+			createUsername: null,
+			createPassword: null,
+			createConfirm: null,
 		};
 	},
 	mounted() {
@@ -167,10 +205,17 @@ const app = createApp({
 		this.checkLogin();
 	},
 	methods: {
+		changeMenu(menu) {
+			this.menu = menu;
+		},
 		showMessage(message) {
 			this.message = message;
 			clearTimeout(this.messageTimeout);
-			this.messageTimeout = setTimeout(() => this.message = null, 2000);
+			this.messageTimeout = setTimeout(() => this.messageTimeout = 0, 5000);
+		},
+		hideMessage() {
+			clearTimeout(this.messageTimeout);
+			this.messageTimeout = 0;
 		},
 		fetchPosts() {
 			fetch("/api/v1/post/list?" + new URLSearchParams({
@@ -322,6 +367,7 @@ const app = createApp({
 					this.$refs.imageInput.value = null;
 
 					this.morePosts = true;
+					this.posts = null;
 					this.currentPost = 0;
 					this.fetchPosts();
 				})
@@ -344,6 +390,35 @@ const app = createApp({
 		toggleMenu() {
 			this.showMenu = !this.showMenu;
 		},
+		create() {
+			if (this.createPassword !== this.createConfirm) return;
+			fetch("/api/v1/user/create", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					username: this.createUsername,
+					password: this.createPassword,
+				}),
+			})
+				.then(res => res.text())
+				.then(text => {
+					if (/^-?\d+$/.test(text)) {
+						this.showMessage("create success");
+						this.username = this.createUsername;
+						this.password = this.createPassword;
+						this.createUsername = null;
+						this.createPassword = null;
+						this.createConfirm = null;
+						this.menu = false;
+						this.login();
+					} else {
+						this.showMessage("create fail");
+					}
+				})
+				.catch(console.error);
+		},
 		login() {
 			fetch("/api/v1/user/login", {
 				method: "POST",
@@ -359,6 +434,8 @@ const app = createApp({
 				.then(text => {
 					if (text === "true") {
 						this.showMessage("login success");
+						this.username = null;
+						this.password = null;
 					} else {
 						this.showMessage("login fail");
 					}
