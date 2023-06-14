@@ -60,10 +60,13 @@ input::file-selector-button {
 	align-items: center;
 	width: 100%;
 	height: 100%;
+	border: 1px solid #eee;
 
 	background-color: rgba(0, 0, 0, 0.1);
 }
 .message__text {
+	position: relative;
+
 	max-width: calc(40rem - 2rem);
 	padding: 1.5rem;
 	margin: 0;
@@ -75,19 +78,27 @@ input::file-selector-button {
 }
 .message-enter-active,
 .message-leave-active {
+	transition: opacity 0.5s;
+}
+.message-enter-active .message__text,
+.message-leave-active .message__text {
 	transition: top 0.5s;
 }
-.message-enter-from {
-	top: 100%;
-}
-.message-enter-to {
-	top: 0;
-}
-.message-leave-from {
-	top: 0;
-}
+.message-enter-from,
 .message-leave-to {
-	top: 100%;
+	opacity: 0;
+}
+.message-enter-to,
+.message-leave-from {
+	opacity: 1;
+}
+.message-enter-from .message__text,
+.message-leave-to .message__text {
+	top: 3rem;
+}
+.message-enter-to .message__text,
+.message-leave-from .message__text {
+	top: 0;
 }
 
 .posts {
@@ -303,17 +314,13 @@ input::file-selector-button {
 .single-leave-active {
 	transition: top 0.5s;
 }
-.single-enter-from {
-	top: 100%;
-}
-.single-enter-to {
-	top: 0;
-}
-.single-leave-from {
-	top: 0;
-}
+.single-enter-from,
 .single-leave-to {
 	top: 100%;
+}
+.single-enter-to,
+.single-leave-from {
+	top: 0;
 }
 
 .form {
@@ -380,6 +387,8 @@ input::file-selector-button {
 	border: none;
 
 	background-color: transparent;
+
+	cursor: pointer;
 }
 .menu__form {
 	padding: 0;

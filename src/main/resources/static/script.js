@@ -5,16 +5,16 @@ const app = createApp({
 		<h1 class="title" v-if="loginUser">hello, {{loginUser}}!</h1>
 		<h1 class="title" v-else>hello, world!</h1>
 
-		<div v-if="messageTimeout" class="message">
-			<Transition name="message">
+		<Transition name="message">
+			<div v-if="messageTimeout" class="message">
 				<p class="message__text" @click="hideMessage">{{message}}</p>
-			</Transition>
-		</div>
+			</div>
+		</Transition>
 
 		<div v-if="!posts">
 			<p>fetching posts...</p>
 		</div>
-		<div v-else-if="posts.length">
+		<div v-else-if="posts.length"
 			<Transition name="single">
 				<div class="single" v-if="post">
 					<div class="post single__inner">
@@ -182,10 +182,14 @@ const app = createApp({
 			comment: null,
 			currentComment: 0,
 			moreComments: true,
+			fetchingPost: false,
+
+			liking: false,
 
 			posts: null,
 			currentPost: 0,
 			morePosts: true,
+			fetchingPosts: false,
 
 			postImage: null,
 			postContent: null,
@@ -218,6 +222,9 @@ const app = createApp({
 			this.messageTimeout = 0;
 		},
 		fetchPosts() {
+			if (this.fetchingPosts) return;
+			this.fetchingPosts = true;
+
 			fetch("/api/v1/post/list?" + new URLSearchParams({
 				start: this.currentPost,
 				length: 5,
@@ -241,9 +248,13 @@ const app = createApp({
 						return index >= from;
 					}));
 				})
-				.catch(console.error);
+				.catch(console.error)
+				.finally(() => this.fetchingPosts = false);
 		},
 		fetchPost(post) {
+			if (this.fetchingPost) return;
+			this.fetchingPost = true;
+
 			fetch(`/api/v1/post/${post.id}`)
 				.then(res => res.json())
 				.then(json => {
@@ -257,7 +268,8 @@ const app = createApp({
 					const p = this.posts.find(p => p.id === post.id);
 					p.views = json.views;
 				})
-				.catch(console.error);
+				.catch(console.error)
+				.finally(() => this.fetchingPost = false);
 		},
 		checkLike(posts) {
 			if (!posts) return;
@@ -282,6 +294,9 @@ const app = createApp({
 				.catch(console.error);
 		},
 		fetchComments(post) {
+			if (this.fetchingComments) return;
+			this.fetchingComments = true;
+
 			fetch("/api/v1/comment/list?" + new URLSearchParams({
 				post: post.id,
 				start: this.currentComment,
@@ -294,9 +309,13 @@ const app = createApp({
 
 					this.post.comments.push(...json.comments);
 				})
-				.catch(console.error);
+				.catch(console.error)
+				.finally(() => this.fetchingComments = false);
 		},
 		like(post) {
+			if (this.liking) return;
+			this.liking = true;
+
 			fetch("/api/v1/post/like", {
 				method: "PUT",
 				headers: {
@@ -306,8 +325,12 @@ const app = createApp({
 					post: post.id,
 				}),
 			})
-				.then(res => res.json())
+				.then(res => {
+					if (res.status === 200) return res.json();
+				})
 				.then(json => {
+					if (!json) return;
+
 					post.like = json.liked;
 					post.likes = json.likes;
 
@@ -315,7 +338,8 @@ const app = createApp({
 					p.like = json.liked;
 					p.likes = json.likes;
 				})
-				.catch(console.error);
+				.catch(console.error)
+				.finally(() => this.liking = false);
 		},
 		addComment(post) {
 			fetch("/api/v1/comment/add", {
