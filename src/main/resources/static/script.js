@@ -5,16 +5,18 @@ const app = createApp({
 		<h1 class="title" v-if="loginUser">hello, {{loginUser}}!</h1>
 		<h1 class="title" v-else>hello, world!</h1>
 
-		<Transition name="message">
-			<div v-if="messageTimeout" class="message">
-				<p class="message__text" @click="hideMessage">{{message}}</p>
+		<Transition name="popup">
+			<div v-if="messageTimeout" class="popup popup--message">
+				<div class="popup__box" @click="hideMessage">
+					<p>{{message}}</p>
+				</div>
 			</div>
 		</Transition>
 
 		<div v-if="!posts">
 			<p>fetching posts...</p>
 		</div>
-		<div v-else-if="posts.length"
+		<div v-else-if="posts.length">
 			<Transition name="single">
 				<div class="single" v-if="post">
 					<div class="post single__inner">
@@ -107,69 +109,112 @@ const app = createApp({
 
 		<div class="menu" :class="{'menu--show': showMenu}">
 			<button class="button menu__toggle" @click="toggleMenu">{{showMenu? "v close v": "^ menu ^"}}</button>
-			<div class="menu__inner" v-if="loginCheck && !loginUser && menu === 'create'">
-				<form class="form menu__form" @submit.prevent="create">
+			<div class="menu__inner" v-if="loginCheck && !loginUser">
+				<form class="form menu__form">
 					<div class="form__row">
-						new user
+						<button class="button" @click.prevent="toggleLogin(true)">login</button>
 					</div>
 					<div class="form__row">
-						<label for="createUsername">username</label>
-						<input id="createUsername" v-model="createUsername"/>
-					</div>
-					<div class="form__row">
-						<label for="createPassword">password</label>
-						<input id="createPassword" type="password" v-model="createPassword"/>
-					</div>
-					<div class="form__row">
-						<label for="createConfirm">confirm</label>
-						<input id="createConfirm" type="password" v-model="createConfirm"/>
-					</div>
-					<div class="form__row">
-						<button class="button form__button">create</button>
-						<button class="button form__button" @click.stop="changeMenu('login')">login</button>
-					</div>
-				</form>
-			</div>
-			<div class="menu__inner" v-else-if="loginCheck && !loginUser">
-				<form class="form menu__form" @submit.prevent="login">
-					<div class="form__row">
-						login
-					</div>
-					<div class="form__row">
-						<label for="username">username</label>
-						<input id="username" v-model="username"/>
-					</div>
-					<div class="form__row">
-						<label for="password">password</label>
-						<input id="password" type="password" v-model="password"/>
-					</div>
-					<div class="form__row">
-						<button class="button form__button">login</button>
-						<button class="button form__button" @click.stop="changeMenu('create')">create</button>
+						<button class="button" @click.prevent="toggleCreate(true)">new user</button>
 					</div>
 				</form>
 			</div>
 			<div class="menu__inner" v-else-if="loginUser">
-				<form class="form menu__form" @submit.prevent="postPost">
+				<form class="form menu__form">
 					<div class="form__row">
-						<label for="image">image</label>
-						<input id="image" type="file" @change="setPostImage" ref="imageInput"/>
+						<button class="button" @click.prevent="toggleNewPost(true)">newPost</button>
 					</div>
 					<div class="form__row">
-						<label for="content">content</label>
-						<input id="content" v-model="postContent"/>
-					</div>
-					<div class="form__row">
-						<button class="button form__button">post</button>
-					</div>
-				</form>
-				<form class="form menu__form" @submit.prevent="logout">
-					<div class="form__row">
-						<button class="button form__button">logout</button>
+						<button class="button form__button" @click.prevent="logout">logout</button>
 					</div>
 				</form>
 			</div>
 		</div>
+
+		<Transition name="popup">
+			<div class="popup" v-if="loginCheck && !loginUser && showLogin">
+				<div class="popup__box">
+					<div class="popup__bar">
+						login
+						<button class="popup__close" @click="toggleLogin(false)">
+							<span></span>
+							<span></span>
+						</button>
+					</div>
+					<form class="form menu__form" @submit.prevent="login">
+						<div class="form__row">
+							<label for="username">username</label>
+							<input id="username" v-model="username"/>
+						</div>
+						<div class="form__row">
+							<label for="password">password</label>
+							<input id="password" type="password" v-model="password"/>
+						</div>
+						<div class="form__row">
+							<button class="button form__button">login</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</Transition>
+
+		<Transition name="popup">
+			<div class="popup" v-if="loginCheck && !loginUser && showCreate">
+				<div class="popup__box">
+					<div class="popup__bar">
+						new user
+						<button class="popup__close" @click="toggleCreate(false)">
+							<span></span>
+							<span></span>
+						</button>
+					</div>
+					<form class="form menu__form" @submit.prevent="create">
+						<div class="form__row">
+							<label for="createUsername">username</label>
+							<input id="createUsername" v-model="createUsername"/>
+						</div>
+						<div class="form__row">
+							<label for="createPassword">password</label>
+							<input id="createPassword" type="password" v-model="createPassword"/>
+						</div>
+						<div class="form__row">
+							<label for="createConfirm">confirm</label>
+							<input id="createConfirm" type="password" v-model="createConfirm"/>
+						</div>
+						<div class="form__row">
+							<button class="button form__button">create</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</Transition>
+
+		<Transition name="popup">
+			<div class="popup" v-if="loginCheck && loginUser && showNewPost">
+				<div class="popup__box">
+					<div class="popup__bar">
+						new post
+						<button class="popup__close" @click="toggleNewPost(false)">
+							<span></span>
+							<span></span>
+						</button>
+					</div>
+					<form class="form menu__form" @submit.prevent="postPost">
+						<div class="form__row">
+							<label for="image">image</label>
+							<input id="image" type="file" @change="setPostImage" ref="imageInput"/>
+						</div>
+						<div class="form__row">
+							<label for="content">content</label>
+							<input id="content" v-model="postContent"/>
+						</div>
+						<div class="form__row">
+							<button class="button form__button">post</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</Transition>
 	`,
 	data() {
 		return {
@@ -195,6 +240,9 @@ const app = createApp({
 			postContent: null,
 
 			showMenu: false,
+			showLogin: false,
+			showCreate: false,
+			showNewPost: false,
 			loginCheck: false,
 			loginUser: null,
 			username: null,
@@ -209,9 +257,6 @@ const app = createApp({
 		this.checkLogin();
 	},
 	methods: {
-		changeMenu(menu) {
-			this.menu = menu;
-		},
 		showMessage(message) {
 			this.message = message;
 			clearTimeout(this.messageTimeout);
@@ -386,14 +431,21 @@ const app = createApp({
 			})
 				.then(res => res.text())
 				.then(text => {
-					this.postImage = null;
-					this.postContent = null;
-					this.$refs.imageInput.value = null;
+					if (/^-?\d+$/.test(text)) {
+						this.postImage = null;
+						this.postContent = null;
+						this.$refs.imageInput.value = null;
+						this.toggleNewPost(false);
 
-					this.morePosts = true;
-					this.posts = null;
-					this.currentPost = 0;
-					this.fetchPosts();
+						this.morePosts = true;
+						this.posts = null;
+						this.currentPost = 0;
+						this.fetchPosts();
+
+						this.showMessage("post success");
+					} else {
+						this.showMessage("post fail");
+					}
 				})
 				.catch(console.error);
 		},
@@ -413,6 +465,15 @@ const app = createApp({
 		},
 		toggleMenu() {
 			this.showMenu = !this.showMenu;
+		},
+		toggleLogin(show) {
+			this.showLogin = show;
+		},
+		toggleCreate(show) {
+			this.showCreate = show;
+		},
+		toggleNewPost(show) {
+			this.showNewPost = show;
 		},
 		create() {
 			if (this.createPassword !== this.createConfirm) return;
@@ -460,6 +521,7 @@ const app = createApp({
 						this.showMessage("login success");
 						this.username = null;
 						this.password = null;
+						this.toggleLogin(false);
 					} else {
 						this.showMessage("login fail");
 					}
