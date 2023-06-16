@@ -24,6 +24,7 @@ import sanko.sankons.domain.user.*; //User, UserRepository
 import sanko.sankons.domain.post.*; //Post, PostRepository
 import sanko.sankons.domain.comment.Comment;
 import sanko.sankons.domain.like.*; //Like, LikeRepository
+import sanko.sankons.domain.hashtag.*; //Hashtag, HashtagRepository
 import sanko.sankons.web.dto.SessionUser;
 import sanko.sankons.web.dto.*; //PostPostRequest, PostListRequest, PostViewResponse, PostListResponse, PostLikeRequest, PostLikeResponse
 
@@ -42,6 +43,9 @@ public class PostServiceTest {
 
 	@MockBean
 	private LikeRepository likeRepository;
+
+	@MockBean
+	private HashtagRepository hashtagRepository;
 
 	@MockBean
 	private HttpSession httpSession;
@@ -141,6 +145,9 @@ public class PostServiceTest {
 
 		when(likeRepository.findByLikerAndPost(user, post))
 			.thenReturn(like);
+
+		when(hashtagRepository.saveAll(any(List.class)))
+			.thenReturn(null);
 	}
 
 	@Test

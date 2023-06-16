@@ -1,8 +1,9 @@
 package sanko.sankons.service;
 
 import java.io.File;
-import java.util.List;
+import java.util.*; //List, Set
 import java.util.stream.Collectors;
+import java.util.regex.*; //Pattern, MatchResult
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import jakarta.servlet.http.HttpSession;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import sanko.sankons.domain.user.*; //User, UserRepository
 import sanko.sankons.domain.post.*; //Post, PostRepository
 import sanko.sankons.domain.like.*; //Like, LikeRepository
+import sanko.sankons.domain.hashtag.*; //Hashtag, HashtagRepository
 import sanko.sankons.web.dto.*; //PostPostRequest, PostViewResponse, PostListRequest, PostListResponse, SessionUser, PostCheckLikeRequest, PostCheckLikeResponse, PostLikeRequest, PostLikeResponse
 
 @RequiredArgsConstructor
@@ -24,6 +26,7 @@ public class PostService {
 	private final PostRepository postRepository;
 	private final UserRepository userRepository;
 	private final LikeRepository likeRepository;
+	private final HashtagRepository hashtagRepository;
 
 	public Long post(PostPostRequest request, MultipartFile file) throws Exception {
 		SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
@@ -49,12 +52,31 @@ public class PostService {
 			throw new Exception("Could not upload file");
 		}
 
-		return postRepository.save(Post.builder()
+		Post post = postRepository.save(Post.builder()
 			.poster(user)
 			.image(filename)
 			.content(request.getContent())
 			.comments(null)
-			.build()).getId();
+			.build());
+
+		List<Hashtag> hashtags = getHashtags(request.getContent()).stream()
+			.map(tag -> Hashtag.builder()
+				.post(post)
+				.tag(tag)
+				.build())
+			.collect(Collectors.toList());
+
+		hashtagRepository.saveAll(hashtags);
+
+		return post.getId();
+	}
+
+	private Set<String> getHashtags(String content) {
+		return Pattern.compile("\\#[a-zA-z0-9]+[a-zA-Z0-9\\-\\_]*[a-zA-z0-9]+")
+			.matcher(content)
+			.results()
+			.map(MatchResult::group)
+			.collect(Collectors.toSet());
 	}
 
 	public PostViewResponse view(Long id) throws Exception {
