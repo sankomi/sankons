@@ -69,8 +69,14 @@ public class PostServiceTest {
 
 	private static final List<Post> posts = new ArrayList<>();
 
+	private static final Long catPostId = 4L;
+	private static final String catContent = "cat content";
+	private static final String catTag = "cat";
+
 	private static User user;
 	private static Post post;
+	private static Post catPost;
+	private static Hashtag catHashtag;
 	private static Like like;
 
 	@BeforeAll
@@ -93,6 +99,24 @@ public class PostServiceTest {
 			.post(post)
 			.build();
 		ReflectionTestUtils.setField(post, "likes", Set.of(like));
+
+		catPost = Post.builder()
+			.poster(user)
+			.image(image)
+			.content(catContent)
+			.build();
+		ReflectionTestUtils.setField(catPost, "id", catPostId);
+
+		Like catLike = Like.builder()
+			.liker(user)
+			.post(catPost)
+			.build();
+		ReflectionTestUtils.setField(catPost, "likes", Set.of(catLike));
+
+		catHashtag = Hashtag.builder()
+			.post(catPost)
+			.tag("#" + catTag)
+			.build();
 
 		for (int i = 0; i < 5; i++) {
 			Set<Comment> comments = new LinkedHashSet();
@@ -148,6 +172,9 @@ public class PostServiceTest {
 
 		when(hashtagRepository.saveAll(any(List.class)))
 			.thenReturn(null);
+
+		when(postRepository.findAllByHashtagsTagOrderByCreatedDesc("#" + catTag))
+			.thenReturn(Arrays.asList(catPost));
 	}
 
 	@Test
@@ -183,7 +210,7 @@ public class PostServiceTest {
 	@Test
 	public void testPostList() throws Exception {
 		//given
-		PostListRequest request = new PostListRequest(start, length, commentLength);
+		PostListRequest request = new PostListRequest(start, length, commentLength, null);
 
 		//when
 		PostListResponse response = postService.list(request);
@@ -195,6 +222,19 @@ public class PostServiceTest {
 		assertEquals(username, response.getPosts().get(0).getComments().get(0).getCommenter().getUsername());
 		assertTrue(commentLength >= response.getPosts().get(0).getComments().size());
 		assertEquals(commentContent, response.getPosts().get(0).getComments().get(0).getContent());
+	}
+
+	@Test
+	public void testPostListWithTag() throws Exception {
+		//given
+		PostListRequest request = new PostListRequest(start, length, commentLength, catTag);
+
+		//when
+		PostListResponse response = postService.list(request);
+
+		//then
+		assertEquals(catPostId, response.getPosts().get(0).getId());
+		assertEquals(catContent, response.getPosts().get(0).getContent());
 	}
 
 	@Test

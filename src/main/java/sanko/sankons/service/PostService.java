@@ -94,7 +94,13 @@ public class PostService {
 		int length = request.getLength();
 		int commentLength = request.getCommentLength();
 
-		List<Post> posts = postRepository.findAllByOrderByCreatedDesc();
+		List<Post> posts;
+		String tag = request.getTag();
+		if (tag == null) {
+			posts = postRepository.findAllByOrderByCreatedDesc();
+		} else {
+			posts = postRepository.findAllByHashtagsTagOrderByCreatedDesc("#" + tag);
+		}
 
 		return new PostListResponse(posts, start, length, commentLength);
 	}

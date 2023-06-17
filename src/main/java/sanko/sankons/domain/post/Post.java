@@ -10,6 +10,7 @@ import sanko.sankons.domain.TimedEntity;
 import sanko.sankons.domain.user.User;
 import sanko.sankons.domain.comment.Comment;
 import sanko.sankons.domain.like.Like;
+import sanko.sankons.domain.hashtag.Hashtag;
 
 @Getter
 @NoArgsConstructor
@@ -41,6 +42,10 @@ public class Post extends TimedEntity {
 
 	@OneToMany(mappedBy = "post")
 	private Set<Like> likes;
+
+	@OneToMany(mappedBy = "post")
+	@OrderBy("tag ASC")
+	private Set<Hashtag> hashtags;
 
 	@Builder
 	public Post(User poster, String image, String content, Set<Comment> comments) {
