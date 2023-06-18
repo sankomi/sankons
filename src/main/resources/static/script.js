@@ -2,8 +2,14 @@ const createApp = Vue.createApp;
 
 const app = createApp({
 	template: `
-		<h1 class="title" v-if="loginUser">hello, {{loginUser}}!</h1>
-		<h1 class="title" v-else>hello, world!</h1>
+		<Transition name="opacity" mode="out-in">
+			<h1 class="title" v-if="tag">
+				<button class="button title__cancel" @click="changeTag(null)">&lt;</button>
+				#{{tag}}
+			</h1>
+			<h1 class="title" v-else-if="loginUser">hello, {{loginUser}}!</h1>
+			<h1 class="title" v-else>hello, world!</h1>
+		</Transition>
 
 		<Transition name="popup">
 			<div v-if="messageTimeout" class="popup popup--message">
@@ -13,99 +19,111 @@ const app = createApp({
 			</div>
 		</Transition>
 
-		<div v-if="!posts">
-			<p>fetching posts...</p>
-		</div>
-		<div v-else-if="posts.length">
-			<Transition name="single">
-				<div class="single" v-if="post">
-					<div class="post single__inner">
-						<div class="single__user post__user">
-							{{post.poster.username}}
-							<button class="single__close" @click="closePost">
-								<span></span>
-								<span></span>
-							</button>
-						</div>
-						<figure class="single__image post__image">
-							<img :src="'/api/v1/post/' + post.id + '/image'">
-						</figure>
-						<div class="post__stats">
-							views {{post.views}}
-							<button class="post__like" :class="{'post__like--liked': post.like}" @click="like(post)">
-								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><path d="M4 7.33l2.952-2.954c.918-.918.9-2.256.066-3.087A2.134 2.134 0 0 0 4 1.29a2.132 2.132 0 0 0-3.015-.01C.15 2.12.13 3.46 1.05 4.372L4 7.33z"/></svg>
-							</button>
-							likes {{post.likes}}
-						</div>
-						<div class="post__content">
-							<p>{{post.content}}</p>
-						</div>
-						<div v-if="post.comments.length" class="single__comment-outer post__comment-outer">
-							<ul class="single__comments comments post__comments" v-if="post.comments">
-								<li class="comments__comment" v-for="comment in post.comments">
-									{{comment.commenter.username}}: {{comment.content}}
-								</li>
-							</ul>
-							<form v-if="moreComments" class="single__comment-form form form--more" @click.prevent="fetchComments(post)">
-								<div class="form__row">
-									<button class="button form__button">more</button>
-								</div>
-							</form>
-						</div>
-						<div v-else class="post__comment-outer">
-							no comments
-						</div>
-						<form class="form single__form" v-if="loginUser" @submit.prevent="addComment(post)">
-							<div class="form__row">
-								<label for="comment">comment</label>
-								<input id="comment" v-model="comment"/>
-							</div>
-							<div class="form__row">
-								<button class="button form__button">add</button>
-							</div>
-						</form>
+		<Transition name="single">
+			<div class="single" v-if="post">
+				<div class="post single__inner">
+					<div class="single__user post__user">
+						{{post.poster.username}}
+						<button class="single__close" @click="closePost">
+							<span></span>
+							<span></span>
+						</button>
 					</div>
-				</div>
-			</Transition>
-
-			<div class="posts">
-				<div class="post posts__post" v-for="post in posts" @click.prevent="viewPost(post)">
-					<div class="post__user">{{post.poster.username}}</div>
-					<figure class="post__image">
+					<figure class="single__image post__image">
 						<img :src="'/api/v1/post/' + post.id + '/image'">
 					</figure>
 					<div class="post__stats">
 						views {{post.views}}
-						<button class="post__like" :class="{'post__like--liked': post.like}" @click.stop="like(post)">
+						<button class="post__like" :class="{'post__like--liked': post.like}" @click="like(post)">
 							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><path d="M4 7.33l2.952-2.954c.918-.918.9-2.256.066-3.087A2.134 2.134 0 0 0 4 1.29a2.132 2.132 0 0 0-3.015-.01C.15 2.12.13 3.46 1.05 4.372L4 7.33z"/></svg>
 						</button>
 						likes {{post.likes}}
 					</div>
 					<div class="post__content">
-						<p>{{post.content}}</p>
+						<p>
+							<span v-for="hashtag in post.hashtags">
+								{{hashtag.text}}
+								<a href="" @click.prevent.stop="changeTag(hashtag.tag.slice(1))">{{hashtag.tag}}</a>
+							</span>
+						</p>
 					</div>
-					<div v-if="post.comments.length" class="post__comment-outer">
-						<ul class="comments post__comments" v-if="post.comments">
+					<div v-if="post.comments.length" class="single__comment-outer post__comment-outer">
+						<ul class="single__comments comments post__comments" v-if="post.comments">
 							<li class="comments__comment" v-for="comment in post.comments">
 								{{comment.commenter.username}}: {{comment.content}}
 							</li>
 						</ul>
+						<form v-if="moreComments" class="single__comment-form form form--more" @click.prevent="fetchComments(post)">
+							<div class="form__row">
+								<button class="button form__button">more</button>
+							</div>
+						</form>
 					</div>
 					<div v-else class="post__comment-outer">
 						no comments
 					</div>
+					<form class="form single__form" v-if="loginUser" @submit.prevent="addComment(post)">
+						<div class="form__row">
+							<label for="comment">comment</label>
+							<input id="comment" v-model="comment"/>
+						</div>
+						<div class="form__row">
+							<button class="button form__button">add</button>
+						</div>
+					</form>
 				</div>
 			</div>
+		</Transition>
 
-			<form v-if="morePosts" class="form form--more" @click.prevent="fetchPosts">
-				<div class="form__row">
-					<button class="button form__button">more</button>
+		<Transition name="opacity" mode="out-in">
+			<div v-if="!posts">
+				<p>fetching posts...</p>
+			</div>
+			<div v-else-if="posts.length">
+				<div class="posts">
+					<div class="post posts__post" v-for="post in posts" @click.prevent="viewPost(post)">
+						<div class="post__user">{{post.poster.username}}</div>
+						<figure class="post__image">
+							<img :src="'/api/v1/post/' + post.id + '/image'">
+						</figure>
+						<div class="post__stats">
+							views {{post.views}}
+							<button class="post__like" :class="{'post__like--liked': post.like}" @click.stop="like(post)">
+								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><path d="M4 7.33l2.952-2.954c.918-.918.9-2.256.066-3.087A2.134 2.134 0 0 0 4 1.29a2.132 2.132 0 0 0-3.015-.01C.15 2.12.13 3.46 1.05 4.372L4 7.33z"/></svg>
+							</button>
+							likes {{post.likes}}
+						</div>
+						<div class="post__content">
+							<p>
+								<span v-for="hashtag in post.hashtags">
+									{{hashtag.text}}
+									<a href="" @click.prevent.stop="changeTag(hashtag.tag.slice(1))">{{hashtag.tag}}</a>
+								</span>
+							</p>
+						</div>
+						<div v-if="post.comments.length" class="post__comment-outer">
+							<ul class="comments post__comments" v-if="post.comments">
+								<li class="comments__comment" v-for="comment in post.comments">
+									{{comment.commenter.username}}: {{comment.content}}
+								</li>
+							</ul>
+						</div>
+						<div v-else class="post__comment-outer">
+							no comments
+						</div>
+					</div>
 				</div>
-			</form>
-		</div>
-		<div v-else>
-			<p>no posts</p>
-		</div>
+
+				<form v-if="morePosts" class="form form--more" @click.prevent="fetchPosts">
+					<div class="form__row">
+						<button class="button form__button">more</button>
+					</div>
+				</form>
+			</div>
+			<div v-else>
+				<p>no posts</p>
+			</div>
+		</Transition>
 
 		<div class="menu" :class="{'menu--show': showMenu}">
 			<button class="button menu__toggle" @click="toggleMenu">{{showMenu? "v close v": "^ menu ^"}}</button>
@@ -231,6 +249,7 @@ const app = createApp({
 
 			liking: false,
 
+			tag: null,
 			posts: null,
 			currentPost: 0,
 			morePosts: true,
@@ -274,6 +293,7 @@ const app = createApp({
 				start: this.currentPost,
 				length: 5,
 				commentLength: 5,
+				...this.tag && {tag: this.tag},
 			}))
 				.then(res => res.json())
 				.then(json => {
@@ -289,6 +309,9 @@ const app = createApp({
 						this.posts = json.posts;
 					}
 
+					this.posts.filter((post, index) => {
+						return index >= from;
+					}).map(post => post.hashtags = this.hashtagify(post.content));
 					this.checkLike(this.posts.filter((post, index) => {
 						return index >= from;
 					}));
@@ -304,6 +327,7 @@ const app = createApp({
 				.then(res => res.json())
 				.then(json => {
 					this.post = json;
+					this.post.hashtags = this.hashtagify(this.post.content);
 					this.currentComment = this.post.comments.length;
 
 					this.moreComments = true;
@@ -315,6 +339,35 @@ const app = createApp({
 				})
 				.catch(console.error)
 				.finally(() => this.fetchingPost = false);
+		},
+		hashtagify(content) {
+			let hashtags = [];
+			let ending;
+			while (true) {
+				let index = content.search(/\#[a-zA-Z0-9]+[a-zA-Z0-9\-\_]*[a-zA-Z0-9]+/);
+				if (!~index) break;
+				let text = content.slice(0, index);
+				let length = content.slice(index + 1).search(/[^a-zA-Z0-9\-\_]/) + 1;
+				let tag;
+				if (length > 0) {
+					tag = content.slice(index, index + length);
+					content = content.slice(index + length);
+				} else {
+					tag = content.slice(index);
+					content = "";
+				}
+				hashtags.push({text, tag});
+			}
+			hashtags.push({text: content, tag: null});
+			return hashtags;
+		},
+		changeTag(tag) {
+			this.tag = tag;
+			this.morePosts = true;
+			this.posts = null;
+			this.post = null;
+			this.currentPost = 0;
+			this.fetchPosts();
 		},
 		checkLike(posts) {
 			if (!posts) return;

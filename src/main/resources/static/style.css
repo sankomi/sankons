@@ -49,6 +49,28 @@ input::file-selector-button {
 	background-color: #fefefe;
 }
 
+.opacity-enter-active,
+.opacity-leave-active {
+	transition: opacity 0.5s;
+}
+.opacity-enter-from,
+.opacity-leave-to {
+	opacity: 0;
+}
+.opacity-enter-to,
+.opacity-leave-from {
+	opacity: 1;
+}
+
+.title {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+}
+.title__cancel {
+	width: 2.5rem;
+}
+
 .popup {
 	position: fixed;
 	left: 0;
