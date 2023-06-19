@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 import sanko.sankons.domain.post.Post;
 import sanko.sankons.service.PostService;
-import sanko.sankons.web.dto.*; //PostPostRequest, PostListRequest, PostListResponse, PostViewResponse, PostCheckLikeRequest, PostCheckLikeResponse, PostLikeRequest, PostLikeResponse
+import sanko.sankons.web.dto.*; //PostPostRequest, PostDeleteRequest, PostListRequest, PostListResponse, PostViewResponse, PostCheckLikeRequest, PostCheckLikeResponse, PostLikeRequest, PostLikeResponse
 
 @RequiredArgsConstructor
 @RestController
@@ -33,6 +33,11 @@ public class PostApiController {
 		}
 
 		return id;
+	}
+
+	@DeleteMapping("/delete")
+	public Boolean delete(@Valid @RequestBody PostDeleteRequest request) throws Exception {
+		return postService.delete(request);
 	}
 
 	@GetMapping("/{id}")

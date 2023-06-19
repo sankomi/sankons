@@ -16,7 +16,7 @@ import sanko.sankons.domain.user.*; //User, UserRepository
 import sanko.sankons.domain.post.*; //Post, PostRepository
 import sanko.sankons.domain.like.*; //Like, LikeRepository
 import sanko.sankons.domain.hashtag.*; //Hashtag, HashtagRepository
-import sanko.sankons.web.dto.*; //PostPostRequest, PostViewResponse, PostListRequest, PostListResponse, SessionUser, PostCheckLikeRequest, PostCheckLikeResponse, PostLikeRequest, PostLikeResponse
+import sanko.sankons.web.dto.*; //PostPostRequest, PostDeleteRequest, PostViewResponse, PostListRequest, PostListResponse, SessionUser, PostCheckLikeRequest, PostCheckLikeResponse, PostLikeRequest, PostLikeResponse
 
 @RequiredArgsConstructor
 @Service
@@ -77,6 +77,29 @@ public class PostService {
 			.results()
 			.map(MatchResult::group)
 			.collect(Collectors.toSet());
+	}
+
+	public Boolean delete(PostDeleteRequest request) throws Exception {
+		SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
+
+		if (sessionUser == null) {
+			throw new Exception("Not logged in");
+		}
+
+		User user = userRepository.findById(sessionUser.getId())
+			.orElseThrow(() -> new Exception("Invalid user"));
+
+		Post post = postRepository.findById(request.getPost())
+			.orElseThrow(() -> new Exception("Post not found"));
+
+		if (post.getPoster() == user) {
+			likeRepository.deleteAll(post.getLikes());
+			postRepository.delete(post);
+		} else {
+			throw new Exception("Not poster");
+		}
+
+		return true;
 	}
 
 	public PostViewResponse view(Long id) throws Exception {
