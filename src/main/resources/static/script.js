@@ -34,10 +34,13 @@ const app = createApp({
 					</figure>
 					<div class="post__stats">
 						views {{post.views}}
-						<button class="post__like" :class="{'post__like--liked': post.like}" @click="like(post)">
+						<button class="post__like" :class="{'post__like--liked': post.like}" @click="likePost(post)">
 							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><path d="M4 7.33l2.952-2.954c.918-.918.9-2.256.066-3.087A2.134 2.134 0 0 0 4 1.29a2.132 2.132 0 0 0-3.015-.01C.15 2.12.13 3.46 1.05 4.372L4 7.33z"/></svg>
 						</button>
 						likes {{post.likes}}
+						<button class="post__delete" @click="deletePost(post)">
+							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><g fill-rule="evenodd"><path d="M2.048.77l5.18 5.182L5.953 7.23.77 2.048 2.048.77z"/><path d="M5.952.77L7.23 2.05 2.048 7.23.77 5.952 5.953.772z"/></g></svg>
+						</button>
 					</div>
 					<div class="post__content">
 						<p>
@@ -88,10 +91,13 @@ const app = createApp({
 						</figure>
 						<div class="post__stats">
 							views {{post.views}}
-							<button class="post__like" :class="{'post__like--liked': post.like}" @click.stop="like(post)">
+							<button class="post__like" :class="{'post__like--liked': post.like}" @click.stop="likePost(post)">
 								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><path d="M4 7.33l2.952-2.954c.918-.918.9-2.256.066-3.087A2.134 2.134 0 0 0 4 1.29a2.132 2.132 0 0 0-3.015-.01C.15 2.12.13 3.46 1.05 4.372L4 7.33z"/></svg>
 							</button>
 							likes {{post.likes}}
+							<button class="post__delete" @click.stop="deletePost(post)">
+								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><g fill-rule="evenodd"><path d="M2.048.77l5.18 5.182L5.953 7.23.77 2.048 2.048.77z"/><path d="M5.952.77L7.23 2.05 2.048 7.23.77 5.952 5.953.772z"/></g></svg>
+							</button>
 						</div>
 						<div class="post__content">
 							<p>
@@ -248,6 +254,7 @@ const app = createApp({
 			fetchingPost: false,
 
 			liking: false,
+			deleting: false,
 
 			tag: null,
 			posts: null,
@@ -410,7 +417,7 @@ const app = createApp({
 				.catch(console.error)
 				.finally(() => this.fetchingComments = false);
 		},
-		like(post) {
+		likePost(post) {
 			if (this.liking) return;
 			this.liking = true;
 
@@ -438,6 +445,24 @@ const app = createApp({
 				})
 				.catch(console.error)
 				.finally(() => this.liking = false);
+		},
+		deletePost(post) {
+			if (this.deleting) return;
+			this.deleting = true;
+
+			fetch("/api/v1/post/delete", {
+				method: "DELETE",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					post: post.id,
+				}),
+			})
+				.then(res => res.text())
+				.then(console.log)
+				.catch(console.error)
+				.finally(() => this.deleting = false);
 		},
 		addComment(post) {
 			fetch("/api/v1/comment/add", {
