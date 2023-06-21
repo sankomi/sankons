@@ -13,12 +13,14 @@ public class PostListResponse {
 	private int end;
 	private List<PostViewResponse> posts;
 
-	public PostListResponse(List<Post> posts, int start, int length, int commentLength) {
+	public PostListResponse(List<Post> posts, Long userId, int start, int length, int commentLength) {
 		this.posts = posts.stream()
 			.skip(start)
 			.limit(length)
 			.map(post -> {
-				return new PostViewResponse(post, commentLength);
+				PostViewResponse response = new PostViewResponse(post, commentLength);
+				response.setOwner(userId);
+				return response;
 			})
 			.collect(Collectors.toList());
 		this.end = start + this.posts.size();

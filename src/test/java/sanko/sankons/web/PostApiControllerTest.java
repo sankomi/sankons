@@ -118,7 +118,7 @@ public class PostApiControllerTest {
 		when(postService.list(any(PostListRequest.class)))
 			.thenAnswer(invocation -> {
 				PostListRequest request = invocation.getArgument(0, PostListRequest.class);
-				return new PostListResponse(posts, request.getStart(), request.getLength(), request.getCommentLength());
+				return new PostListResponse(posts, null, request.getStart(), request.getLength(), request.getCommentLength());
 			});
 
 		when(postService.view(postId)).thenReturn(new PostViewResponse(post));

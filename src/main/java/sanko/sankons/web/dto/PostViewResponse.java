@@ -19,6 +19,7 @@ public class PostViewResponse {
 	private List<CommentResponse> comments;
 	private int views;
 	private int likes;
+	private boolean login;
 
 	public PostViewResponse(Post post, int commentLength) {
 		this.id = post.getId();
@@ -41,6 +42,12 @@ public class PostViewResponse {
 
 	public PostViewResponse(Post post) {
 		this(post, 0);
+	}
+
+	public void setOwner(Long userId) {
+		if (poster.getId().equals(userId)) {
+			login = true;
+		}
 	}
 
 }

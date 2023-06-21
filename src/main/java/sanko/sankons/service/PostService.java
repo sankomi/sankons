@@ -103,19 +103,27 @@ public class PostService {
 	}
 
 	public PostViewResponse view(Long id) throws Exception {
+		SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
+
 		Post post = postRepository.findById(id)
 			.orElseThrow(() -> new Exception("Could not find post"));
 
 		post.view();
 		postRepository.save(post);
 
-		return new PostViewResponse(post);
+		PostViewResponse response = new PostViewResponse(post);
+		if (sessionUser != null) response.setOwner(sessionUser.getId());
+
+		return response;
 	}
 
 	public PostListResponse list(PostListRequest request) {
 		int start = request.getStart();
 		int length = request.getLength();
 		int commentLength = request.getCommentLength();
+
+		SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
+		Long userId = sessionUser == null? null: sessionUser.getId();
 
 		List<Post> posts;
 		String tag = request.getTag();
@@ -125,7 +133,7 @@ public class PostService {
 			posts = postRepository.findAllByHashtagsTagOrderByCreatedDesc("#" + tag);
 		}
 
-		return new PostListResponse(posts, start, length, commentLength);
+		return new PostListResponse(posts, userId, start, length, commentLength);
 	}
 
 	public File getImage(Long id) throws Exception {

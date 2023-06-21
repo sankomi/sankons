@@ -38,7 +38,7 @@ const app = createApp({
 							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><path d="M4 7.33l2.952-2.954c.918-.918.9-2.256.066-3.087A2.134 2.134 0 0 0 4 1.29a2.132 2.132 0 0 0-3.015-.01C.15 2.12.13 3.46 1.05 4.372L4 7.33z"/></svg>
 						</button>
 						likes {{post.likes}}
-						<button class="post__delete" @click="deletePost(post)">
+						<button v-if="post.login" class="post__delete" @click="deletePost(post)">
 							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><g fill-rule="evenodd"><path d="M2.048.77l5.18 5.182L5.953 7.23.77 2.048 2.048.77z"/><path d="M5.952.77L7.23 2.05 2.048 7.23.77 5.952 5.953.772z"/></g></svg>
 						</button>
 					</div>
@@ -95,7 +95,7 @@ const app = createApp({
 								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><path d="M4 7.33l2.952-2.954c.918-.918.9-2.256.066-3.087A2.134 2.134 0 0 0 4 1.29a2.132 2.132 0 0 0-3.015-.01C.15 2.12.13 3.46 1.05 4.372L4 7.33z"/></svg>
 							</button>
 							likes {{post.likes}}
-							<button class="post__delete" @click.stop="deletePost(post)">
+							<button v-if="post.login" class="post__delete" @click.stop="deletePost(post)">
 								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><g fill-rule="evenodd"><path d="M2.048.77l5.18 5.182L5.953 7.23.77 2.048 2.048.77z"/><path d="M5.952.77L7.23 2.05 2.048 7.23.77 5.952 5.953.772z"/></g></svg>
 							</button>
 						</div>
