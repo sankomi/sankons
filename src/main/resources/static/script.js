@@ -460,7 +460,12 @@ const app = createApp({
 				}),
 			})
 				.then(res => res.text())
-				.then(console.log)
+				.then(text => {
+					if (text === "true") {
+						const index = this.posts.indexOf(post);
+						if (~index) this.posts.splice(index, 1);
+					}
+				})
 				.catch(console.error)
 				.finally(() => this.deleting = false);
 		},

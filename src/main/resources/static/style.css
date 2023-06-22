@@ -31,6 +31,9 @@ img {
 p, li {
 	line-height: 1.5;
 }
+a {
+	color: cornflowerblue;
+}
 
 input, button, .button,
 input::file-selector-button {

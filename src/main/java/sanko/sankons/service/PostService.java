@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 
 import sanko.sankons.domain.user.*; //User, UserRepository
 import sanko.sankons.domain.post.*; //Post, PostRepository
+import sanko.sankons.domain.comment.CommentRepository;
 import sanko.sankons.domain.like.*; //Like, LikeRepository
 import sanko.sankons.domain.hashtag.*; //Hashtag, HashtagRepository
 import sanko.sankons.web.dto.*; //PostPostRequest, PostDeleteRequest, PostViewResponse, PostListRequest, PostListResponse, SessionUser, PostCheckLikeRequest, PostCheckLikeResponse, PostLikeRequest, PostLikeResponse
@@ -25,6 +26,7 @@ public class PostService {
 	private final HttpSession httpSession;
 	private final PostRepository postRepository;
 	private final UserRepository userRepository;
+	private final CommentRepository commentRepository;
 	private final LikeRepository likeRepository;
 	private final HashtagRepository hashtagRepository;
 
@@ -93,8 +95,11 @@ public class PostService {
 			.orElseThrow(() -> new Exception("Post not found"));
 
 		if (post.getPoster() == user) {
+			File file = new File(Paths.get("files", user.getId().toString(), post.getImage()).toString());
 			likeRepository.deleteAll(post.getLikes());
+			commentRepository.deleteAll(post.getComments());
 			postRepository.delete(post);
+			file.delete();
 		} else {
 			throw new Exception("Not poster");
 		}
