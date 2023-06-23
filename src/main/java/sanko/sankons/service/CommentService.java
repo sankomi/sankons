@@ -45,9 +45,12 @@ public class CommentService {
 		int start = request.getStart();
 		int length = request.getLength();
 
+		SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
+		Long userId = sessionUser == null? null: sessionUser.getId();
+
 		List<Comment> comments = commentRepository.findAllByPostIdOrderByIdDesc(request.getPost());
 
-		return new CommentListResponse(request.getPost(), comments, start, length);
+		return new CommentListResponse(request.getPost(), comments, userId, start, length);
 	}
 
 }

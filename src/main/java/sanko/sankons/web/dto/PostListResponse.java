@@ -19,7 +19,7 @@ public class PostListResponse {
 			.limit(length)
 			.map(post -> {
 				PostViewResponse response = new PostViewResponse(post, commentLength);
-				response.setOwner(userId);
+				response.setLogin(userId);
 				return response;
 			})
 			.collect(Collectors.toList());

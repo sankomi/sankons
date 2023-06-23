@@ -15,12 +15,16 @@ public class CommentListResponse {
 	private int end;
 
 	@Builder
-	public CommentListResponse(Long post, List<Comment> comments, int start, int length) {
+	public CommentListResponse(Long post, List<Comment> comments, Long userId, int start, int length) {
 		this.post = post;
 		this.comments = comments.stream()
 			.skip(start)
 			.limit(length)
-			.map(CommentResponse::new)
+			.map(comment -> {
+				CommentResponse response = new CommentResponse(comment);
+				response.setLogin(userId);
+				return response;
+			})
 			.collect(Collectors.toList());
 		this.end = start + this.comments.size();
 	}

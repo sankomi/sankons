@@ -44,9 +44,15 @@ public class PostViewResponse {
 		this(post, 0);
 	}
 
-	public void setOwner(Long userId) {
+	public void setLogin(Long userId) {
 		if (poster.getId().equals(userId)) {
 			login = true;
+		}
+
+		if (comments != null) {
+			for (CommentResponse comment : comments) {
+				comment.setLogin(userId);
+			}
 		}
 	}
 

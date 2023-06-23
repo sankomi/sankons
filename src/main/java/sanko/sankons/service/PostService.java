@@ -117,7 +117,7 @@ public class PostService {
 		postRepository.save(post);
 
 		PostViewResponse response = new PostViewResponse(post);
-		if (sessionUser != null) response.setOwner(sessionUser.getId());
+		if (sessionUser != null) response.setLogin(sessionUser.getId());
 
 		return response;
 	}
