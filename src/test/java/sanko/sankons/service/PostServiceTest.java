@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import sanko.sankons.domain.user.*; //User, UserRepository
 import sanko.sankons.domain.post.*; //Post, PostRepository
-import sanko.sankons.domain.comment.Comment;
+import sanko.sankons.domain.comment.*; //Comment, CommentRepository
 import sanko.sankons.domain.like.*; //Like, LikeRepository
 import sanko.sankons.domain.hashtag.*; //Hashtag, HashtagRepository
 import sanko.sankons.web.dto.SessionUser;
@@ -40,6 +40,9 @@ public class PostServiceTest {
 
 	@MockBean
 	private PostRepository postRepository;
+
+	@MockBean
+	private CommentRepository commentRepository;
 
 	@MockBean
 	private LikeRepository likeRepository;
