@@ -2,11 +2,11 @@ package sanko.sankons.web;
 
 import jakarta.validation.Valid;
 
-import org.springframework.web.bind.annotation.*; //RestController, RequestMapping, PostMapping, RequestBody
+import org.springframework.web.bind.annotation.*; //RestController, RequestMapping, PostMapping, RequestBody, DeleteMapping, GetMapping
 import lombok.RequiredArgsConstructor;
 
 import sanko.sankons.service.CommentService;
-import sanko.sankons.web.dto.*; //CommentAddRequest, CommentListRequest, CommentListResponse
+import sanko.sankons.web.dto.*; //CommentAddRequest, CommentDeleteRequest, CommentListRequest, CommentListResponse
 
 @RequiredArgsConstructor
 @RestController
@@ -18,6 +18,11 @@ public class CommentApiController {
 	@PostMapping("/add")
 	public Long add(@Valid @RequestBody CommentAddRequest request) throws Exception {
 		return commentService.add(request);
+	}
+
+	@DeleteMapping("/delete")
+	public Boolean delete(@Valid @RequestBody CommentDeleteRequest request) throws Exception {
+		return commentService.delete(request);
 	}
 
 	@GetMapping("/list")

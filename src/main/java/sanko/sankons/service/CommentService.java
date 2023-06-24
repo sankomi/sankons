@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import sanko.sankons.domain.user.*; //User, UserRepository
 import sanko.sankons.domain.post.*; //Post, PostRepository
 import sanko.sankons.domain.comment.*; //Comment, CommentRepository
-import sanko.sankons.web.dto.*; //CommentAddRequest, SessionUser
+import sanko.sankons.web.dto.*; //CommentAddRequest, SessionUser, CommentDeleteRequest, CommentListRequest
 
 @RequiredArgsConstructor
 @Service
@@ -39,6 +39,28 @@ public class CommentService {
 			.content(request.getContent())
 			.build()
 		).getId();
+	}
+
+	public Boolean delete(CommentDeleteRequest request) throws Exception {
+		SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
+
+		if (sessionUser == null) {
+			throw new Exception("Not logged in");
+		}
+
+		User user = userRepository.findById(sessionUser.getId())
+			.orElseThrow(() -> new Exception("Invalid user"));
+
+		Comment comment = commentRepository.findById(request.getComment())
+			.orElseThrow(() -> new Exception("Comment not found"));
+
+		if (comment.getCommenter() == user) {
+			commentRepository.delete(comment);
+		} else {
+			throw new Exception("Not commenter");
+		}
+
+		return true;
 	}
 
 	public CommentListResponse list(CommentListRequest request) {
