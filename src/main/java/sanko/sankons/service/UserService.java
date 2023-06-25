@@ -1,20 +1,18 @@
 package sanko.sankons.service;
 
-import jakarta.servlet.http.HttpSession;
-
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import sanko.sankons.domain.user.User;
 import sanko.sankons.domain.user.UserRepository;
+import sanko.sankons.service.SessionService;
 import sanko.sankons.web.dto.*; //UserCreateRequest, UserLoginRequest, SessionUser
 
 @RequiredArgsConstructor
 @Service
 public class UserService {
 
-	private final HttpSession httpSession;
+	private final SessionService sessionService;
 	private final UserRepository userRepository;
 
 	public Long create(UserCreateRequest request) {
@@ -25,9 +23,7 @@ public class UserService {
 		}
 	}
 
-	public String checkLogin() {
-		SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
-
+	public String checkLogin(SessionUser sessionUser) {
 		if (sessionUser == null) return null;
 
 		return sessionUser.getUsername();
@@ -38,7 +34,7 @@ public class UserService {
 
 		if (user != null && user.checkPassword(request.getPassword())) {
 			SessionUser sessionUser = new SessionUser(user);
-			httpSession.setAttribute("user", sessionUser);
+			sessionService.setUser(sessionUser);
 			return true;
 		}
 
@@ -46,7 +42,7 @@ public class UserService {
 	}
 
 	public Boolean logout() {
-		httpSession.removeAttribute("user");
+		sessionService.removeUser();
 		
 		return true;
 	}

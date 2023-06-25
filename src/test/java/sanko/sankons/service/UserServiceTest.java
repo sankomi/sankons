@@ -1,7 +1,5 @@
 package sanko.sankons.service;
 
-import jakarta.servlet.http.HttpSession;
-
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.context.annotation.Import;
@@ -18,8 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import sanko.sankons.domain.user.User;
 import sanko.sankons.domain.user.UserRepository;
-import sanko.sankons.web.dto.SessionUser;
-import sanko.sankons.web.dto.*; //UserCreateRequest, UserLoginRequest
+import sanko.sankons.service.SessionService;
+import sanko.sankons.web.dto.*; //UserCreateRequest, UserLoginRequest, SessionUser
 
 @ExtendWith(SpringExtension.class)
 @Import(UserService.class)
@@ -32,7 +30,7 @@ public class UserServiceTest {
 	private UserRepository userRepository;
 
 	@MockBean
-	private HttpSession httpSession;
+	private SessionService sessionService;
 
 	private static final Long id = 1L;
 	private static final String username = "username";
@@ -58,9 +56,6 @@ public class UserServiceTest {
 
 		when(userRepository.findFirstByUsername(username))
 			.thenReturn(user);
-
-		when(httpSession.getAttribute("user"))
-			.thenReturn(new SessionUser(user));
 	}
 
 	@Test
@@ -95,11 +90,28 @@ public class UserServiceTest {
 
 	@Test
 	public void testUserCheckLogin() {
+		//given
+		SessionUser sessionUser = new SessionUser(user);
+		when(sessionService.getUser())
+			.thenReturn(new SessionUser(user));
+
 		//when
-		String login = userService.checkLogin();
+		String login = userService.checkLogin(sessionUser);
 
 		//then
 		assertEquals(username, login);
+	}
+
+	@Test
+	public void testUserCheckNoLogin() {
+		//given
+		SessionUser sessionUser = null;
+
+		//when
+		String login = userService.checkLogin(sessionUser);
+
+		//then
+		assertEquals(null, login);
 	}
 
 }

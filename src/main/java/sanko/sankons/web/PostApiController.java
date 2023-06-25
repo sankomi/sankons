@@ -14,8 +14,8 @@ import org.springframework.core.io.InputStreamResource;
 import lombok.RequiredArgsConstructor;
 
 import sanko.sankons.domain.post.Post;
-import sanko.sankons.service.PostService;
-import sanko.sankons.web.dto.*; //PostPostRequest, PostDeleteRequest, PostListRequest, PostListResponse, PostViewResponse, PostCheckLikeRequest, PostCheckLikeResponse, PostLikeRequest, PostLikeResponse
+import sanko.sankons.service.*; //PostService, SessionService
+import sanko.sankons.web.dto.*; //PostPostRequest, PostDeleteRequest, PostListRequest, PostListResponse, PostViewResponse, PostCheckLikeRequest, PostCheckLikeResponse, PostLikeRequest, PostLikeResponse, SessionUser
 
 @RequiredArgsConstructor
 @RestController
@@ -23,10 +23,13 @@ import sanko.sankons.web.dto.*; //PostPostRequest, PostDeleteRequest, PostListRe
 public class PostApiController {
 
 	private final PostService postService;
+	private final SessionService sessionService;
 
 	@PostMapping("/post")
 	public Long post(@Valid @RequestPart PostPostRequest request, @RequestPart MultipartFile file) throws Exception {
-		Long id = postService.post(request, file);
+		SessionUser sessionUser = sessionService.getUser();
+
+		Long id = postService.post(request, file, sessionUser);
 
 		if (id == null) {
 			throw new Exception("Could not post post");
@@ -37,17 +40,23 @@ public class PostApiController {
 
 	@DeleteMapping("/delete")
 	public Boolean delete(@Valid @RequestBody PostDeleteRequest request) throws Exception {
-		return postService.delete(request);
+		SessionUser sessionUser = sessionService.getUser();
+
+		return postService.delete(request, sessionUser);
 	}
 
 	@GetMapping("/{id}")
 	public PostViewResponse view(@PathVariable Long id) throws Exception {
-		return postService.view(id);
+		SessionUser sessionUser = sessionService.getUser();
+
+		return postService.view(id, sessionUser);
 	}
 
 	@GetMapping("/list")
 	public PostListResponse list(PostListRequest request) {
-		return postService.list(request);
+		SessionUser sessionUser = sessionService.getUser();
+
+		return postService.list(request, sessionUser);
 	}
 
 	@GetMapping("/{id}/image")
@@ -64,12 +73,16 @@ public class PostApiController {
 
 	@GetMapping("/like")
 	public PostCheckLikeResponse checkLike(PostCheckLikeRequest request) throws Exception {
-		return postService.checkLike(request);
+		SessionUser sessionUser = sessionService.getUser();
+
+		return postService.checkLike(request, sessionUser);
 	}
 
 	@PutMapping("/like")
 	public PostLikeResponse like(@Valid @RequestBody PostLikeRequest request) throws Exception {
-		return postService.like(request);
+		SessionUser sessionUser = sessionService.getUser();
+
+		return postService.like(request, sessionUser);
 	}
 
 }

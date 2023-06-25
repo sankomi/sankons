@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import java.util.regex.*; //Pattern, MatchResult
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import jakarta.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,16 +22,13 @@ import sanko.sankons.web.dto.*; //PostPostRequest, PostDeleteRequest, PostViewRe
 @Service
 public class PostService {
 
-	private final HttpSession httpSession;
 	private final PostRepository postRepository;
 	private final UserRepository userRepository;
 	private final CommentRepository commentRepository;
 	private final LikeRepository likeRepository;
 	private final HashtagRepository hashtagRepository;
 
-	public Long post(PostPostRequest request, MultipartFile file) throws Exception {
-		SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
-
+	public Long post(PostPostRequest request, MultipartFile file, SessionUser sessionUser) throws Exception {
 		if (sessionUser == null) {
 			throw new Exception("Not logged in");
 		}
@@ -81,9 +77,7 @@ public class PostService {
 			.collect(Collectors.toSet());
 	}
 
-	public Boolean delete(PostDeleteRequest request) throws Exception {
-		SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
-
+	public Boolean delete(PostDeleteRequest request, SessionUser sessionUser) throws Exception {
 		if (sessionUser == null) {
 			throw new Exception("Not logged in");
 		}
@@ -107,9 +101,7 @@ public class PostService {
 		return true;
 	}
 
-	public PostViewResponse view(Long id) throws Exception {
-		SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
-
+	public PostViewResponse view(Long id, SessionUser sessionUser) throws Exception {
 		Post post = postRepository.findById(id)
 			.orElseThrow(() -> new Exception("Could not find post"));
 
@@ -122,12 +114,11 @@ public class PostService {
 		return response;
 	}
 
-	public PostListResponse list(PostListRequest request) {
+	public PostListResponse list(PostListRequest request, SessionUser sessionUser) {
 		int start = request.getStart();
 		int length = request.getLength();
 		int commentLength = request.getCommentLength();
 
-		SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
 		Long userId = sessionUser == null? null: sessionUser.getId();
 
 		List<Post> posts;
@@ -151,9 +142,7 @@ public class PostService {
 		return path.toFile();
 	}
 
-	public PostCheckLikeResponse checkLike(PostCheckLikeRequest request) throws Exception {
-		SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
-
+	public PostCheckLikeResponse checkLike(PostCheckLikeRequest request, SessionUser sessionUser) throws Exception {
 		if (sessionUser == null) {
 			throw new Exception("Not logged in");
 		}
@@ -175,9 +164,7 @@ public class PostService {
 		return new PostCheckLikeResponse(responses);
 	}
 
-	public PostLikeResponse like(PostLikeRequest request) throws Exception {
-		SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
-
+	public PostLikeResponse like(PostLikeRequest request, SessionUser sessionUser) throws Exception {
 		if (sessionUser == null) {
 			throw new Exception("Not logged in");
 		}

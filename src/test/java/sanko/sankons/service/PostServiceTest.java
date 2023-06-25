@@ -2,7 +2,6 @@ package sanko.sankons.service;
 
 import java.util.*; //List, ArrayList, Optional, LinkedHashSet, Arrays
 import java.util.stream.Collectors;
-import jakarta.servlet.http.HttpSession;
 
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -25,8 +24,8 @@ import sanko.sankons.domain.post.*; //Post, PostRepository
 import sanko.sankons.domain.comment.*; //Comment, CommentRepository
 import sanko.sankons.domain.like.*; //Like, LikeRepository
 import sanko.sankons.domain.hashtag.*; //Hashtag, HashtagRepository
-import sanko.sankons.web.dto.SessionUser;
-import sanko.sankons.web.dto.*; //PostPostRequest, PostListRequest, PostViewResponse, PostListResponse, PostLikeRequest, PostLikeResponse
+import sanko.sankons.service.SessionService;
+import sanko.sankons.web.dto.*; //PostPostRequest, PostListRequest, PostViewResponse, PostListResponse, PostLikeRequest, PostLikeResponse, SessionUser
 
 @ExtendWith(SpringExtension.class)
 @Import(PostService.class)
@@ -51,7 +50,7 @@ public class PostServiceTest {
 	private HashtagRepository hashtagRepository;
 
 	@MockBean
-	private HttpSession httpSession;
+	private SessionService sessionService;
 
 	private static final Long userId = 1L;
 	private static final String username = "username";
@@ -81,6 +80,7 @@ public class PostServiceTest {
 	private static Post catPost;
 	private static Hashtag catHashtag;
 	private static Like like;
+	private static SessionUser sessionUser;
 
 	@BeforeAll
 	public static void beforeAll() {
@@ -145,15 +145,14 @@ public class PostServiceTest {
 
 			posts.add(post);
 		}
+
+		sessionUser = new SessionUser(user);
 	}
 
 	@BeforeEach
 	public void mockRepositorys() {
 		when(userRepository.findById(userId))
 			.thenReturn(Optional.of(user));
-
-		when(httpSession.getAttribute("user"))
-			.thenReturn(new SessionUser(user));
 
 		when(postRepository.save(any(Post.class)))
 			.thenAnswer(invocation -> {
@@ -178,6 +177,9 @@ public class PostServiceTest {
 
 		when(postRepository.findAllByHashtagsTagOrderByCreatedDesc("#" + catTag))
 			.thenReturn(Arrays.asList(catPost));
+
+		when(sessionService.getUser())
+			.thenReturn(sessionUser);
 	}
 
 	@Test
@@ -190,7 +192,7 @@ public class PostServiceTest {
 		when(file.getOriginalFilename()).thenReturn(image);
 
 		//when
-		Long post = postService.post(request, file);
+		Long post = postService.post(request, file, sessionUser);
 
 		//then
 		assertEquals(postId, post);
@@ -199,7 +201,7 @@ public class PostServiceTest {
 	@Test
 	public void testPostView() throws Exception {
 		//when
-		PostViewResponse view = postService.view(postId);
+		PostViewResponse view = postService.view(postId, sessionUser);
 
 		//then
 		assertEquals(postId, view.getId());
@@ -216,7 +218,7 @@ public class PostServiceTest {
 		PostListRequest request = new PostListRequest(start, length, commentLength, null);
 
 		//when
-		PostListResponse response = postService.list(request);
+		PostListResponse response = postService.list(request, sessionUser);
 
 		//then
 		assertEquals(content, response.getPosts().get(0).getContent());
@@ -233,7 +235,7 @@ public class PostServiceTest {
 		PostListRequest request = new PostListRequest(start, length, commentLength, catTag);
 
 		//when
-		PostListResponse response = postService.list(request);
+		PostListResponse response = postService.list(request, sessionUser);
 
 		//then
 		assertEquals(catPostId, response.getPosts().get(0).getId());
@@ -248,7 +250,7 @@ public class PostServiceTest {
 			.build();
 
 		//when
-		PostCheckLikeResponse response = postService.checkLike(request);
+		PostCheckLikeResponse response = postService.checkLike(request, sessionUser);
 
 		//then
 		assertEquals(true, response.getLikes().get(0).isLiked());
@@ -261,7 +263,7 @@ public class PostServiceTest {
 		PostLikeRequest request = new PostLikeRequest(postId);
 
 		//when
-		PostLikeResponse response = postService.like(request);
+		PostLikeResponse response = postService.like(request, sessionUser);
 
 		//then
 		assertEquals(postId, response.getPost());

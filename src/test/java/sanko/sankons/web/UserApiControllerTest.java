@@ -22,9 +22,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.hamcrest.Matchers.is;
 
 import sanko.sankons.domain.user.User;
-import sanko.sankons.service.UserService;
-import sanko.sankons.web.dto.UserCreateRequest;
-import sanko.sankons.web.dto.UserLoginRequest;
+import sanko.sankons.service.*; //UserService, SessionService
+import sanko.sankons.web.dto.*; //UserCreateRequest, UserLoginRequest, SessionUser
 
 @WebMvcTest(UserApiController.class)
 public class UserApiControllerTest {
@@ -34,6 +33,9 @@ public class UserApiControllerTest {
 
 	@MockBean
 	private UserService userService;
+
+	@MockBean
+	private SessionService sessionService;
 
 	private static final String createUrl = "/api/v1/user/create";
 	private static final String loginUrl = "/api/v1/user/login";
@@ -61,7 +63,7 @@ public class UserApiControllerTest {
 		when(userService.create(any(UserCreateRequest.class)))
 			.thenReturn(id);
 
-		when(userService.checkLogin()).thenReturn(username);
+		when(userService.checkLogin(any(SessionUser.class))).thenReturn(username);
 
 		when(userService.login(any(UserLoginRequest.class)))
 			.thenAnswer(invocation -> {
@@ -72,6 +74,9 @@ public class UserApiControllerTest {
 			});
 
 		when(userService.logout()).thenReturn(true);
+
+		when(sessionService.getUser())
+			.thenReturn(new SessionUser(user));
 	}
 
 	private static byte[] bytify(Object object) throws Exception {

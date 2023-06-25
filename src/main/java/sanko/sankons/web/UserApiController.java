@@ -6,14 +6,15 @@ import org.springframework.web.bind.annotation.*; //RestController, RequestBody,
 import lombok.RequiredArgsConstructor;
 
 import sanko.sankons.domain.user.User;
-import sanko.sankons.service.UserService;
-import sanko.sankons.web.dto.*; //UserCreateRequest, UserLoginRequest
+import sanko.sankons.service.*; //UserService, SessionService
+import sanko.sankons.web.dto.*; //SessionUser, UserCreateRequest, UserLoginRequest
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/user")
 public class UserApiController {
 
+	private final SessionService sessionService;
 	private final UserService userService;
 
 	@PostMapping("/create")
@@ -29,7 +30,9 @@ public class UserApiController {
 
 	@GetMapping("/login")
 	public String checkLogin() {
-		return userService.checkLogin();
+		SessionUser sessionUser = sessionService.getUser();
+
+		return userService.checkLogin(sessionUser);
 	}
 
 	@PostMapping("/login")
