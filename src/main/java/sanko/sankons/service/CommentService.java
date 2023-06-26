@@ -1,7 +1,6 @@
 package sanko.sankons.service;
 
 import java.util.List;
-import jakarta.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
@@ -15,14 +14,11 @@ import sanko.sankons.web.dto.*; //CommentAddRequest, SessionUser
 @Service
 public class CommentService {
 
-	private final HttpSession httpSession;
 	private final UserRepository userRepository;
 	private final PostRepository postRepository;
 	private final CommentRepository commentRepository;
 
-	public Long add(CommentAddRequest request) throws Exception {
-		SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
-
+	public Long add(CommentAddRequest request, SessionUser sessionUser) throws Exception {
 		if (sessionUser == null) {
 			throw new Exception("Not logged in");
 		}
