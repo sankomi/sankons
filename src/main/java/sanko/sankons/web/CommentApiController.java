@@ -5,7 +5,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*; //RestController, RequestMapping, PostMapping, RequestBody
 import lombok.RequiredArgsConstructor;
 
-import sanko.sankons.service.*; //CommentService, SessionService
+import sanko.sankons.service.CommentService;
 import sanko.sankons.web.dto.*; //CommentAddRequest, CommentListRequest, CommentListResponse, SessionUser
 
 @RequiredArgsConstructor
@@ -14,11 +14,9 @@ import sanko.sankons.web.dto.*; //CommentAddRequest, CommentListRequest, Comment
 public class CommentApiController {
 
 	private final CommentService commentService;
-	private final SessionService sessionService;
 
 	@PostMapping("/add")
-	public Long add(@Valid @RequestBody CommentAddRequest request) throws Exception {
-		SessionUser sessionUser = sessionService.getUser();
+	public Long add(@Valid @RequestBody CommentAddRequest request, @LoginUser SessionUser sessionUser) throws Exception {
 
 		return commentService.add(request, sessionUser);
 	}
