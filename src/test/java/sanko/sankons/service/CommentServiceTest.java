@@ -1,7 +1,6 @@
 package sanko.sankons.service;
 
 import java.util.*; //List, ArrayList, Optional, LinkedHashSet
-import jakarta.servlet.http.HttpSession;
 
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -18,14 +17,10 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import sanko.sankons.domain.user.User;
-import sanko.sankons.domain.user.UserRepository;
-import sanko.sankons.domain.post.Post;
-import sanko.sankons.domain.post.PostRepository;
-import sanko.sankons.domain.comment.Comment;
-import sanko.sankons.domain.comment.CommentRepository;
-import sanko.sankons.web.dto.SessionUser;
-import sanko.sankons.web.dto.*; //CommentAddRequest, CommentListRequest, CommentListResponse
+import sanko.sankons.domain.user.*; //User, UserRepository
+import sanko.sankons.domain.post.*; //Post, PostRepository
+import sanko.sankons.domain.comment.*; //Comment, CommentRepository
+import sanko.sankons.web.dto.*; //CommentAddRequest, CommentListRequest, CommentListResponse, SessionUser
 
 @ExtendWith(SpringExtension.class)
 @Import(CommentService.class)
@@ -42,9 +37,6 @@ public class CommentServiceTest {
 
 	@MockBean
 	private CommentRepository commentRepository;
-
-	@MockBean
-	private HttpSession httpSession;
 
 	private static final Long userId = 1L;
 	private static final String username = "username";
@@ -64,6 +56,7 @@ public class CommentServiceTest {
 	private static User user;
 	private static Post post;
 	private static Comment comment;
+	private static SessionUser sessionUser;
 
 	@BeforeAll
 	public static void beforeAll() {
@@ -97,15 +90,14 @@ public class CommentServiceTest {
 
 			comments.add(comment);
 		}
+
+		sessionUser = new SessionUser(user);
 	}
 
 	@BeforeEach
 	public void mockRepositorys() {
 		when(userRepository.findById(userId))
 			.thenReturn(Optional.of(user));
-
-		when(httpSession.getAttribute("user"))
-			.thenReturn(new SessionUser(user));
 
 		when(postRepository.findById(postId))
 			.thenReturn(Optional.of(post));
@@ -126,7 +118,7 @@ public class CommentServiceTest {
 			.build();
 
 		//when
-		Long response = commentService.add(request);
+		Long response = commentService.add(request, sessionUser);
 
 		//then
 		assertEquals(commentId, response);

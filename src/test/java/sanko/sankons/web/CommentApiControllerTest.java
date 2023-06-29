@@ -26,8 +26,8 @@ import static org.hamcrest.number.OrderingComparison.lessThanOrEqualTo;
 import sanko.sankons.domain.user.User;
 import sanko.sankons.domain.post.Post;
 import sanko.sankons.domain.comment.Comment;
-import sanko.sankons.service.CommentService;
-import sanko.sankons.web.dto.*; //CommentAddRequest, CommentListRequest, CommentListResponse
+import sanko.sankons.service.*; //CommentService, SessionService
+import sanko.sankons.web.dto.*; //CommentAddRequest, CommentListRequest, CommentListResponse, SessionUser
 
 @WebMvcTest(CommentApiController.class)
 public class CommentApiControllerTest {
@@ -37,6 +37,9 @@ public class CommentApiControllerTest {
 
 	@MockBean
 	private CommentService commentService;
+
+	@MockBean
+	private SessionService sessionService;
 
 	private static final Long userId = 1L;
 	private static final String username = "username";
@@ -88,7 +91,7 @@ public class CommentApiControllerTest {
 
 	@BeforeEach
 	public void mockCommentService() throws Exception {
-		when(commentService.add(any(CommentAddRequest.class)))
+		when(commentService.add(any(CommentAddRequest.class), any(SessionUser.class)))
 			.thenReturn(commentId);
 
 		when(commentService.list(any(CommentListRequest.class)))
@@ -101,6 +104,9 @@ public class CommentApiControllerTest {
 					.length(length)
 					.build();
 			});
+
+		when(sessionService.getUser())
+			.thenReturn(new SessionUser(user));
 	}
 
 	@Test

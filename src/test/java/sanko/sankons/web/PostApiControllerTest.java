@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -31,8 +32,8 @@ import sanko.sankons.domain.user.User;
 import sanko.sankons.domain.post.Post;
 import sanko.sankons.domain.like.Like;
 import sanko.sankons.domain.comment.Comment;
-import sanko.sankons.service.PostService;
-import sanko.sankons.web.dto.*; //PostPostRequest, PostViewResponse, PostListRequest, PostListResponse, PostCheckLikeRequest, PostCheckLikeResponse, PostLikeRequest, PostLikeResponse
+import sanko.sankons.service.*; //PostService, SessionService
+import sanko.sankons.web.dto.*; //PostPostRequest, PostViewResponse, PostListRequest, PostListResponse, PostCheckLikeRequest, PostCheckLikeResponse, PostLikeRequest, PostLikeResponse, SessionUser
 
 @WebMvcTest(PostApiController.class)
 public class PostApiControllerTest {
@@ -42,6 +43,9 @@ public class PostApiControllerTest {
 
 	@MockBean
 	private PostService postService;
+
+	@MockBean
+	private SessionService sessionService;
 
 	private static final Long userId = 1L;
 	private static final String username = "username";
@@ -112,18 +116,18 @@ public class PostApiControllerTest {
 
 	@BeforeEach
 	public void mockPostService() throws Exception {
-		when(postService.post(any(PostPostRequest.class), any(MultipartFile.class)))
+		when(postService.post(any(PostPostRequest.class), any(MultipartFile.class), any(SessionUser.class)))
 			.thenReturn(postId);
 
-		when(postService.list(any(PostListRequest.class)))
+		when(postService.list(any(PostListRequest.class), any(SessionUser.class)))
 			.thenAnswer(invocation -> {
 				PostListRequest request = invocation.getArgument(0, PostListRequest.class);
 				return new PostListResponse(posts, null, request.getStart(), request.getLength(), request.getCommentLength());
 			});
 
-		when(postService.view(postId)).thenReturn(new PostViewResponse(post));
+		when(postService.view(eq(postId), any(SessionUser.class))).thenReturn(new PostViewResponse(post));
 
-		when(postService.checkLike(any(PostCheckLikeRequest.class)))
+		when(postService.checkLike(any(PostCheckLikeRequest.class), any(SessionUser.class)))
 			.thenReturn(new PostCheckLikeResponse(
 				Arrays.asList(
 					PostLikeResponse.builder()
@@ -133,12 +137,15 @@ public class PostApiControllerTest {
 						.build()))
 			);
 
-		when(postService.like(any(PostLikeRequest.class)))
+		when(postService.like(any(PostLikeRequest.class), any(SessionUser.class)))
 			.thenReturn(PostLikeResponse.builder()
 				.post(postId)
 				.liked(true)
 				.likes(likes)
 				.build());
+
+		when(sessionService.getUser())
+			.thenReturn(new SessionUser(user));
 	}
 
 	@Test

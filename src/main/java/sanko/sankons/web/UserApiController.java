@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 
 import sanko.sankons.domain.user.User;
 import sanko.sankons.service.UserService;
-import sanko.sankons.web.dto.*; //UserCreateRequest, UserLoginRequest
+import sanko.sankons.web.dto.*; //SessionUser, UserCreateRequest, UserLoginRequest
 
 @RequiredArgsConstructor
 @RestController
@@ -28,8 +28,8 @@ public class UserApiController {
 	}
 
 	@GetMapping("/login")
-	public String checkLogin() {
-		return userService.checkLogin();
+	public String checkLogin(@LoginUser SessionUser sessionUser) {
+		return userService.checkLogin(sessionUser);
 	}
 
 	@PostMapping("/login")

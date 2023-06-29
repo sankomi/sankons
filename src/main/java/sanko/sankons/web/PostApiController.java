@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 import sanko.sankons.domain.post.Post;
 import sanko.sankons.service.PostService;
-import sanko.sankons.web.dto.*; //PostPostRequest, PostDeleteRequest, PostListRequest, PostListResponse, PostViewResponse, PostCheckLikeRequest, PostCheckLikeResponse, PostLikeRequest, PostLikeResponse
+import sanko.sankons.web.dto.*; //PostPostRequest, PostDeleteRequest, PostListRequest, PostListResponse, PostViewResponse, PostCheckLikeRequest, PostCheckLikeResponse, PostLikeRequest, PostLikeResponse, SessionUser
 
 @RequiredArgsConstructor
 @RestController
@@ -25,8 +25,8 @@ public class PostApiController {
 	private final PostService postService;
 
 	@PostMapping("/post")
-	public Long post(@Valid @RequestPart PostPostRequest request, @RequestPart MultipartFile file) throws Exception {
-		Long id = postService.post(request, file);
+	public Long post(@Valid @RequestPart PostPostRequest request, @RequestPart MultipartFile file, @LoginUser SessionUser sessionUser) throws Exception {
+		Long id = postService.post(request, file, sessionUser);
 
 		if (id == null) {
 			throw new Exception("Could not post post");
@@ -36,18 +36,18 @@ public class PostApiController {
 	}
 
 	@DeleteMapping("/delete")
-	public Boolean delete(@Valid @RequestBody PostDeleteRequest request) throws Exception {
-		return postService.delete(request);
+	public Boolean delete(@Valid @RequestBody PostDeleteRequest request, @LoginUser SessionUser sessionUser) throws Exception {
+		return postService.delete(request, sessionUser);
 	}
 
 	@GetMapping("/{id}")
-	public PostViewResponse view(@PathVariable Long id) throws Exception {
-		return postService.view(id);
+	public PostViewResponse view(@PathVariable Long id, @LoginUser SessionUser sessionUser) throws Exception {
+		return postService.view(id, sessionUser);
 	}
 
 	@GetMapping("/list")
-	public PostListResponse list(PostListRequest request) {
-		return postService.list(request);
+	public PostListResponse list(PostListRequest request, @LoginUser SessionUser sessionUser) {
+		return postService.list(request, sessionUser);
 	}
 
 	@GetMapping("/{id}/image")
@@ -63,13 +63,13 @@ public class PostApiController {
 	}
 
 	@GetMapping("/like")
-	public PostCheckLikeResponse checkLike(PostCheckLikeRequest request) throws Exception {
-		return postService.checkLike(request);
+	public PostCheckLikeResponse checkLike(PostCheckLikeRequest request, @LoginUser SessionUser sessionUser) throws Exception {
+		return postService.checkLike(request, sessionUser);
 	}
 
 	@PutMapping("/like")
-	public PostLikeResponse like(@Valid @RequestBody PostLikeRequest request) throws Exception {
-		return postService.like(request);
+	public PostLikeResponse like(@Valid @RequestBody PostLikeRequest request, @LoginUser SessionUser sessionUser) throws Exception {
+		return postService.like(request, sessionUser);
 	}
 
 }
