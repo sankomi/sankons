@@ -11,4 +11,8 @@ public class CommentDeleteRequest {
 	@NotNull
 	private Long comment;
 
+	public CommentDeleteRequest(Long comment) {
+		this.comment = comment;
+	}
+
 }

@@ -88,7 +88,7 @@ public class PostService {
 		Post post = postRepository.findById(request.getPost())
 			.orElseThrow(() -> new Exception("Post not found"));
 
-		if (post.getPoster() == user) {
+		if (post.getPoster().equals(user)) {
 			File file = new File(Paths.get("files", user.getId().toString(), post.getImage()).toString());
 			likeRepository.deleteAll(post.getLikes());
 			commentRepository.deleteAll(post.getComments());

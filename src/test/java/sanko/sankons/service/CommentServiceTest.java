@@ -16,11 +16,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import sanko.sankons.domain.user.*; //User, UserRepository
 import sanko.sankons.domain.post.*; //Post, PostRepository
 import sanko.sankons.domain.comment.*; //Comment, CommentRepository
-import sanko.sankons.web.dto.*; //CommentAddRequest, CommentListRequest, CommentListResponse, SessionUser
+import sanko.sankons.web.dto.*; //CommentAddRequest, CommentListRequest, CommentListResponse, SessionUser, CommentDeleteRequest
 
 @ExtendWith(SpringExtension.class)
 @Import(CommentService.class)
@@ -39,6 +41,7 @@ public class CommentServiceTest {
 	private CommentRepository commentRepository;
 
 	private static final Long userId = 1L;
+	private static final Long notCommenterId = 4L;
 	private static final String username = "username";
 	private static final String password = "password";
 
@@ -54,9 +57,11 @@ public class CommentServiceTest {
 	private static final int length = 5;
 
 	private static User user;
+	private static User notCommenter;
 	private static Post post;
 	private static Comment comment;
 	private static SessionUser sessionUser;
+	private static SessionUser sessionNotCommenter;
 
 	@BeforeAll
 	public static void beforeAll() {
@@ -92,12 +97,23 @@ public class CommentServiceTest {
 		}
 
 		sessionUser = new SessionUser(user);
+
+		notCommenter = User.builder()
+			.username(username)
+			.password(password)
+			.build();
+		ReflectionTestUtils.setField(notCommenter, "id", notCommenterId);
+
+		sessionNotCommenter = new SessionUser(notCommenter);
 	}
 
 	@BeforeEach
 	public void mockRepositorys() {
 		when(userRepository.findById(userId))
 			.thenReturn(Optional.of(user));
+
+		when(userRepository.findById(notCommenterId))
+			.thenReturn(Optional.of(notCommenter));
 
 		when(postRepository.findById(postId))
 			.thenReturn(Optional.of(post));
@@ -125,6 +141,53 @@ public class CommentServiceTest {
 	}
 
 	@Test
+	public void testCommentDelete() throws Exception {
+		//given
+		CommentDeleteRequest request = new CommentDeleteRequest(commentId);
+		when(commentRepository.findById(commentId))
+			.thenReturn(Optional.of(comment));
+
+		//whenthen
+		assertDoesNotThrow(() -> commentService.delete(request, sessionUser));
+	}
+
+	@Test
+	public void testCommentDeleteNoLogin() throws Exception {
+		//given
+		CommentDeleteRequest request = new CommentDeleteRequest(commentId);
+		when(commentRepository.findById(commentId))
+			.thenReturn(Optional.of(comment));
+
+		//whenthen
+		Exception exception = assertThrows(Exception.class, () -> commentService.delete(request, null));
+		assertTrue(exception.getMessage().contains("Not logged in"));
+	}
+
+	@Test
+	public void testCommentDeleteNotCommenter() throws Exception {
+		//given
+		CommentDeleteRequest request = new CommentDeleteRequest(commentId);
+		when(commentRepository.findById(commentId))
+			.thenReturn(Optional.of(comment));
+
+		//whenthen
+		Exception exception = assertThrows(Exception.class, () -> commentService.delete(request, sessionNotCommenter));
+		assertTrue(exception.getMessage().contains("Not commenter"));
+	}
+
+	@Test
+	public void testCommentDeleteNoComment() throws Exception {
+		//given
+		CommentDeleteRequest request = new CommentDeleteRequest(commentId);
+		when(commentRepository.findById(commentId))
+			.thenReturn(Optional.ofNullable(null));
+
+		//whenthen
+		Exception exception = assertThrows(Exception.class, () -> commentService.delete(request, sessionUser));
+		assertTrue(exception.getMessage().contains("Comment not found"));
+	}
+
+	@Test
 	public void testCommentList() throws Exception {
 		//given
 		CommentListRequest request = CommentListRequest.builder()
@@ -134,7 +197,7 @@ public class CommentServiceTest {
 			.build();
 
 		//when
-		CommentListResponse response = commentService.list(request);
+		CommentListResponse response = commentService.list(request, sessionUser);
 
 		//then
 		assertTrue(length >= response.getComments().size());

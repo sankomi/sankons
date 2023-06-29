@@ -94,7 +94,7 @@ public class CommentApiControllerTest {
 		when(commentService.add(any(CommentAddRequest.class), any(SessionUser.class)))
 			.thenReturn(commentId);
 
-		when(commentService.list(any(CommentListRequest.class)))
+		when(commentService.list(any(CommentListRequest.class), any(SessionUser.class)))
 			.thenAnswer(invocation -> {
 				CommentListRequest request = invocation.getArgument(0, CommentListRequest.class);
 				return CommentListResponse.builder()

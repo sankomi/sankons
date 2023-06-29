@@ -22,13 +22,13 @@ public class CommentApiController {
 	}
 
 	@DeleteMapping("/delete")
-	public Boolean delete(@Valid @RequestBody CommentDeleteRequest request) throws Exception {
-		return commentService.delete(request);
+	public Boolean delete(@Valid @RequestBody CommentDeleteRequest request, @LoginUser SessionUser sessionUser) throws Exception {
+		return commentService.delete(request, sessionUser);
 	}
 
 	@GetMapping("/list")
-	public CommentListResponse list(CommentListRequest request) {
-		return commentService.list(request);
+	public CommentListResponse list(CommentListRequest request, @LoginUser SessionUser sessionUser) {
+		return commentService.list(request, sessionUser);
 	}
 
 }

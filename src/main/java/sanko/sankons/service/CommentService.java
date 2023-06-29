@@ -37,9 +37,7 @@ public class CommentService {
 		).getId();
 	}
 
-	public Boolean delete(CommentDeleteRequest request) throws Exception {
-		SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
-
+	public Boolean delete(CommentDeleteRequest request, SessionUser sessionUser) throws Exception {
 		if (sessionUser == null) {
 			throw new Exception("Not logged in");
 		}
@@ -50,7 +48,7 @@ public class CommentService {
 		Comment comment = commentRepository.findById(request.getComment())
 			.orElseThrow(() -> new Exception("Comment not found"));
 
-		if (comment.getCommenter() == user) {
+		if (comment.getCommenter().equals(user)) {
 			commentRepository.delete(comment);
 		} else {
 			throw new Exception("Not commenter");
@@ -59,11 +57,10 @@ public class CommentService {
 		return true;
 	}
 
-	public CommentListResponse list(CommentListRequest request) {
+	public CommentListResponse list(CommentListRequest request, SessionUser sessionUser) {
 		int start = request.getStart();
 		int length = request.getLength();
 
-		SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
 		Long userId = sessionUser == null? null: sessionUser.getId();
 
 		List<Comment> comments = commentRepository.findAllByPostIdOrderByIdDesc(request.getPost());
