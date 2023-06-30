@@ -54,6 +54,9 @@ const app = createApp({
 						<ul class="single__comments comments post__comments" v-if="post.comments">
 							<li class="comments__comment" v-for="comment in post.comments">
 								{{comment.commenter.username}}: {{comment.content}}
+								<button v-if="comment.login" class="comments__delete" @click.stop="deleteComment(post, comment)">
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><g fill-rule="evenodd"><path d="M2.048.77l5.18 5.182L5.953 7.23.77 2.048 2.048.77z"/><path d="M5.952.77L7.23 2.05 2.048 7.23.77 5.952 5.953.772z"/></g></svg>
+								</button>
 							</li>
 						</ul>
 						<form v-if="moreComments" class="single__comment-form form form--more" @click.prevent="fetchComments(post)">
@@ -487,6 +490,27 @@ const app = createApp({
 					this.currentComment = 0;
 					this.moreComments = true;
 					this.fetchComments(post);
+				})
+				.catch(console.error);
+		},
+		deleteComment(post, comment) {
+			fetch("/api/v1/comment/delete", {
+				method: "DELETE",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					comment: comment.id,
+				}),
+			})
+				.then(res => res.text())
+				.then(text => {
+					if (text === "true") {
+						this.post.comments.length = 0;
+						this.currentComment = 0;
+						this.moreComments = true;
+						this.fetchComments(post);
+					}
 				})
 				.catch(console.error);
 		},

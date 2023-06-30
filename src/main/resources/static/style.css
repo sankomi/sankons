@@ -344,8 +344,27 @@ input::file-selector-button {
 
 	list-style-type: none;
 }
+.comments__comment {
+	display: flex;
+	align-items: center;
+}
 .comments__comment:not(:first-of-type) {
 	margin: 1rem 0 0;
+}
+.comments__delete {
+	display: inline-block;
+	padding: 0;
+	margin: 0 0 0 auto;
+	border: none;
+
+	color: red;
+	background-color: transparent;
+}
+.comments__delete > svg {
+	display: block;
+	height: 1rem;
+
+	fill: currentcolor;
 }
 
 .single {
