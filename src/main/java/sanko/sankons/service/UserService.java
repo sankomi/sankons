@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import sanko.sankons.domain.user.User;
 import sanko.sankons.domain.user.UserRepository;
 import sanko.sankons.service.SessionService;
-import sanko.sankons.web.dto.*; //UserCreateRequest, UserLoginRequest, SessionUser
+import sanko.sankons.web.dto.*; //UserCreateRequest, UserLoginRequest, UserChangePasswordRequest, SessionUser
 
 @RequiredArgsConstructor
 @Service
@@ -27,6 +27,33 @@ public class UserService {
 		if (sessionUser == null) return null;
 
 		return sessionUser.getUsername();
+	}
+
+	public Boolean changePassword(UserChangePasswordRequest request, SessionUser sessionUser) throws Exception {
+		if (!request.confirm()) {
+			throw new Exception("Confirm password does not match");
+		}
+
+		if (sessionUser == null) {
+			throw new Exception("Not logged in");
+		}
+
+		User user = userRepository.findById(sessionUser.getId())
+			.orElseThrow(() -> new Exception("Invalid user"));
+
+		if (user == null) {
+			throw new Exception("Could not find user");
+		}
+
+		if (!user.checkPassword(request.getOldPassword())) {
+			throw new Exception("Incorrect password");
+		}
+
+		if (user.changePassword(request.getNewPassword())) {
+			return true;
+		}
+		
+		return false;
 	}
 
 	public Boolean login(UserLoginRequest request) {

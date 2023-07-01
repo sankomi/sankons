@@ -1,5 +1,7 @@
 package sanko.sankons.service;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.context.annotation.Import;
@@ -13,11 +15,12 @@ import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import sanko.sankons.domain.user.User;
 import sanko.sankons.domain.user.UserRepository;
 import sanko.sankons.service.SessionService;
-import sanko.sankons.web.dto.*; //UserCreateRequest, UserLoginRequest, SessionUser
+import sanko.sankons.web.dto.*; //UserCreateRequest, UserLoginRequest, UserChangePasswordRequest, SessionUser
 
 @ExtendWith(SpringExtension.class)
 @Import(UserService.class)
@@ -71,6 +74,35 @@ public class UserServiceTest {
 
 		//then
 		assertEquals(id, create);
+	}
+
+	@Test
+	public void testUserChangePassword() throws Exception {
+		//given
+		String oldPassword = password;
+		String newPassword = "new password";
+		String confirmPassword = "new password";
+
+		UserChangePasswordRequest request = UserChangePasswordRequest.builder()
+			.oldPassword(oldPassword)
+			.newPassword(newPassword)
+			.confirmPassword(confirmPassword)
+			.build();
+
+		ReflectionTestUtils.setField(user, "id", id);
+
+		when(userRepository.findById(user.getId()))
+			.thenReturn(Optional.of(user));
+
+		SessionUser sessionUser = new SessionUser(user);
+		when(sessionService.getUser())
+			.thenReturn(sessionUser);
+
+		//when
+		boolean changed = userService.changePassword(request, sessionUser);
+
+		//then
+		assertTrue(changed);
 	}
 
 	@Test

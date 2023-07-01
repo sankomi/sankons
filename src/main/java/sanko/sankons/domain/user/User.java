@@ -45,6 +45,13 @@ public class User extends TimedEntity {
 		return encoder.matches(password, this.password);
 	}
 
+	public boolean changePassword(String password) {
+		Pbkdf2PasswordEncoder encoder = new Pbkdf2PasswordEncoder(SECRET, SALT_LENGTH, ITERATIONS, SecretKeyFactoryAlgorithm.PBKDF2WithHmacSHA256);
+		password = encoder.encode(password);
+
+		return true;
+	}
+
 	@Override
 	public boolean equals(Object object) {
 		if (this == object) return true;
