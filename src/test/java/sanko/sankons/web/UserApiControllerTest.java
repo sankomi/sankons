@@ -14,6 +14,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -23,7 +24,7 @@ import static org.hamcrest.Matchers.is;
 
 import sanko.sankons.domain.user.User;
 import sanko.sankons.service.*; //UserService, SessionService
-import sanko.sankons.web.dto.*; //UserCreateRequest, UserLoginRequest, SessionUser
+import sanko.sankons.web.dto.*; //UserCreateRequest, UserLoginRequest, UserChangePasswordRequest, SessionUser
 
 @WebMvcTest(UserApiController.class)
 public class UserApiControllerTest {
@@ -39,6 +40,7 @@ public class UserApiControllerTest {
 
 	private static final String createUrl = "/api/v1/user/create";
 	private static final String loginUrl = "/api/v1/user/login";
+	private static final String changePasswordUrl = "/api/v1/user/password";
 
 	private static final Long id = 1L;
 	private static final String username = "username";
@@ -91,6 +93,14 @@ public class UserApiControllerTest {
 		);
 	}
 
+	private ResultActions mockPut(String url, Object body) throws Exception {
+		return mockMvc.perform(
+			put(url)
+				.contentType(MediaType.APPLICATION_JSON_VALUE)
+				.content(bytify(body))
+		);
+	}
+
 	@Test
 	public void testUserCreate() throws Exception {
 		UserCreateRequest request = UserCreateRequest.builder()
@@ -121,6 +131,56 @@ public class UserApiControllerTest {
 			.build();
 
 		mockPost(createUrl, blankPassword).andExpect(status().isBadRequest());
+	}
+
+	@Test
+	public void testUserChangePassword() throws Exception {
+		String oldPassword = password;
+		String newPassword = "new password";
+		String confirmPassword = "new password";
+
+		UserChangePasswordRequest request = UserChangePasswordRequest.builder()
+			.oldPassword(oldPassword)
+			.newPassword(newPassword)
+			.confirmPassword(confirmPassword)
+			.build();
+
+		when(userService.changePassword(any(UserChangePasswordRequest.class), any(SessionUser.class)))
+			.thenReturn(true);
+
+		mockPut(changePasswordUrl, request)
+			.andExpect(status().isOk())
+			.andExpect(content().string("true"));
+	}
+
+	@Test
+	public void testChangePasswordNoConfirm() throws Exception {
+		String oldPassword = password;
+		String newPassword = "new password";
+		String confirmPassword = "different password";
+
+		UserChangePasswordRequest request = UserChangePasswordRequest.builder()
+			.oldPassword(oldPassword)
+			.newPassword(newPassword)
+			.confirmPassword(confirmPassword)
+			.build();
+
+		mockPost(changePasswordUrl, request).andExpect(status().isInternalServerError());
+	}
+
+	@Test
+	public void testChangePasswordIncorrectPassword() throws Exception {
+		String oldPassword = "incorrect password";
+		String newPassword = "new password";
+		String confirmPassword = "new password";
+
+		UserChangePasswordRequest request = UserChangePasswordRequest.builder()
+			.oldPassword(oldPassword)
+			.newPassword(newPassword)
+			.confirmPassword(confirmPassword)
+			.build();
+
+		mockPost(changePasswordUrl, request).andExpect(status().isInternalServerError());
 	}
 
 	@Test

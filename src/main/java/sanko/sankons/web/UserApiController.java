@@ -2,12 +2,12 @@ package sanko.sankons.web;
 
 import jakarta.validation.Valid;
 
-import org.springframework.web.bind.annotation.*; //RestController, RequestBody, RequestMapping, GetMapping, PostMapping, DeleteMapping
+import org.springframework.web.bind.annotation.*; //RestController, RequestBody, RequestMapping, GetMapping, PostMapping, DeleteMapping, PutMapping
 import lombok.RequiredArgsConstructor;
 
 import sanko.sankons.domain.user.User;
 import sanko.sankons.service.UserService;
-import sanko.sankons.web.dto.*; //SessionUser, UserCreateRequest, UserLoginRequest
+import sanko.sankons.web.dto.*; //SessionUser, UserCreateRequest, UserLoginRequest, UserChangePasswordRequest
 
 @RequiredArgsConstructor
 @RestController
@@ -25,6 +25,14 @@ public class UserApiController {
 		}
 
 		return id;
+	}
+
+	@PutMapping("/password")
+	public Boolean changePassword(
+		@Valid @RequestBody UserChangePasswordRequest request,
+		@LoginUser SessionUser sessionUser
+	) throws Exception {
+		return userService.changePassword(request, sessionUser);
 	}
 
 	@GetMapping("/login")

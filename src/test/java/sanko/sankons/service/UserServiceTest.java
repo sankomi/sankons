@@ -16,6 +16,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import sanko.sankons.domain.user.User;
 import sanko.sankons.domain.user.UserRepository;
@@ -38,6 +39,11 @@ public class UserServiceTest {
 	private static final Long id = 1L;
 	private static final String username = "username";
 	private static final String password = "password";
+
+	private static String oldPassword = password;
+	private static String newPassword = "new password";
+	private static String confirmPassword = "new password";
+
 
 	private static User user;
 
@@ -79,10 +85,6 @@ public class UserServiceTest {
 	@Test
 	public void testUserChangePassword() throws Exception {
 		//given
-		String oldPassword = password;
-		String newPassword = "new password";
-		String confirmPassword = "new password";
-
 		UserChangePasswordRequest request = UserChangePasswordRequest.builder()
 			.oldPassword(oldPassword)
 			.newPassword(newPassword)
@@ -103,6 +105,95 @@ public class UserServiceTest {
 
 		//then
 		assertTrue(changed);
+	}
+
+	@Test
+	public void testUserChangePasswordNoLogin() throws Exception {
+		//given
+		UserChangePasswordRequest request = UserChangePasswordRequest.builder()
+			.oldPassword(oldPassword)
+			.newPassword(newPassword)
+			.confirmPassword(confirmPassword)
+			.build();
+
+		ReflectionTestUtils.setField(user, "id", id);
+
+		when(userRepository.findById(user.getId()))
+			.thenReturn(Optional.of(user));
+
+		//whenthen
+		Exception exception = assertThrows(Exception.class, () -> userService.changePassword(request, null));
+		assertTrue(exception.getMessage().contains("Not logged in"));
+	}
+
+	@Test
+	public void testUserChangePasswordNoConfirm() throws Exception {
+		//given
+		UserChangePasswordRequest request = UserChangePasswordRequest.builder()
+			.oldPassword(oldPassword)
+			.newPassword(newPassword)
+			.confirmPassword("different password")
+			.build();
+
+		ReflectionTestUtils.setField(user, "id", id);
+
+		when(userRepository.findById(user.getId()))
+			.thenReturn(Optional.of(user));
+
+		SessionUser sessionUser = new SessionUser(user);
+		when(sessionService.getUser())
+			.thenReturn(null);
+
+		//whenthen
+		Exception exception = assertThrows(Exception.class, () -> userService.changePassword(request, sessionUser));
+		assertTrue(exception.getMessage().contains("Confirm password does not match"));
+	}
+
+	@Test
+	public void testUserChangePasswordNoUser() throws Exception {
+		//given
+		UserChangePasswordRequest request = UserChangePasswordRequest.builder()
+			.oldPassword(oldPassword)
+			.newPassword(newPassword)
+			.confirmPassword(confirmPassword)
+			.build();
+
+		ReflectionTestUtils.setField(user, "id", id);
+
+		when(userRepository.findById(user.getId()))
+			.thenReturn(Optional.ofNullable(null));
+
+		SessionUser sessionUser = new SessionUser(user);
+		when(sessionService.getUser())
+			.thenReturn(sessionUser);
+
+		//whenthen
+		Exception exception = assertThrows(Exception.class, () -> userService.changePassword(request, sessionUser));
+		System.out.println(exception.getMessage());
+		assertTrue(exception.getMessage().contains("Invalid user"));
+	}
+
+	@Test
+	public void testUserChangePasswordIncorrectPassword() throws Exception {
+		//given
+		UserChangePasswordRequest request = UserChangePasswordRequest.builder()
+			.oldPassword("incorrect password")
+			.newPassword(newPassword)
+			.confirmPassword(confirmPassword)
+			.build();
+
+		ReflectionTestUtils.setField(user, "id", id);
+
+		when(userRepository.findById(user.getId()))
+			.thenReturn(Optional.of(user));
+
+		SessionUser sessionUser = new SessionUser(user);
+		when(sessionService.getUser())
+			.thenReturn(sessionUser);
+
+		//whenthen
+		Exception exception = assertThrows(Exception.class, () -> userService.changePassword(request, sessionUser));
+		assertTrue(exception.getMessage().contains("Incorrect password"));
 	}
 
 	@Test
