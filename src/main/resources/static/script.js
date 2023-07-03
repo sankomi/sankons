@@ -149,7 +149,10 @@ const app = createApp({
 			<div class="menu__inner" v-else-if="loginUser">
 				<form class="form menu__form">
 					<div class="form__row">
-						<button class="button" @click.prevent="toggleNewPost(true)">newPost</button>
+						<button class="button" @click.prevent="toggleNewPost(true)">new post</button>
+					</div>
+					<div class="form__row">
+						<button class="button" @click.prevent="toggleSetting(true)">setting</button>
 					</div>
 					<div class="form__row">
 						<button class="button form__button" @click.prevent="logout">logout</button>
@@ -242,6 +245,37 @@ const app = createApp({
 				</div>
 			</div>
 		</Transition>
+
+		<Transition name="popup">
+			<div class="popup" v-if="showSetting">
+				<div class="popup__box">
+					<div class="popup__bar">
+						setting
+						<button class="popup__close" @click="toggleSetting(false)">
+							<span></span>
+							<span></span>
+						</button>
+					</div>
+					<form class="form menu__form" @submit.prevent="changePassword">
+						<div class="form__row">
+							<label for="changePasswordOld">old assword</label>
+							<input id="changePasswordOld" type="password" v-model="changePasswordOld"/>
+						</div>
+						<div class="form__row">
+							<label for="changePasswordNew">new password</label>
+							<input id="changePasswordNew" type="password" v-model="changePasswordNew"/>
+						</div>
+						<div class="form__row">
+							<label for="changePasswordConfirm">confirm</label>
+							<input id="changePasswordConfirm" type="password" v-model="changePasswordConfirm"/>
+						</div>
+						<div class="form__row">
+							<button class="button form__button">change</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</Transition>
 	`,
 	data() {
 		return {
@@ -272,6 +306,7 @@ const app = createApp({
 			showLogin: false,
 			showCreate: false,
 			showNewPost: false,
+			showSetting: false,
 			loginCheck: false,
 			loginUser: null,
 			username: null,
@@ -279,6 +314,10 @@ const app = createApp({
 			createUsername: null,
 			createPassword: null,
 			createConfirm: null,
+			changingPassword: false,
+			changePasswordOld: null,
+			changePasswordNew: null,
+			changePasswordConfirm: null,
 		};
 	},
 	mounted() {
@@ -646,6 +685,42 @@ const app = createApp({
 					this.checkLogin();
 				})
 				.catch(console.error);
+		},
+		toggleSetting(show) {
+			this.showSetting = show;
+		},
+		changePassword() {
+			if (this.changingPassword) return;
+			this.changingPassword = true;
+
+			fetch("/api/v1/user/password", {
+				method: "PUT",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					oldPassword: this.changePasswordOld,
+					newPassword: this.changePasswordNew,
+					confirmPassword: this.changePasswordConfirm,
+				}),
+			})
+				.then(res => res.json())
+				.then(json => {
+					if (json === true) {
+						this.changePasswordOld = null;
+						this.changePasswordNew = null;
+						this.changePasswordConfirm = null;
+						this.showMessage("password change success");
+					} else {
+						if (json.message) {
+							this.showMessage(json.message.toLowerCase());
+						} else {
+							this.showMessage("password change fail");
+						}
+					}
+				})
+				.catch(console.error)
+				.finally(() => this.changingPassword = false);
 		},
 	},
 }).mount("#app");

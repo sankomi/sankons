@@ -25,7 +25,7 @@ public class UserChangePasswordRequest {
 	}
 
 	public boolean confirm() {
-		return newPassword == confirmPassword;
+		return newPassword.equals(confirmPassword);
 	}
 
 }
