@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 
 import sanko.sankons.domain.user.User;
 import sanko.sankons.service.UserService;
-import sanko.sankons.web.dto.*; //SessionUser, UserCreateRequest, UserLoginRequest, UserChangePasswordRequest
+import sanko.sankons.web.dto.*; //SessionUser, UserCreateRequest, UserLoginRequest, UserChangePasswordRequest, UserChangeNameRequest
 
 @RequiredArgsConstructor
 @RestController
@@ -48,6 +48,14 @@ public class UserApiController {
 	@DeleteMapping("/login")
 	public Boolean logout() {
 		return userService.logout();
+	}
+
+	@PutMapping("/username")
+	public Boolean changeUsername(
+		@Valid @RequestBody UserChangeNameRequest request,
+		@LoginUser SessionUser sessionUser
+	) throws Exception {
+		return userService.changeUsername(request, sessionUser);
 	}
 
 }

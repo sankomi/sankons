@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import sanko.sankons.domain.user.User;
 import sanko.sankons.domain.user.UserRepository;
 import sanko.sankons.service.SessionService;
-import sanko.sankons.web.dto.*; //UserCreateRequest, UserLoginRequest, UserChangePasswordRequest, SessionUser
+import sanko.sankons.web.dto.*; //UserCreateRequest, UserLoginRequest, UserChangePasswordRequest, UserChangeNameRequest, SessionUser
 
 @RequiredArgsConstructor
 @Service
@@ -30,30 +30,15 @@ public class UserService {
 	}
 
 	public Boolean changePassword(UserChangePasswordRequest request, SessionUser sessionUser) throws Exception {
-		if (!request.confirm()) {
-			throw new Exception("Confirm password does not match");
-		}
+		if (!request.confirm()) throw new Exception("Confirm password does not match");
 
-		if (sessionUser == null) {
-			throw new Exception("Not logged in");
-		}
+		if (sessionUser == null) throw new Exception("Not logged in");
 
-		User user = userRepository.findById(sessionUser.getId())
-			.orElseThrow(() -> new Exception("Invalid user"));
+		User user = findUserById(sessionUser.getId());
 
-		if (user == null) {
-			throw new Exception("Could not find user");
-		}
+		if (!user.checkPassword(request.getOldPassword())) throw new Exception("Incorrect password");
 
-		if (!user.checkPassword(request.getOldPassword())) {
-			throw new Exception("Incorrect password");
-		}
-
-		if (user.changePassword(request.getNewPassword())) {
-			return true;
-		}
-		
-		return false;
+		return user.changePassword(request.getNewPassword());
 	}
 
 	public Boolean login(UserLoginRequest request) {
@@ -72,6 +57,19 @@ public class UserService {
 		sessionService.removeUser();
 		
 		return true;
+	}
+
+	public Boolean changeUsername(UserChangeNameRequest request, SessionUser sessionUser) throws Exception {
+		if (sessionUser == null) throw new Exception("Not logged in");
+
+		User user = findUserById(sessionUser.getId());
+
+		return user.changeUsername(request.getUsername());
+	}
+
+	private User findUserById(Long id) throws Exception {
+		return userRepository.findById(id)
+			.orElseThrow(() -> new Exception("Invalid user"));
 	}
 
 }

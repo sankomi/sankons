@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import sanko.sankons.domain.user.User;
 import sanko.sankons.domain.user.UserRepository;
 import sanko.sankons.service.SessionService;
-import sanko.sankons.web.dto.*; //UserCreateRequest, UserLoginRequest, UserChangePasswordRequest, SessionUser
+import sanko.sankons.web.dto.*; //UserCreateRequest, UserLoginRequest, UserChangePasswordRequest, UserChangeNameRequest, SessionUser
 
 @ExtendWith(SpringExtension.class)
 @Import(UserService.class)
@@ -235,6 +235,48 @@ public class UserServiceTest {
 
 		//then
 		assertEquals(null, login);
+	}
+
+	@Test
+	public void testUserChangeName() throws Exception {
+		//given
+		String newUsername = "new username";
+		UserChangeNameRequest request = UserChangeNameRequest.builder()
+			.username(newUsername)
+			.build();
+
+		ReflectionTestUtils.setField(user, "id", id);
+		when(userRepository.findById(user.getId()))
+			.thenReturn(Optional.of(user));
+
+		SessionUser sessionUser = new SessionUser(user);
+		when(sessionService.getUser())
+			.thenReturn(new SessionUser(user));
+
+		//when
+		boolean changed = userService.changeUsername(request, sessionUser);
+
+		//then
+		assertTrue(changed);
+	}
+
+	@Test
+	public void testUserChangeNameNoLogin() throws Exception {
+		//given
+		String newUsername = "new username";
+		UserChangeNameRequest request = UserChangeNameRequest.builder()
+			.username(newUsername)
+			.build();
+
+		ReflectionTestUtils.setField(user, "id", id);
+		when(userRepository.findById(user.getId()))
+			.thenReturn(Optional.of(user));
+
+		SessionUser sessionUser = null;
+
+		//whenthen
+		Exception exception = assertThrows(Exception.class, () -> userService.changeUsername(request, sessionUser));
+		assertTrue(exception.getMessage().contains("Not logged in"));
 	}
 
 }

@@ -52,6 +52,12 @@ public class User extends TimedEntity {
 		return true;
 	}
 
+	public boolean changeUsername(String username) {
+		this.username = username;
+
+		return true;
+	}
+
 	@Override
 	public boolean equals(Object object) {
 		if (this == object) return true;

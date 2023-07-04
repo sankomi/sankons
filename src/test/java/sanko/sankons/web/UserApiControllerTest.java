@@ -24,7 +24,7 @@ import static org.hamcrest.Matchers.is;
 
 import sanko.sankons.domain.user.User;
 import sanko.sankons.service.*; //UserService, SessionService
-import sanko.sankons.web.dto.*; //UserCreateRequest, UserLoginRequest, UserChangePasswordRequest, SessionUser
+import sanko.sankons.web.dto.*; //UserCreateRequest, UserLoginRequest, UserChangePasswordRequest, UserChangeNameRequest, SessionUser
 
 @WebMvcTest(UserApiController.class)
 public class UserApiControllerTest {
@@ -41,6 +41,7 @@ public class UserApiControllerTest {
 	private static final String createUrl = "/api/v1/user/create";
 	private static final String loginUrl = "/api/v1/user/login";
 	private static final String changePasswordUrl = "/api/v1/user/password";
+	private static final String changeUsernameUrl = "/api/v1/user/username";
 
 	private static final Long id = 1L;
 	private static final String username = "username";
@@ -236,6 +237,34 @@ public class UserApiControllerTest {
 		mockMvc.perform(delete("/api/v1/user/login"))
 			.andExpect(status().isOk())
 			.andExpect(content().string("true"));
+	}
+
+	@Test
+	public void testUserChangeName() throws Exception {
+		String newUsername = "new username";
+
+		UserChangeNameRequest request = UserChangeNameRequest.builder()
+			.username(newUsername)
+			.build();
+
+		when(userService.changeUsername(any(UserChangeNameRequest.class), any(SessionUser.class)))
+			.thenReturn(true);
+
+		mockPut(changeUsernameUrl, request)
+			.andExpect(status().isOk())
+			.andExpect(content().string("true"));
+	}
+
+	@Test
+	public void testUserChangeNameBlankUsername() throws Exception {
+		String blankUsername = " ";
+
+		UserChangeNameRequest request = UserChangeNameRequest.builder()
+			.username(blankUsername)
+			.build();
+
+		mockPut(changeUsernameUrl, request)
+			.andExpect(status().isBadRequest());
 	}
 
 }
