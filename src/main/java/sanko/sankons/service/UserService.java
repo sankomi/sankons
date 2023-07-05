@@ -38,11 +38,16 @@ public class UserService {
 
 		if (!user.checkPassword(request.getOldPassword())) throw new Exception("Incorrect password");
 
-		return user.changePassword(request.getNewPassword());
+		user.changePassword(request.getNewPassword());
+		userRepository.save(user);
+
+		return true;
 	}
 
 	public Boolean login(UserLoginRequest request) {
 		User user = userRepository.findFirstByUsername(request.getUsername());
+		System.out.println(user != null);
+		System.out.println(user.checkPassword(request.getPassword()));
 
 		if (user != null && user.checkPassword(request.getPassword())) {
 			SessionUser sessionUser = new SessionUser(user);
@@ -64,7 +69,10 @@ public class UserService {
 
 		User user = findUserById(sessionUser.getId());
 
-		return user.changeUsername(request.getUsername());
+		user.changeUsername(request.getUsername());
+		userRepository.save(user);
+
+		return true;
 	}
 
 	private User findUserById(Long id) throws Exception {

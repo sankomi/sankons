@@ -199,6 +199,15 @@ public class UserServiceTest {
 	@Test
 	public void testUserLogin() {
 		//given
+		User user = User.builder()
+			.username(username)
+			.password(password)
+			.build();
+		ReflectionTestUtils.setField(user, "id", id);
+
+		when(userRepository.findFirstByUsername(username))
+			.thenReturn(user);
+
 		UserLoginRequest request = UserLoginRequest.builder()
 			.username(username)
 			.password(password)

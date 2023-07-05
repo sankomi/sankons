@@ -256,7 +256,18 @@ const app = createApp({
 							<span></span>
 						</button>
 					</div>
+					<form class="form menu__form" @submit.prevent="changeUsername">
+						<div>change username</div>
+						<div class="form__row">
+							<label for="changeUsernameNew">new username</label>
+							<input id="changeUsernameNew" v-model="changeUsernameNew"/>
+						</div>
+						<div class="form__row">
+							<button class="button form__button">change</button>
+						</div>
+					</form>
 					<form class="form menu__form" @submit.prevent="changePassword">
+						<div>change password</div>
 						<div class="form__row">
 							<label for="changePasswordOld">old assword</label>
 							<input id="changePasswordOld" type="password" v-model="changePasswordOld"/>
@@ -318,6 +329,9 @@ const app = createApp({
 			changePasswordOld: null,
 			changePasswordNew: null,
 			changePasswordConfirm: null,
+
+			changingUsername: false,
+			changeUsernameNew: null,
 		};
 	},
 	mounted() {
@@ -721,6 +735,35 @@ const app = createApp({
 				})
 				.catch(console.error)
 				.finally(() => this.changingPassword = false);
+		},
+		changeUsername() {
+			if (this.changingUsername) return;
+			this.changingUsername = true;
+
+			fetch("/api/v1/user/username", {
+				method: "PUT",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					username: this.changeUsernameNew,
+				}),
+			})
+				.then(res => res.json())
+				.then(json => {
+					if (json === true) {
+						this.showMessage("username change success");
+					} else {
+						if (json.message) {
+							this.changeUsernameNew = null;
+							this.showMessage(json.message.toLowerCase());
+						} else {
+							this.showMessage("username change fail");
+						}
+					}
+				})
+				.catch(console.error)
+				.finally(() => this.changingUsername = false);
 		},
 	},
 }).mount("#app");

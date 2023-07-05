@@ -529,3 +529,6 @@ input::file-selector-button {
 	margin: 0;
 	border: none;
 }
+.menu__form + .menu__form {
+	margin-top: 2rem;
+}
