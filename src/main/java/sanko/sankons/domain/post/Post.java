@@ -33,6 +33,9 @@ public class Post extends TimedEntity {
 	@Column(name = "content")
 	private String content;
 
+	@Column(name = "visibility", columnDefinition = "INTEGER DEFAULT 0")
+	private PostVisibility visibility = PostVisibility.ALL;
+
 	@OneToMany(mappedBy = "post")
 	@OrderBy("id DESC")
 	private Set<Comment> comments;

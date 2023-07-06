@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 
 import sanko.sankons.domain.post.Post;
+import sanko.sankons.domain.like.Like;
 import sanko.sankons.domain.comment.Comment;
 
 @Getter
@@ -37,7 +38,9 @@ public class PostViewResponse {
 				.collect(Collectors.toList());
 		}
 		this.views = post.getViews();
-		this.likes = post.getLikes().size();
+
+		Set<Like> likes = post.getLikes(); 
+		this.likes = likes == null? 0: likes.size();
 	}
 
 	public PostViewResponse(Post post) {

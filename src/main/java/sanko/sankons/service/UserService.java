@@ -46,8 +46,6 @@ public class UserService {
 
 	public Boolean login(UserLoginRequest request) {
 		User user = userRepository.findFirstByUsername(request.getUsername());
-		System.out.println(user != null);
-		System.out.println(user.checkPassword(request.getPassword()));
 
 		if (user != null && user.checkPassword(request.getPassword())) {
 			SessionUser sessionUser = new SessionUser(user);

@@ -18,9 +18,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import sanko.sankons.domain.user.*; //User, UserRepository
-import sanko.sankons.domain.post.*; //Post, PostRepository
+import sanko.sankons.domain.post.*; //Post, PostRepository, PostVisibility
 import sanko.sankons.domain.comment.*; //Comment, CommentRepository
 import sanko.sankons.domain.like.*; //Like, LikeRepository
 import sanko.sankons.domain.hashtag.*; //Hashtag, HashtagRepository
@@ -200,6 +201,9 @@ public class PostServiceTest {
 
 	@Test
 	public void testPostView() throws Exception {
+		//given
+		int views = post.getViews();
+
 		//when
 		PostViewResponse view = postService.view(postId, sessionUser);
 
@@ -207,9 +211,80 @@ public class PostServiceTest {
 		assertEquals(postId, view.getId());
 		assertEquals(content, view.getContent());
 		assertEquals(null, view.getComments());
-		assertEquals(1, view.getViews());
+		assertEquals(views + 1, view.getViews());
 		assertEquals(userId, view.getPoster().getId());
 		assertEquals(username, view.getPoster().getUsername());
+	}
+
+	@Test
+	public void testPostViewSelf() throws Exception {
+		//given
+		Long selfPostId = 11L;
+		Post selfPost = Post.builder()
+			.poster(user)
+			.image(image)
+			.content(content)
+			.build();
+		ReflectionTestUtils.setField(selfPost, "id", selfPostId);
+		ReflectionTestUtils.setField(selfPost, "visibility", PostVisibility.SELF);
+
+		when(postRepository.findById(selfPostId))
+			.thenReturn(Optional.of(selfPost));
+
+		//when
+		PostViewResponse response = postService.view(selfPostId, sessionUser);
+
+		//then
+		assertEquals(selfPostId, response.getId());
+	}
+
+	@Test
+	public void testPostViewSelfNoLogin() throws Exception {
+		//given
+		Long selfPostId = 11L;
+		Post selfPost = Post.builder()
+			.poster(user)
+			.image(image)
+			.content(content)
+			.build();
+		ReflectionTestUtils.setField(selfPost, "id", selfPostId);
+		ReflectionTestUtils.setField(selfPost, "visibility", PostVisibility.SELF);
+
+		when(postRepository.findById(selfPostId))
+			.thenReturn(Optional.of(selfPost));
+
+		//when
+		PostViewResponse response = postService.view(selfPostId, sessionUser);
+
+		//then
+		Exception exception = assertThrows(Exception.class, () -> postService.view(selfPostId, null));
+		assertTrue(exception.getMessage().contains("Not permitted"));
+	}
+
+	@Test
+	public void testPostViewSelfNotPoster() throws Exception {
+		//given
+		User otherUser = User.builder()
+			.username("other user")
+			.password("other password")
+			.build();
+		ReflectionTestUtils.setField(otherUser, "id", 12L);
+
+		Long otherPostId = 8L;
+		Post otherPost = Post.builder()
+			.poster(otherUser)
+			.image(image)
+			.content(content)
+			.build();
+		ReflectionTestUtils.setField(otherPost, "id", otherPostId);
+		ReflectionTestUtils.setField(otherPost, "visibility", PostVisibility.SELF);
+
+		when(postRepository.findById(otherPostId))
+			.thenReturn(Optional.of(otherPost));
+
+		//whenthen
+		Exception exception = assertThrows(Exception.class, () -> postService.view(otherPostId, sessionUser));
+		assertTrue(exception.getMessage().contains("Not permitted"));
 	}
 
 	@Test
@@ -240,6 +315,111 @@ public class PostServiceTest {
 		//then
 		assertEquals(catPostId, response.getPosts().get(0).getId());
 		assertEquals(catContent, response.getPosts().get(0).getContent());
+	}
+
+	@Test
+	public void testPostListSelfPoster() throws Exception {
+		//given
+		Long selfPostId = 4L;
+		Post selfPost = Post.builder()
+			.poster(user)
+			.image(image)
+			.content(content)
+			.build();
+		ReflectionTestUtils.setField(selfPost, "id", selfPostId);
+		ReflectionTestUtils.setField(selfPost, "visibility", PostVisibility.SELF);
+
+		Long anotherSelfPostId = 5L;
+		Post anotherSelfPost = Post.builder()
+			.poster(user)
+			.image(image)
+			.content(content)
+			.build();
+		ReflectionTestUtils.setField(anotherSelfPost, "id", anotherSelfPostId);
+		ReflectionTestUtils.setField(anotherSelfPost, "visibility", PostVisibility.SELF);
+
+		when(postRepository.findAllByOrderByCreatedDesc())
+			.thenReturn(List.of(selfPost, anotherSelfPost));
+
+		PostListRequest request = new PostListRequest(start, length, commentLength, null);
+
+		//when
+		PostListResponse response = postService.list(request, sessionUser);
+
+		//then
+		assertEquals(2, response.getPosts().size());
+	}
+
+	@Test
+	public void testPostListSelfNoLogin() throws Exception {
+		//given
+		Long selfPostId = 6L;
+		Post selfPost = Post.builder()
+			.poster(user)
+			.image(image)
+			.content(content)
+			.build();
+		ReflectionTestUtils.setField(selfPost, "id", selfPostId);
+		ReflectionTestUtils.setField(selfPost, "visibility", PostVisibility.SELF);
+
+		Long anotherSelfPostId = 7L;
+		Post anotherSelfPost = Post.builder()
+			.poster(user)
+			.image(image)
+			.content(content)
+			.build();
+		ReflectionTestUtils.setField(anotherSelfPost, "id", anotherSelfPostId);
+		ReflectionTestUtils.setField(anotherSelfPost, "visibility", PostVisibility.SELF);
+
+		when(postRepository.findAllByOrderByCreatedDesc())
+			.thenReturn(List.of(selfPost, anotherSelfPost));
+
+		PostListRequest request = new PostListRequest(start, length, commentLength, null);
+
+		//when
+		PostListResponse response = postService.list(request, null);
+
+		//then
+		assertEquals(0, response.getPosts().size());
+	}
+
+	@Test
+	public void testPostListSelfNotPoster() throws Exception {
+		//given
+		User otherUser = User.builder()
+			.username("other user")
+			.password("other password")
+			.build();
+		ReflectionTestUtils.setField(otherUser, "id", 12L);
+
+		Long otherPostId = 8L;
+		Post otherPost = Post.builder()
+			.poster(otherUser)
+			.image(image)
+			.content(content)
+			.build();
+		ReflectionTestUtils.setField(otherPost, "id", otherPostId);
+		ReflectionTestUtils.setField(otherPost, "visibility", PostVisibility.SELF);
+
+		Long anotherPostId = 9L;
+		Post anotherPost = Post.builder()
+			.poster(otherUser)
+			.image(image)
+			.content(content)
+			.build();
+		ReflectionTestUtils.setField(anotherPost, "id", anotherPostId);
+		ReflectionTestUtils.setField(anotherPost, "visibility", PostVisibility.SELF);
+
+		when(postRepository.findAllByOrderByCreatedDesc())
+			.thenReturn(List.of(otherPost, anotherPost));
+
+		PostListRequest request = new PostListRequest(start, length, commentLength, null);
+
+		//when
+		PostListResponse response = postService.list(request, sessionUser);
+
+		//then
+		assertEquals(0, response.getPosts().size());
 	}
 
 	@Test

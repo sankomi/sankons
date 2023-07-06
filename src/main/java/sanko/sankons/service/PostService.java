@@ -105,6 +105,15 @@ public class PostService {
 		Post post = postRepository.findById(id)
 			.orElseThrow(() -> new Exception("Could not find post"));
 
+		PostVisibility visibility = post.getVisibility();
+		Exception exception = new Exception("Not permitted");
+		if (visibility == PostVisibility.SELF) {
+			if (sessionUser == null) throw exception;
+			if (!sessionUser.getId().equals(post.getPoster().getId())) throw exception;
+		} else if (post.getVisibility() != PostVisibility.ALL) {
+			throw exception;
+		}
+
 		post.view();
 		postRepository.save(post);
 
@@ -128,6 +137,16 @@ public class PostService {
 		} else {
 			posts = postRepository.findAllByHashtagsTagOrderByCreatedDesc("#" + tag);
 		}
+
+		posts = posts.stream()
+			.filter(post -> {
+				PostVisibility visibility = post.getVisibility();
+				boolean visible = false;
+				visible |= visibility == PostVisibility.ALL;
+				visible |= visibility == PostVisibility.SELF && post.getPoster().getId().equals(userId);
+				return visible;
+			})
+			.collect(Collectors.toList());
 
 		return new PostListResponse(posts, userId, start, length, commentLength);
 	}

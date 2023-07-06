@@ -169,7 +169,6 @@ public class UserServiceTest {
 
 		//whenthen
 		Exception exception = assertThrows(Exception.class, () -> userService.changePassword(request, sessionUser));
-		System.out.println(exception.getMessage());
 		assertTrue(exception.getMessage().contains("Invalid user"));
 	}
 
