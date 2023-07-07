@@ -312,6 +312,7 @@ const app = createApp({
 
 			postImage: null,
 			postContent: null,
+			postVisibility: "ALL",
 
 			showMenu: false,
 			showLogin: false,
@@ -582,7 +583,10 @@ const app = createApp({
 			const formData = new FormData();
 			formData.append("file", this.postImage);
 			formData.append("request", new Blob(
-				[JSON.stringify({content: this.postContent})],
+				[JSON.stringify({
+					content: this.postContent,
+					visibility: this.postVisibility,
+				})],
 				{type: "application/json"},
 			));
 			fetch("/api/v1/post/post", {

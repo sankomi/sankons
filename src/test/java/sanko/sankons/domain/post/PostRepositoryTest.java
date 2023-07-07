@@ -33,6 +33,7 @@ public class PostRepositoryTest {
 		String password = "password";
 		String file = "file.txt";
 		String content = "content";
+		PostVisibility visibility = PostVisibility.ALL;
 
 		User user = userRepository.save(User.builder()
 			.username(username)
@@ -44,6 +45,7 @@ public class PostRepositoryTest {
 			.poster(user)
 			.image(file)
 			.content(content)
+			.visibility(visibility)
 			.build());
 		List<Post> posts = postRepository.findAll();
 

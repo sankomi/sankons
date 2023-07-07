@@ -29,7 +29,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.number.OrderingComparison.lessThanOrEqualTo;
 
 import sanko.sankons.domain.user.User;
-import sanko.sankons.domain.post.Post;
+import sanko.sankons.domain.post.*; //Post, PostVisibility
 import sanko.sankons.domain.like.Like;
 import sanko.sankons.domain.comment.Comment;
 import sanko.sankons.service.*; //PostService, SessionService
@@ -156,6 +156,7 @@ public class PostApiControllerTest {
 
 		PostPostRequest postPostRequest = PostPostRequest.builder()
 			.content(content)
+			.visibility(PostVisibility.ALL)
 			.build();
 		String json = new ObjectMapper().writeValueAsString(postPostRequest);
 		MockMultipartFile request = new MockMultipartFile(

@@ -95,6 +95,7 @@ public class PostServiceTest {
 			.poster(user)
 			.image(image)
 			.content(content)
+			.visibility(PostVisibility.ALL)
 			.build();
 		ReflectionTestUtils.setField(post, "id", postId);
 
@@ -108,6 +109,7 @@ public class PostServiceTest {
 			.poster(user)
 			.image(image)
 			.content(catContent)
+			.visibility(PostVisibility.ALL)
 			.build();
 		ReflectionTestUtils.setField(catPost, "id", catPostId);
 
@@ -138,6 +140,7 @@ public class PostServiceTest {
 				.poster(user)
 				.image(image)
 				.content(content)
+				.visibility(PostVisibility.ALL)
 				.comments(comments)
 				.build();
 			ReflectionTestUtils.setField(post, "id", Long.valueOf(i));
@@ -176,9 +179,6 @@ public class PostServiceTest {
 		when(hashtagRepository.saveAll(any(List.class)))
 			.thenReturn(null);
 
-		when(postRepository.findAllByHashtagsTagOrderByCreatedDesc("#" + catTag))
-			.thenReturn(Arrays.asList(catPost));
-
 		when(sessionService.getUser())
 			.thenReturn(sessionUser);
 	}
@@ -188,6 +188,7 @@ public class PostServiceTest {
 		//given
 		PostPostRequest request = PostPostRequest.builder()
 			.content(content)
+			.visibility(PostVisibility.ALL)
 			.build();
 		MultipartFile file = mock(MultipartFile.class);
 		when(file.getOriginalFilename()).thenReturn(image);
@@ -223,10 +224,10 @@ public class PostServiceTest {
 		Post selfPost = Post.builder()
 			.poster(user)
 			.image(image)
+			.visibility(PostVisibility.SELF)
 			.content(content)
 			.build();
 		ReflectionTestUtils.setField(selfPost, "id", selfPostId);
-		ReflectionTestUtils.setField(selfPost, "visibility", PostVisibility.SELF);
 
 		when(postRepository.findById(selfPostId))
 			.thenReturn(Optional.of(selfPost));
@@ -245,10 +246,10 @@ public class PostServiceTest {
 		Post selfPost = Post.builder()
 			.poster(user)
 			.image(image)
+			.visibility(PostVisibility.SELF)
 			.content(content)
 			.build();
 		ReflectionTestUtils.setField(selfPost, "id", selfPostId);
-		ReflectionTestUtils.setField(selfPost, "visibility", PostVisibility.SELF);
 
 		when(postRepository.findById(selfPostId))
 			.thenReturn(Optional.of(selfPost));
@@ -274,10 +275,10 @@ public class PostServiceTest {
 		Post otherPost = Post.builder()
 			.poster(otherUser)
 			.image(image)
+			.visibility(PostVisibility.SELF)
 			.content(content)
 			.build();
 		ReflectionTestUtils.setField(otherPost, "id", otherPostId);
-		ReflectionTestUtils.setField(otherPost, "visibility", PostVisibility.SELF);
 
 		when(postRepository.findById(otherPostId))
 			.thenReturn(Optional.of(otherPost));
@@ -309,6 +310,9 @@ public class PostServiceTest {
 		//given
 		PostListRequest request = new PostListRequest(start, length, commentLength, catTag);
 
+		when(postRepository.findAllByHashtagsTagOrderByCreatedDesc("#" + catTag))
+			.thenReturn(Arrays.asList(catPost));
+
 		//when
 		PostListResponse response = postService.list(request, sessionUser);
 
@@ -324,19 +328,19 @@ public class PostServiceTest {
 		Post selfPost = Post.builder()
 			.poster(user)
 			.image(image)
+			.visibility(PostVisibility.SELF)
 			.content(content)
 			.build();
 		ReflectionTestUtils.setField(selfPost, "id", selfPostId);
-		ReflectionTestUtils.setField(selfPost, "visibility", PostVisibility.SELF);
 
 		Long anotherSelfPostId = 5L;
 		Post anotherSelfPost = Post.builder()
 			.poster(user)
 			.image(image)
 			.content(content)
+			.visibility(PostVisibility.SELF)
 			.build();
 		ReflectionTestUtils.setField(anotherSelfPost, "id", anotherSelfPostId);
-		ReflectionTestUtils.setField(anotherSelfPost, "visibility", PostVisibility.SELF);
 
 		when(postRepository.findAllByOrderByCreatedDesc())
 			.thenReturn(List.of(selfPost, anotherSelfPost));
@@ -357,19 +361,18 @@ public class PostServiceTest {
 		Post selfPost = Post.builder()
 			.poster(user)
 			.image(image)
+			.visibility(PostVisibility.SELF)
 			.content(content)
 			.build();
-		ReflectionTestUtils.setField(selfPost, "id", selfPostId);
-		ReflectionTestUtils.setField(selfPost, "visibility", PostVisibility.SELF);
 
 		Long anotherSelfPostId = 7L;
 		Post anotherSelfPost = Post.builder()
 			.poster(user)
 			.image(image)
+			.visibility(PostVisibility.SELF)
 			.content(content)
 			.build();
 		ReflectionTestUtils.setField(anotherSelfPost, "id", anotherSelfPostId);
-		ReflectionTestUtils.setField(anotherSelfPost, "visibility", PostVisibility.SELF);
 
 		when(postRepository.findAllByOrderByCreatedDesc())
 			.thenReturn(List.of(selfPost, anotherSelfPost));
@@ -396,19 +399,19 @@ public class PostServiceTest {
 		Post otherPost = Post.builder()
 			.poster(otherUser)
 			.image(image)
+			.visibility(PostVisibility.SELF)
 			.content(content)
 			.build();
 		ReflectionTestUtils.setField(otherPost, "id", otherPostId);
-		ReflectionTestUtils.setField(otherPost, "visibility", PostVisibility.SELF);
 
 		Long anotherPostId = 9L;
 		Post anotherPost = Post.builder()
 			.poster(otherUser)
 			.image(image)
+			.visibility(PostVisibility.SELF)
 			.content(content)
 			.build();
 		ReflectionTestUtils.setField(anotherPost, "id", anotherPostId);
-		ReflectionTestUtils.setField(anotherPost, "visibility", PostVisibility.SELF);
 
 		when(postRepository.findAllByOrderByCreatedDesc())
 			.thenReturn(List.of(otherPost, anotherPost));

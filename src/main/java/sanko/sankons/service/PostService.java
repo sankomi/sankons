@@ -54,6 +54,7 @@ public class PostService {
 			.poster(user)
 			.image(filename)
 			.content(request.getContent())
+			.visibility(request.getVisibility())
 			.comments(null)
 			.build());
 

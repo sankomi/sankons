@@ -51,10 +51,11 @@ public class Post extends TimedEntity {
 	private Set<Hashtag> hashtags;
 
 	@Builder
-	public Post(User poster, String image, String content, Set<Comment> comments) {
+	public Post(User poster, String image, String content, PostVisibility visibility, Set<Comment> comments) {
 		this.poster = poster;
 		this.image = image;
 		this.content = content;
+		this.visibility = visibility;
 		this.comments = comments;
 	}
 
