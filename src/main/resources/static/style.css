@@ -35,13 +35,14 @@ a {
 	color: cornflowerblue;
 }
 
-input, button, .button,
+input, button, .button, select,
 input::file-selector-button {
 	display: inline-block;
 	padding: 0.5rem;
 	border: 1px solid #eee;
 
 	color: inherit;
+	background-color: white;
 	font-family: inherit;
 	font-weight: inherit;
 	line-height: inherit;

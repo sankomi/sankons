@@ -235,6 +235,13 @@ const app = createApp({
 							<input id="image" type="file" @change="setPostImage" ref="imageInput"/>
 						</div>
 						<div class="form__row">
+							<label for="visibility">visibility</label>
+							<select name="visibility" v-model="postVisibility">
+								<option value="ALL">All</option>
+								<option value="SELF">Self</option>
+							</select>
+						</div>
+						<div class="form__row">
 							<label for="content">content</label>
 							<input id="content" v-model="postContent"/>
 						</div>
