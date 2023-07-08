@@ -245,6 +245,13 @@ input::file-selector-button {
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
+.post__visibility {
+	display: inline-block;
+	height: 1rem;
+
+	vertical-align: middle;
+	fill: currentcolor;
+}
 .post__image {
 	flex-shrink: 0;
 

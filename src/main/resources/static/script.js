@@ -23,6 +23,7 @@ const app = createApp({
 			<div class="single" v-if="post">
 				<div class="post single__inner">
 					<div class="single__user post__user">
+						<svg class="post__visibility" v-if="post.visibility === 'SELF'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><path d="M103.88 45.208c0-24.193-19.683-43.875-43.875-43.875-24.193 0-43.875 19.682-43.875 43.875H5v69.75h110v-69.75h-11.12zm-69.754 0c0-14.268 11.607-25.875 25.875-25.875S85.88 30.94 85.88 45.208H34.13zm31.75 32.918v20.06h-11.89V78.12c-2.485-1.828-4.105-4.766-4.105-8.09 0-5.55 4.5-10.05 10.06-10.05s10.05 4.5 10.05 10.05c0 3.324-1.62 6.264-4.105 8.094z"/></svg>
 						{{post.poster.username}}
 						<button class="single__close" @click="closePost">
 							<span></span>
@@ -88,7 +89,10 @@ const app = createApp({
 			<div v-else-if="posts.length">
 				<div class="posts">
 					<div class="post posts__post" v-for="post in posts" @click.prevent="viewPost(post)">
-						<div class="post__user">{{post.poster.username}}</div>
+						<div class="post__user">
+							<svg class="post__visibility" v-if="post.visibility === 'SELF'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><path d="M103.88 45.208c0-24.193-19.683-43.875-43.875-43.875-24.193 0-43.875 19.682-43.875 43.875H5v69.75h110v-69.75h-11.12zm-69.754 0c0-14.268 11.607-25.875 25.875-25.875S85.88 30.94 85.88 45.208H34.13zm31.75 32.918v20.06h-11.89V78.12c-2.485-1.828-4.105-4.766-4.105-8.09 0-5.55 4.5-10.05 10.06-10.05s10.05 4.5 10.05 10.05c0 3.324-1.62 6.264-4.105 8.094z"/></svg>
+							{{post.poster.username}}
+						</div>
 						<figure class="post__image">
 							<img :src="'/api/v1/post/' + post.id + '/image'">
 						</figure>

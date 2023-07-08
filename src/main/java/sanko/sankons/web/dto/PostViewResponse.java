@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 import lombok.Getter;
 
-import sanko.sankons.domain.post.Post;
+import sanko.sankons.domain.post.*; //Post, PostVisibility
 import sanko.sankons.domain.like.Like;
 import sanko.sankons.domain.comment.Comment;
 
@@ -21,6 +21,7 @@ public class PostViewResponse {
 	private int views;
 	private int likes;
 	private boolean login;
+	private PostVisibility visibility;
 
 	public PostViewResponse(Post post, int commentLength) {
 		this.id = post.getId();
@@ -41,6 +42,8 @@ public class PostViewResponse {
 
 		Set<Like> likes = post.getLikes(); 
 		this.likes = likes == null? 0: likes.size();
+
+		this.visibility = post.getVisibility();
 	}
 
 	public PostViewResponse(Post post) {
