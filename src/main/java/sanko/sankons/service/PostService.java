@@ -1,12 +1,14 @@
 package sanko.sankons.service;
 
 import java.io.File;
-import java.util.*; //List, Set
+import java.util.*; //List, Set, Date
+import java.text.SimpleDateFormat;
 import java.util.stream.Collectors;
 import java.util.regex.*; //Pattern, MatchResult
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +44,10 @@ public class PostService {
 			throw new Exception("Could not find upload path");
 		}
 
-		File upload = new File(path.getAbsolutePath(), filename);
+		String newname = new SimpleDateFormat("yyMMdd-HHmmss").format(new Date())
+			+ "-" + RandomStringUtils.randomAlphanumeric(8)
+			+ "-" + filename;
+		File upload = new File(path.getAbsolutePath(), newname);
 		try {
 			file.transferTo(upload);
 		} catch (Exception e) {
