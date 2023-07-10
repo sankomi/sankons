@@ -18,7 +18,7 @@ import sanko.sankons.domain.post.*; //Post, PostRepository
 import sanko.sankons.domain.comment.CommentRepository;
 import sanko.sankons.domain.like.*; //Like, LikeRepository
 import sanko.sankons.domain.hashtag.*; //Hashtag, HashtagRepository
-import sanko.sankons.web.dto.*; //PostPostRequest, PostDeleteRequest, PostViewResponse, PostListRequest, PostListResponse, SessionUser, PostCheckLikeRequest, PostCheckLikeResponse, PostLikeRequest, PostLikeResponse
+import sanko.sankons.web.dto.*; //PostPostRequest, PostDeleteRequest, PostViewResponse, PostListRequest, PostListResponse, SessionUser, PostCheckLikeRequest, PostCheckLikeResponse, PostLikeRequest, PostLikeResponse, PostEditRequest
 
 @RequiredArgsConstructor
 @Service
@@ -75,6 +75,37 @@ public class PostService {
 		return post.getId();
 	}
 
+	public boolean edit(PostEditRequest request, SessionUser sessionUser) throws Exception {
+		if (sessionUser == null) {
+			throw new Exception("Not logged in");
+		}
+
+		User user = userRepository.findById(sessionUser.getId())
+			.orElseThrow(() -> new Exception("Invalid user"));
+
+		Post post = postRepository.findById(request.getPost())
+			.orElseThrow(() -> new Exception("Post not found"));
+
+		if (post.getPoster().equals(user)) {
+			post.editContent(request.getContent());
+
+			hashtagRepository.deleteAll(post.getHashtags());
+
+			List<Hashtag> hashtags = getHashtags(request.getContent()).stream()
+				.map(tag -> Hashtag.builder()
+					.post(post)
+					.tag(tag)
+					.build())
+				.collect(Collectors.toList());
+
+			hashtagRepository.saveAll(hashtags);
+		} else {
+			throw new Exception("Not poster");
+		}
+
+		return true;
+	}
+
 	private Set<String> getHashtags(String content) {
 		return Pattern.compile("\\#[a-zA-z0-9]+[a-zA-Z0-9\\-\\_]*[a-zA-z0-9]+")
 			.matcher(content)
@@ -98,6 +129,7 @@ public class PostService {
 			File file = new File(Paths.get("files", user.getId().toString(), post.getImage()).toString());
 			likeRepository.deleteAll(post.getLikes());
 			commentRepository.deleteAll(post.getComments());
+			hashtagRepository.deleteAll(post.getHashtags());
 			postRepository.delete(post);
 			file.delete();
 		} else {

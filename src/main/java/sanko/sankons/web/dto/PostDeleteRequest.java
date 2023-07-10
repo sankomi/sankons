@@ -8,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 public class PostDeleteRequest {
 
-	@NotNull
+	@NotNull(message = "Post can't be null")
 	private Long post;
 	
 }

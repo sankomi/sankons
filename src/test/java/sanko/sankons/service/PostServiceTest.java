@@ -26,7 +26,7 @@ import sanko.sankons.domain.comment.*; //Comment, CommentRepository
 import sanko.sankons.domain.like.*; //Like, LikeRepository
 import sanko.sankons.domain.hashtag.*; //Hashtag, HashtagRepository
 import sanko.sankons.service.SessionService;
-import sanko.sankons.web.dto.*; //PostPostRequest, PostListRequest, PostViewResponse, PostListResponse, PostLikeRequest, PostLikeResponse, SessionUser
+import sanko.sankons.web.dto.*; //PostPostRequest, PostListRequest, PostViewResponse, PostListResponse, PostLikeRequest, PostLikeResponse, PostEditRequest, SessionUser
 
 @ExtendWith(SpringExtension.class)
 @Import(PostService.class)
@@ -204,6 +204,7 @@ public class PostServiceTest {
 	public void testPostView() throws Exception {
 		//given
 		int views = post.getViews();
+		ReflectionTestUtils.setField(post, "content", content);
 
 		//when
 		PostViewResponse view = postService.view(postId, sessionUser);
@@ -426,7 +427,7 @@ public class PostServiceTest {
 	}
 
 	@Test
-	public void testCheckLike() throws Exception {
+	public void testPostCheckLike() throws Exception {
 		//given
 		PostCheckLikeRequest request = PostCheckLikeRequest.builder()
 			.posts(Arrays.asList(postId))
@@ -441,7 +442,7 @@ public class PostServiceTest {
 	}
 
 	@Test
-	public void testLike() throws Exception {
+	public void testPostLike() throws Exception {
 		//given
 		PostLikeRequest request = new PostLikeRequest(postId);
 
@@ -452,6 +453,42 @@ public class PostServiceTest {
 		assertEquals(postId, response.getPost());
 		assertEquals(false, response.isLiked());
 		assertEquals(1, response.getLikes());
+	}
+
+	@Test
+	public void testPostEdit() throws Exception {
+		//given
+		String newContent = "new content";
+
+		PostEditRequest request = PostEditRequest.builder()
+			.post(postId)
+			.content(newContent)
+			.build();
+
+		//when
+		boolean edited = postService.edit(request, sessionUser);
+
+		//then
+		assertTrue(edited);
+	}
+
+	@Test
+	public void testPostEditNoPost() throws Exception {
+		//given
+		Long noPostId = 17L;
+		String newContent = "new content";
+
+		PostEditRequest request = PostEditRequest.builder()
+			.post(noPostId)
+			.content(newContent)
+			.build();
+
+		when(postRepository.findById(noPostId))
+			.thenReturn(Optional.ofNullable(null));
+
+		//whenthen
+		Exception exception = assertThrows(Exception.class, () -> postService.edit(request, sessionUser));
+		assertTrue(exception.getMessage().contains("Post not found"));
 	}
 
 }

@@ -63,4 +63,8 @@ public class Post extends TimedEntity {
 		this.views++;
 	}
 
+	public void editContent(String content) {
+		this.content = content;
+	}
+
 }
