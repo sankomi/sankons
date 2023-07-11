@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 import sanko.sankons.domain.post.Post;
 import sanko.sankons.service.PostService;
-import sanko.sankons.web.dto.*; //PostPostRequest, PostDeleteRequest, PostListRequest, PostListResponse, PostViewResponse, PostCheckLikeRequest, PostCheckLikeResponse, PostLikeRequest, PostLikeResponse, SessionUser
+import sanko.sankons.web.dto.*; //PostPostRequest, PostDeleteRequest, PostListRequest, PostListResponse, PostViewResponse, PostCheckLikeRequest, PostCheckLikeResponse, PostLikeRequest, PostLikeResponse, PostEditRequest, SessionUser
 
 @RequiredArgsConstructor
 @RestController
@@ -33,6 +33,11 @@ public class PostApiController {
 		}
 
 		return id;
+	}
+
+	@PutMapping("/edit")
+	public Boolean edit(@Valid @RequestBody PostEditRequest request, @LoginUser SessionUser sessionUser) throws Exception {
+		return postService.edit(request, sessionUser);
 	}
 
 	@DeleteMapping("/delete")

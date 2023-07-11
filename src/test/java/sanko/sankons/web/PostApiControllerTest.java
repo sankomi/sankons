@@ -33,7 +33,7 @@ import sanko.sankons.domain.post.*; //Post, PostVisibility
 import sanko.sankons.domain.like.Like;
 import sanko.sankons.domain.comment.Comment;
 import sanko.sankons.service.*; //PostService, SessionService
-import sanko.sankons.web.dto.*; //PostPostRequest, PostViewResponse, PostListRequest, PostListResponse, PostCheckLikeRequest, PostCheckLikeResponse, PostLikeRequest, PostLikeResponse, SessionUser
+import sanko.sankons.web.dto.*; //PostPostRequest, PostViewResponse, PostListRequest, PostListResponse, PostCheckLikeRequest, PostCheckLikeResponse, PostLikeRequest, PostLikeResponse, PostEditRequest, SessionUser
 
 @WebMvcTest(PostApiController.class)
 public class PostApiControllerTest {
@@ -199,7 +199,7 @@ public class PostApiControllerTest {
 	}
 
 	@Test
-	public void testCheckLike() throws Exception {
+	public void testPostCheckLike() throws Exception {
 		mockMvc.perform(get("/api/v1/post/like?posts=" + postId))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.likes[0].liked", is(true), Boolean.class))
@@ -207,7 +207,7 @@ public class PostApiControllerTest {
 	}
 
 	@Test
-	public void testLike() throws Exception {
+	public void testPostLike() throws Exception {
 		PostLikeRequest request = new PostLikeRequest(postId);
 
 		mockMvc.perform(
@@ -218,6 +218,49 @@ public class PostApiControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.liked", is(true), Boolean.class))
 			.andExpect(jsonPath("$.likes", is(likes), Integer.class));
+	}
+
+	@Test
+	public void testPostEdit() throws Exception {
+		Long userId = 4L;
+		User user = User.builder()
+			.username(username)
+			.password(password)
+			.build();
+		ReflectionTestUtils.setField(user, "id", userId);
+
+		Like like = Like.builder()
+			.liker(user)
+			.post(post)
+			.build();
+
+		Long postId = 5L;
+		Post post = Post.builder()
+			.poster(user)
+			.image(image)
+			.content(content)
+			.visibility(PostVisibility.ALL)
+			.build();
+		ReflectionTestUtils.setField(post, "id", postId);
+		ReflectionTestUtils.setField(post, "likes", Set.of(like));
+
+		String newContent = "new content";
+
+		PostEditRequest request = PostEditRequest.builder()
+			.post(postId)
+			.content(newContent)
+			.build();
+
+		when(postService.edit(any(PostEditRequest.class), any(SessionUser.class)))
+			.thenReturn(true);
+
+		mockMvc.perform(
+			put("/api/v1/post/edit")
+				.contentType(MediaType.APPLICATION_JSON_VALUE)
+				.content(new ObjectMapper().writeValueAsBytes(request))
+		)
+			.andExpect(status().isOk())
+			.andExpect(content().string("true"));
 	}
 
 }
