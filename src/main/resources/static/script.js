@@ -39,6 +39,9 @@ const app = createApp({
 							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><path d="M4 7.33l2.952-2.954c.918-.918.9-2.256.066-3.087A2.134 2.134 0 0 0 4 1.29a2.132 2.132 0 0 0-3.015-.01C.15 2.12.13 3.46 1.05 4.372L4 7.33z"/></svg>
 						</button>
 						likes {{post.likes}}
+						<button v-if="post.login" class="post__edit" @click="toggleEditPost(true)">
+							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><path d="M60 95.5c-19.575 0-35.5-15.926-35.5-35.5 0-19.575 15.925-35.5 35.5-35.5 13.62 0 25.467 7.714 31.418 19h22.627c-7.06-23.153-28.578-40-54.04-40-31.204 0-56.5 25.296-56.5 56.5 0 31.203 25.296 56.5 56.5 56.5 16.264 0 30.91-6.882 41.22-17.88l-15.33-14.365C79.422 91.168 70.217 95.5 60.015 95.5z"/><path d="M120 0v45.336M91.418 43.5h22.622" fill="none"/><path d="M120 21.832l-.01 47.01-45.163-13.03z"/></svg>
+						</button>
 						<button v-if="post.login" class="post__delete" @click="deletePost(post)">
 							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><g fill-rule="evenodd"><path d="M2.048.77l5.18 5.182L5.953 7.23.77 2.048 2.048.77z"/><path d="M5.952.77L7.23 2.05 2.048 7.23.77 5.952 5.953.772z"/></g></svg>
 						</button>
@@ -258,6 +261,36 @@ const app = createApp({
 		</Transition>
 
 		<Transition name="popup">
+			<div class="popup" v-if="loginCheck && loginUser && showEditPost">
+				<div class="popup__box">
+					<div class="popup__bar">
+						edit post
+						<button class="popup__close" @click="toggleEditPost(false)">
+							<span></span>
+							<span></span>
+						</button>
+					</div>
+					<form class="form menu__form" @submit.prevent="editPost">
+						<div class="form__row">
+							<label for="visibility">visibility</label>
+							<select name="visibility" v-model="editVisibility">
+								<option value="ALL">All</option>
+								<option value="SELF">Self</option>
+							</select>
+						</div>
+						<div class="form__row">
+							<label for="content">content</label>
+							<input id="content" v-model="editContent"/>
+						</div>
+						<div class="form__row">
+							<button class="button form__button">edit</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</Transition>
+
+		<Transition name="popup">
 			<div class="popup" v-if="showSetting">
 				<div class="popup__box">
 					<div class="popup__bar">
@@ -329,6 +362,7 @@ const app = createApp({
 			showLogin: false,
 			showCreate: false,
 			showNewPost: false,
+			showEditPost: false,
 			showSetting: false,
 			loginCheck: false,
 			loginUser: null,
@@ -341,6 +375,7 @@ const app = createApp({
 			changePasswordOld: null,
 			changePasswordNew: null,
 			changePasswordConfirm: null,
+			editContent: null,
 
 			changingUsername: false,
 			changeUsernameNew: null,
@@ -624,6 +659,32 @@ const app = createApp({
 				})
 				.catch(console.error);
 		},
+		editPost() {
+			fetch("/api/v1/post/edit", {
+				method: "PUT",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					post: this.post.id,
+					content: this.editContent,
+				}),
+			})
+				.then(res => res.text())
+				.then(text => {
+					if (text === "true") {
+						this.editContent = null;
+						this.toggleEditPost(false);
+
+						this.fetchPost(this.post);
+
+						this.showMessage("edit success");
+					} else {
+						this.showMessage("edit fail");
+					}
+				})
+				.catch(console.error);
+		},
 		checkLogin() {
 			fetch("/api/v1/user/login")
 				.then(res => res.text())
@@ -649,6 +710,12 @@ const app = createApp({
 		},
 		toggleNewPost(show) {
 			this.showNewPost = show;
+		},
+		toggleEditPost(show) {
+			if (show) {
+				this.editContent = this.post.content;
+			}
+			this.showEditPost = show;
 		},
 		create() {
 			if (this.createPassword !== this.createConfirm) return;

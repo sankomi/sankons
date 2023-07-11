@@ -304,6 +304,19 @@ input::file-selector-button {
 .post__like--liked {
 	color: red;
 }
+.post__edit {
+	display: inline-block;
+	padding: 0;
+	border: none;
+
+	background-color: transparent;
+}
+.post__edit > svg {
+	display: block;
+	height: 1rem;
+
+	fill: currentcolor;
+}
 .post__delete {
 	display: inline-block;
 	padding: 0;
