@@ -203,14 +203,24 @@ public class PostServiceTest {
 	@Test
 	public void testPostView() throws Exception {
 		//given
-		int views = post.getViews();
-		ReflectionTestUtils.setField(post, "content", content);
+		Long allPostId = 16L;
+		Post allPost = Post.builder()
+			.poster(user)
+			.image(image)
+			.visibility(PostVisibility.SELF)
+			.content(content)
+			.build();
+		ReflectionTestUtils.setField(allPost, "id", allPostId);
+		int views = allPost.getViews();
+
+		when(postRepository.findById(allPostId))
+			.thenReturn(Optional.of(allPost));
 
 		//when
-		PostViewResponse view = postService.view(postId, sessionUser);
+		PostViewResponse view = postService.view(allPostId, sessionUser);
 
 		//then
-		assertEquals(postId, view.getId());
+		assertEquals(allPostId, view.getId());
 		assertEquals(content, view.getContent());
 		assertEquals(null, view.getComments());
 		assertEquals(views + 1, view.getViews());
@@ -458,11 +468,24 @@ public class PostServiceTest {
 	@Test
 	public void testPostEdit() throws Exception {
 		//given
+		Long editPostId = 29L;
 		String newContent = "new content";
+		PostVisibility visibility = PostVisibility.ALL;
+		Post editPost = Post.builder()
+			.poster(user)
+			.image(image)
+			.visibility(visibility)
+			.content(content)
+			.build();
+		ReflectionTestUtils.setField(editPost, "id", editPostId);
+
+		when(postRepository.findById(editPostId))
+			.thenReturn(Optional.of(editPost));
 
 		PostEditRequest request = PostEditRequest.builder()
-			.post(postId)
+			.post(editPostId)
 			.content(newContent)
+			.visibility(visibility)
 			.build();
 
 		//when
@@ -470,6 +493,37 @@ public class PostServiceTest {
 
 		//then
 		assertTrue(edited);
+		assertEquals(newContent, editPost.getContent());
+	}
+
+	@Test
+	public void testPostEditChangeVisibility() throws Exception {
+		//given
+		Long editPostId = 31L;
+		PostVisibility visibility = PostVisibility.ALL;
+		PostVisibility newVisibility = PostVisibility.SELF;
+		Post editPost = Post.builder()
+			.poster(user)
+			.image(image)
+			.visibility(visibility)
+			.content(content)
+			.build();
+		ReflectionTestUtils.setField(editPost, "id", editPostId);
+
+		when(postRepository.findById(editPostId))
+			.thenReturn(Optional.of(editPost));
+
+		PostEditRequest request = PostEditRequest.builder()
+			.post(editPostId)
+			.content(content)
+			.visibility(newVisibility)
+			.build();
+
+		//when
+		boolean edited = postService.edit(request, sessionUser);
+
+		//then
+		assertEquals(newVisibility, editPost.getVisibility());
 	}
 
 	@Test

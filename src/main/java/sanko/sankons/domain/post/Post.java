@@ -67,4 +67,8 @@ public class Post extends TimedEntity {
 		this.content = content;
 	}
 
+	public void setVisibility(PostVisibility visibility) {
+		this.visibility = visibility;
+	}
+
 }

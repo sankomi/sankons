@@ -88,6 +88,7 @@ public class PostService {
 
 		if (post.getPoster().equals(user)) {
 			post.editContent(request.getContent());
+			post.setVisibility(request.getVisibility());
 
 			hashtagRepository.deleteAll(post.getHashtags());
 

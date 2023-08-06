@@ -376,6 +376,7 @@ const app = createApp({
 			changePasswordNew: null,
 			changePasswordConfirm: null,
 			editContent: null,
+			editVisibility: null,
 
 			changingUsername: false,
 			changeUsernameNew: null,
@@ -668,6 +669,7 @@ const app = createApp({
 				body: JSON.stringify({
 					post: this.post.id,
 					content: this.editContent,
+					visibility: this.editVisibility,
 				}),
 			})
 				.then(res => res.text())
@@ -714,6 +716,7 @@ const app = createApp({
 		toggleEditPost(show) {
 			if (show) {
 				this.editContent = this.post.content;
+				this.editVisibility = this.post.visibility;
 			}
 			this.showEditPost = show;
 		},
