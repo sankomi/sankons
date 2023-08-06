@@ -57,7 +57,7 @@ public class PostService {
 
 		Post post = postRepository.save(Post.builder()
 			.poster(user)
-			.image(filename)
+			.image(newname)
 			.content(request.getContent())
 			.visibility(request.getVisibility())
 			.comments(null)
