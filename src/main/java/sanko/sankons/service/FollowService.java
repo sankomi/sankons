@@ -18,10 +18,8 @@ public class FollowService {
 	public boolean follow(Long userId, SessionUser sessionUser) throws Exception {
 		if (sessionUser == null) throw new Exception("Not logged in");
 
-		User follower = userRepository.findById(sessionUser.getId())
-			.orElseThrow(() -> new Exception("Invalid user"));
-		User following = userRepository.findById(userId)
-			.orElseThrow(() -> new Exception("Invalid user"));
+		User follower = findUser(sessionUser.getId());
+		User following = findUser(userId);
 
 		Follow follow = followRepository.save(Follow.builder()
 			.follower(follower)
@@ -29,6 +27,22 @@ public class FollowService {
 			.build());
 
 		return follow != null;
+	}
+
+	public boolean checkFollow(Long userId, SessionUser sessionUser) throws Exception {
+		if (sessionUser == null) throw new Exception("Not logged in");
+
+		User follower = findUser(sessionUser.getId());
+		User following = findUser(userId);
+
+		Follow follow = followRepository.findOneByFollowerAndFollowing(follower, following);
+
+		return follow != null;
+	}
+
+	private User findUser(Long userId) throws Exception {
+		return userRepository.findById(userId)
+			.orElseThrow(() -> new Exception("Invalid user"));
 	}
 
 }

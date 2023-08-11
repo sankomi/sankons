@@ -45,6 +45,9 @@ public class FollowServiceTest {
 			.build();
 		setField(user, "id", userIds++);
 
+		when(userRepository.findById(user.getId()))
+			.thenReturn(Optional.of(user));
+
 		return user;
 	}
 
@@ -55,11 +58,6 @@ public class FollowServiceTest {
 		User following = createUser("following");
 
 		SessionUser sessionFollower = new SessionUser(follower);
-
-		when(userRepository.findById(follower.getId()))
-			.thenReturn(Optional.of(follower));
-		when(userRepository.findById(following.getId()))
-			.thenReturn(Optional.of(following));
 
 		when(followRepository.save(any(Follow.class)))
 			.thenAnswer(invocation -> {
@@ -73,6 +71,30 @@ public class FollowServiceTest {
 
 		//then
 		assertTrue(followed);
+	}
+
+	@Test
+	public void testCheckFollowing() throws Exception {
+		//given
+		User follower = createUser("follower");
+		User following = createUser("following");
+
+		SessionUser sessionFollower = new SessionUser(follower);
+
+		Follow follow = Follow.builder()
+			.follower(follower)
+			.following(following)
+			.build();
+		setField(follow, "id", followIds++);
+
+		when(followRepository.findOneByFollowerAndFollowing(follower, following))
+			.thenReturn(follow);
+
+		//when
+		boolean check = followService.checkFollow(following.getId(), sessionFollower);
+
+		//then
+		assertTrue(check);
 	}
 
 }
