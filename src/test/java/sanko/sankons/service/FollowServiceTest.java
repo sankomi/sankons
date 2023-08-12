@@ -14,6 +14,8 @@ import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import sanko.sankons.domain.follow.*; //Follow, FollowRepository
 import sanko.sankons.domain.user.*; //User, UserRepository
@@ -35,8 +37,8 @@ public class FollowServiceTest {
 	@MockBean
 	private SessionService sessionService;
 
-	private static Long userIds = 0L;
-	private static Long followIds = 0L;
+	private static Long userIds = 1L;
+	private static Long followIds = 1L;
 
 	private User createUser(String username) {
 		User user = User.builder()
@@ -95,6 +97,36 @@ public class FollowServiceTest {
 
 		//then
 		assertTrue(check);
+	}
+
+	@Test
+	public void testCheckFollowingNotFollowing() throws Exception {
+		//given
+		User follower = createUser("follower");
+		User following = createUser("following");
+
+		SessionUser sessionFollower = new SessionUser(follower);
+
+		when(followRepository.findOneByFollowerAndFollowing(follower, following))
+			.thenReturn(null);
+
+		//when
+		boolean check = followService.checkFollow(following.getId(), sessionFollower);
+
+		//then
+		assertFalse(check);
+	}
+
+	@Test
+	public void testCheckFollowingNoFollowing() throws Exception {
+		//given
+		User follower = createUser("follower");
+
+		SessionUser sessionFollower = new SessionUser(follower);
+
+		//whenthen
+		Exception exception = assertThrows(Exception.class, () -> followService.checkFollow(0L, sessionFollower));
+		assertTrue(exception.getMessage().contains("Invalid user"));
 	}
 
 }
