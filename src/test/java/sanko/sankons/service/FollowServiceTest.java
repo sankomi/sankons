@@ -53,6 +53,16 @@ public class FollowServiceTest {
 		return user;
 	}
 
+	private Follow createFollow(User follower, User following) {
+		Follow follow = Follow.builder()
+			.follower(follower)
+			.following(following)
+			.build();
+		setField(follow, "id", followIds++);
+
+		return follow;
+	}
+
 	@Test
 	public void testFollowUser() throws Exception {
 		//given
@@ -76,18 +86,48 @@ public class FollowServiceTest {
 	}
 
 	@Test
-	public void testCheckFollowing() throws Exception {
+	public void testUnfollow() throws Exception {
+		//given
+		User follower = createUser("follower");
+		User following = createUser("following");
+
+		SessionUser sessionFollower = new SessionUser(follower);
+		Follow follow = createFollow(follower, following);
+
+		when(followRepository.findOneByFollowerAndFollowing(follower, following))
+			.thenReturn(follow);
+
+		//when
+		boolean unfollowed = followService.unfollow(following.getId(), sessionFollower);
+
+		//then
+		assertTrue(unfollowed);
+	}
+
+	@Test
+	public void testUnfollowNotFollowing() throws Exception {
 		//given
 		User follower = createUser("follower");
 		User following = createUser("following");
 
 		SessionUser sessionFollower = new SessionUser(follower);
 
-		Follow follow = Follow.builder()
-			.follower(follower)
-			.following(following)
-			.build();
-		setField(follow, "id", followIds++);
+		when(followRepository.findOneByFollowerAndFollowing(follower, following))
+			.thenReturn(null);
+
+		//when
+		Exception exception = assertThrows(Exception.class, () -> followService.unfollow(following.getId(), sessionFollower));
+		assertTrue(exception.getMessage().contains("Not following"));
+	}
+
+	@Test
+	public void testCheckFollowing() throws Exception {
+		//given
+		User follower = createUser("follower");
+		User following = createUser("following");
+
+		SessionUser sessionFollower = new SessionUser(follower);
+		Follow follow = createFollow(follower, following);
 
 		when(followRepository.findOneByFollowerAndFollowing(follower, following))
 			.thenReturn(follow);

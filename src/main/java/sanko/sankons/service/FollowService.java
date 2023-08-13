@@ -40,6 +40,21 @@ public class FollowService {
 		return follow != null;
 	}
 
+	public boolean unfollow(Long userId, SessionUser sessionUser) throws Exception {
+		if (sessionUser == null) throw new Exception("Not logged in");
+
+		User follower = findUser(sessionUser.getId());
+		User following = findUser(userId);
+
+		Follow follow = followRepository.findOneByFollowerAndFollowing(follower, following);
+
+		if (follow == null) throw new Exception ("Not following");
+
+		followRepository.delete(follow);
+
+		return true;
+	}
+
 	private User findUser(Long userId) throws Exception {
 		return userRepository.findById(userId)
 			.orElseThrow(() -> new Exception("Invalid user"));
