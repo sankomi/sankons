@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import sanko.sankons.domain.follow.*; //Follow, FollowRepository
 import sanko.sankons.domain.user.*; //User, UserRepository
-import sanko.sankons.web.dto.SessionUser;
+import sanko.sankons.web.dto.*; //SessionUser, UserFollowRequest
 
 @ExtendWith(SpringExtension.class)
 @Import(FollowService.class)
@@ -70,6 +70,9 @@ public class FollowServiceTest {
 		User following = createUser("following");
 
 		SessionUser sessionFollower = new SessionUser(follower);
+		UserFollowRequest request = UserFollowRequest.builder()
+			.user(following.getId())
+			.build();
 
 		when(followRepository.save(any(Follow.class)))
 			.thenAnswer(invocation -> {
@@ -79,7 +82,7 @@ public class FollowServiceTest {
 			});
 
 		//when
-		boolean followed = followService.follow(following.getId(), sessionFollower);
+		boolean followed = followService.follow(request, sessionFollower);
 
 		//then
 		assertTrue(followed);

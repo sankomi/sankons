@@ -252,6 +252,26 @@ input::file-selector-button {
 	vertical-align: middle;
 	fill: currentcolor;
 }
+.post__follow {
+	display: inline-block;
+	padding: 0;
+	margin: 0;
+	border: none;
+
+	color: #888;
+	background-color: transparent;
+
+	transition: color 0.5s;
+}
+.post__follow > svg {
+	display: block;
+	height: 1rem;
+
+	fill: currentcolor;
+}
+.post__follow--followed {
+	color: gold;
+}
 .post__image {
 	flex-shrink: 0;
 

@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.*; //RestController, RequestBody,
 import lombok.RequiredArgsConstructor;
 
 import sanko.sankons.domain.user.User;
-import sanko.sankons.service.UserService;
-import sanko.sankons.web.dto.*; //SessionUser, UserCreateRequest, UserLoginRequest, UserChangePasswordRequest, UserChangeNameRequest
+import sanko.sankons.service.*; //UserService, FollowService
+import sanko.sankons.web.dto.*; //SessionUser, UserCreateRequest, UserLoginRequest, UserChangePasswordRequest, UserChangeNameRequest, UserFollowRequest
 
 @RequiredArgsConstructor
 @RestController
@@ -15,6 +15,7 @@ import sanko.sankons.web.dto.*; //SessionUser, UserCreateRequest, UserLoginReque
 public class UserApiController {
 
 	private final UserService userService;
+	private final FollowService followService;
 
 	@PostMapping("/create")
 	public Long create(@Valid @RequestBody UserCreateRequest request) throws Exception {
@@ -56,6 +57,14 @@ public class UserApiController {
 		@LoginUser SessionUser sessionUser
 	) throws Exception {
 		return userService.changeUsername(request, sessionUser);
+	}
+
+	@PutMapping("/follow")
+	public Boolean follow(
+		@Valid @RequestBody UserFollowRequest request,
+		@LoginUser SessionUser sessionUser
+	) throws Exception {
+		return followService.follow(request, sessionUser);
 	}
 
 }
