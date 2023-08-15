@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.hamcrest.Matchers.is;
 
 import sanko.sankons.domain.user.User;
-import sanko.sankons.service.*; //UserService, SessionService
+import sanko.sankons.service.*; //UserService, SessionService, FollowService
 import sanko.sankons.web.dto.*; //UserCreateRequest, UserLoginRequest, UserChangePasswordRequest, UserChangeNameRequest, SessionUser
 
 @WebMvcTest(UserApiController.class)
@@ -37,6 +37,9 @@ public class UserApiControllerTest {
 
 	@MockBean
 	private SessionService sessionService;
+
+	@MockBean
+	private FollowService followService;
 
 	private static final String createUrl = "/api/v1/user/create";
 	private static final String loginUrl = "/api/v1/user/login";

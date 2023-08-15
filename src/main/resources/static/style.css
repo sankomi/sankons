@@ -269,7 +269,7 @@ input::file-selector-button {
 
 	fill: currentcolor;
 }
-.post__follow--followed {
+.post__follow--following {
 	color: gold;
 }
 .post__image {

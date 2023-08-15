@@ -25,7 +25,7 @@ const app = createApp({
 					<div class="single__user post__user">
 						<svg class="post__visibility" v-if="post.visibility === 'SELF'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><path d="M103.88 45.208c0-24.193-19.683-43.875-43.875-43.875-24.193 0-43.875 19.682-43.875 43.875H5v69.75h110v-69.75h-11.12zm-69.754 0c0-14.268 11.607-25.875 25.875-25.875S85.88 30.94 85.88 45.208H34.13zm31.75 32.918v20.06h-11.89V78.12c-2.485-1.828-4.105-4.766-4.105-8.09 0-5.55 4.5-10.05 10.06-10.05s10.05 4.5 10.05 10.05c0 3.324-1.62 6.264-4.105 8.094z"/></svg>
 						{{post.poster.username}}
-						<button v-if="!post.login" class="post__follow" @click="follow(post.poster)">
+						<button v-if="!post.login" class="post__follow" :class="{'post__follow--following': post.following}" @click="follow(post)">
 							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><path d="M41.504 39.537L60.062 0l18.556 39.538 41.502 6.34-30.032 30.775 7.088 43.457L60.06 99.593 22.947 120.11l7.09-43.457L.01 45.878z"/></svg>
 						</button>
 						<button class="single__close" @click="closePost">
@@ -582,20 +582,27 @@ const app = createApp({
 				})
 				.catch(console.error);
 		},
-		follow(user) {
+		follow(post) {
+			const following = post.following;
 			fetch("/api/v1/user/follow", {
-				method: "PUT",
+				method: following? "DELETE": "PUT",
 				headers: {
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify({
-					user: user.id,
+					user: post.poster.id,
 				}),
 			})
 				.then(res => res.text())
 				.then(text => {
 					if (text === "true") {
-						this.showMessage("followed");
+						if (following) {
+							this.showMessage("unfollowed");
+							post.following = false;
+						} else {
+							this.showMessage("followed");
+							post.following = true;
+						}
 					}
 				})
 				.catch(console.error);

@@ -67,4 +67,12 @@ public class UserApiController {
 		return followService.follow(request, sessionUser);
 	}
 
+	@DeleteMapping("/follow")
+	public Boolean unfollow(
+		@Valid @RequestBody UserFollowRequest request,
+		@LoginUser SessionUser sessionUser
+	) throws Exception {
+		return followService.unfollow(request, sessionUser);
+	}
+
 }

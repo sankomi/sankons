@@ -95,13 +95,16 @@ public class FollowServiceTest {
 		User following = createUser("following");
 
 		SessionUser sessionFollower = new SessionUser(follower);
+		UserFollowRequest request = UserFollowRequest.builder()
+			.user(following.getId())
+			.build();
 		Follow follow = createFollow(follower, following);
 
 		when(followRepository.findOneByFollowerAndFollowing(follower, following))
 			.thenReturn(follow);
 
 		//when
-		boolean unfollowed = followService.unfollow(following.getId(), sessionFollower);
+		boolean unfollowed = followService.unfollow(request, sessionFollower);
 
 		//then
 		assertTrue(unfollowed);
@@ -114,12 +117,15 @@ public class FollowServiceTest {
 		User following = createUser("following");
 
 		SessionUser sessionFollower = new SessionUser(follower);
+		UserFollowRequest request = UserFollowRequest.builder()
+			.user(following.getId())
+			.build();
 
 		when(followRepository.findOneByFollowerAndFollowing(follower, following))
 			.thenReturn(null);
 
 		//when
-		Exception exception = assertThrows(Exception.class, () -> followService.unfollow(following.getId(), sessionFollower));
+		Exception exception = assertThrows(Exception.class, () -> followService.unfollow(request, sessionFollower));
 		assertTrue(exception.getMessage().contains("Not following"));
 	}
 
