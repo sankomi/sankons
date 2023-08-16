@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 import sanko.sankons.domain.user.*; //User, UserRepository
 import sanko.sankons.domain.follow.*; //Follow, FollowRepository
-import sanko.sankons.web.dto.*; //SessionUser, UserFollowRequest
+import sanko.sankons.web.dto.*; //SessionUser, UserFollowRequest, UserCheckFollowRequest
 
 @RequiredArgsConstructor
 @Service
@@ -29,11 +29,11 @@ public class FollowService {
 		return follow != null;
 	}
 
-	public boolean checkFollow(Long userId, SessionUser sessionUser) throws Exception {
+	public boolean checkFollow(UserCheckFollowRequest request, SessionUser sessionUser) throws Exception {
 		if (sessionUser == null) throw new Exception("Not logged in");
 
 		User follower = findUser(sessionUser.getId());
-		User following = findUser(userId);
+		User following = findUser(request.getUser());
 
 		Follow follow = followRepository.findOneByFollowerAndFollowing(follower, following);
 

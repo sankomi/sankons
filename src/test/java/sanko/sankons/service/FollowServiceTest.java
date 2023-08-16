@@ -138,11 +138,15 @@ public class FollowServiceTest {
 		SessionUser sessionFollower = new SessionUser(follower);
 		Follow follow = createFollow(follower, following);
 
+		UserCheckFollowRequest request = UserCheckFollowRequest.builder()
+			.user(following.getId())
+			.build();
+
 		when(followRepository.findOneByFollowerAndFollowing(follower, following))
 			.thenReturn(follow);
 
 		//when
-		boolean check = followService.checkFollow(following.getId(), sessionFollower);
+		boolean check = followService.checkFollow(request, sessionFollower);
 
 		//then
 		assertTrue(check);
@@ -156,11 +160,15 @@ public class FollowServiceTest {
 
 		SessionUser sessionFollower = new SessionUser(follower);
 
+		UserCheckFollowRequest request = UserCheckFollowRequest.builder()
+			.user(following.getId())
+			.build();
+
 		when(followRepository.findOneByFollowerAndFollowing(follower, following))
 			.thenReturn(null);
 
 		//when
-		boolean check = followService.checkFollow(following.getId(), sessionFollower);
+		boolean check = followService.checkFollow(request, sessionFollower);
 
 		//then
 		assertFalse(check);
@@ -173,8 +181,12 @@ public class FollowServiceTest {
 
 		SessionUser sessionFollower = new SessionUser(follower);
 
+		UserCheckFollowRequest request = UserCheckFollowRequest.builder()
+			.user(0L)
+			.build();
+
 		//whenthen
-		Exception exception = assertThrows(Exception.class, () -> followService.checkFollow(0L, sessionFollower));
+		Exception exception = assertThrows(Exception.class, () -> followService.checkFollow(request, sessionFollower));
 		assertTrue(exception.getMessage().contains("Invalid user"));
 	}
 

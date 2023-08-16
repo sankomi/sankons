@@ -411,6 +411,7 @@ const app = createApp({
 					this.moreComments = true;
 					this.fetchComments(this.post);
 					this.checkLike([this.post]);
+					this.checkFollow(this.post);
 
 					const p = this.posts.find(p => p.id === post.id);
 					p.views = json.views;
@@ -467,6 +468,14 @@ const app = createApp({
 						post.likes = like.likes;
 					});
 				})
+				.catch(console.error);
+		},
+		checkFollow(post) {
+			if (!post) return;
+
+			fetch("/api/v1/user/follow?" + new URLSearchParams({user: post.poster.id}))
+				.then(res => res.json())
+				.then(json => post.following = json)
 				.catch(console.error);
 		},
 		fetchComments(post) {
