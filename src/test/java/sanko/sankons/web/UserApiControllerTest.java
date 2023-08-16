@@ -24,7 +24,7 @@ import static org.hamcrest.Matchers.is;
 
 import sanko.sankons.domain.user.User;
 import sanko.sankons.service.*; //UserService, SessionService, FollowService
-import sanko.sankons.web.dto.*; //UserCreateRequest, UserLoginRequest, UserChangePasswordRequest, UserChangeNameRequest, SessionUser
+import sanko.sankons.web.dto.*; //UserCreateRequest, UserLoginRequest, UserChangePasswordRequest, UserChangeNameRequest, UserFollowRequest, UserCheckFollowRequest, SessionUser
 
 @WebMvcTest(UserApiController.class)
 public class UserApiControllerTest {
@@ -103,6 +103,30 @@ public class UserApiControllerTest {
 				.contentType(MediaType.APPLICATION_JSON_VALUE)
 				.content(bytify(body))
 		);
+	}
+
+	private ResultActions mockDelete(String url, Object body) throws Exception {
+		return mockMvc.perform(
+			delete(url)
+				.contentType(MediaType.APPLICATION_JSON_VALUE)
+				.content(bytify(body))
+		);
+	}
+
+	private Long userIds = 151L;
+
+	private User createUser(String username) {
+		return createUser(username, "password");
+	}
+
+	private User createUser(String username, String password) {
+		User user = User.builder()
+			.username(username)
+			.password(password)
+			.build();
+		ReflectionTestUtils.setField(user, "id", userIds++);
+
+		return user;
 	}
 
 	@Test
@@ -268,6 +292,54 @@ public class UserApiControllerTest {
 
 		mockPut(changeUsernameUrl, request)
 			.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	public void testUserFollow() throws Exception {
+		User following = createUser("following");
+
+		UserFollowRequest request = UserFollowRequest.builder()
+			.user(following.getId())
+			.build();
+
+		when(followService.follow(any(UserFollowRequest.class), any(SessionUser.class)))
+			.thenReturn(true);
+
+		mockPut("/api/v1/user/follow", request)
+			.andExpect(status().isOk())
+			.andExpect(content().string("true"));
+	}
+
+	@Test
+	public void testUserUnfollow() throws Exception {
+		User following = createUser("following");
+
+		UserFollowRequest request = UserFollowRequest.builder()
+			.user(following.getId())
+			.build();
+
+		when(followService.unfollow(any(UserFollowRequest.class), any(SessionUser.class)))
+			.thenReturn(true);
+
+		mockDelete("/api/v1/user/follow", request)
+			.andExpect(status().isOk())
+			.andExpect(content().string("true"));
+	}
+
+	@Test
+	public void testUserCheckFollow() throws Exception {
+		User following = createUser("following");
+
+		UserCheckFollowRequest request = UserCheckFollowRequest.builder()
+			.user(following.getId())
+			.build();
+
+		when(followService.checkFollow(any(UserCheckFollowRequest.class), any(SessionUser.class)))
+			.thenReturn(true);
+
+		mockMvc.perform(get("/api/v1/user/follow?user=" + String.valueOf(following.getId())))
+			.andExpect(status().isOk())
+			.andExpect(content().string("true"));
 	}
 
 }
