@@ -1,6 +1,6 @@
 package sanko.sankons.service;
 
-import java.util.Optional;
+import java.util.*; //Optional, List, ArrayList
 
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import sanko.sankons.domain.follow.*; //Follow, FollowRepository
 import sanko.sankons.domain.user.*; //User, UserRepository
-import sanko.sankons.web.dto.*; //SessionUser, UserFollowRequest
+import sanko.sankons.web.dto.*; //SessionUser, UserFollowRequest, UserFollowingRequest, UserFollowerRequest
 
 @ExtendWith(SpringExtension.class)
 @Import(FollowService.class)
@@ -188,6 +188,66 @@ public class FollowServiceTest {
 		//whenthen
 		Exception exception = assertThrows(Exception.class, () -> followService.checkFollow(request, sessionFollower));
 		assertTrue(exception.getMessage().contains("Invalid user"));
+	}
+
+	@Test
+	public void testGetFollowing() throws Exception {
+		//given
+		User follower = createUser("follower");
+
+		int length = (int) (Math.random() * 10 + 1);
+
+		List<User> followings = new ArrayList<>();
+		List<Follow> follows = new ArrayList<>();
+		for (int i = 0; i < length; i++) {
+			User following = createUser("following" + String.valueOf(i));
+			Follow follow = createFollow(follower, following);
+			followings.add(following);
+			follows.add(follow);
+		}
+
+		UserFollowRequest request = UserFollowRequest.builder()
+			.user(follower.getId())
+			.build();
+
+		when(followRepository.findAllByFollower(any(User.class)))
+			.thenReturn(follows);
+
+		//when
+		UserFollowingResponse response = followService.getFollowing(request);
+
+		//then
+		assertEquals(length, response.getFollowings().size());
+	}
+
+	@Test
+	public void testGetFollower() throws Exception {
+		//given
+		User following = createUser("following");
+
+		int length = (int) (Math.random() * 10 + 1);
+
+		List<User> followers = new ArrayList<>();
+		List<Follow> follows = new ArrayList<>();
+		for (int i = 0; i < length; i++) {
+			User follower = createUser("follower" + String.valueOf(i));
+			Follow follow = createFollow(follower, following);
+			followers.add(follower);
+			follows.add(follow);
+		}
+
+		UserFollowRequest request = UserFollowRequest.builder()
+			.user(following.getId())
+			.build();
+
+		when(followRepository.findAllByFollowing(any(User.class)))
+			.thenReturn(follows);
+
+		//when
+		UserFollowerResponse response = followService.getFollower(request);
+
+		//then
+		assertEquals(length, response.getFollowers().size());
 	}
 
 }
