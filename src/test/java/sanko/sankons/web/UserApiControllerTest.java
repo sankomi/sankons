@@ -1,5 +1,7 @@
 package sanko.sankons.web;
 
+import java.util.*; //List, ArrayList
+
 import org.junit.jupiter.api.*; //Test, BeforeAll, BeforeEach
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +23,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.hasSize;
 
 import sanko.sankons.domain.user.User;
+import sanko.sankons.domain.follow.Follow;
 import sanko.sankons.service.*; //UserService, SessionService, FollowService
-import sanko.sankons.web.dto.*; //UserCreateRequest, UserLoginRequest, UserChangePasswordRequest, UserChangeNameRequest, UserFollowRequest, UserCheckFollowRequest, SessionUser
+import sanko.sankons.web.dto.*; //UserCreateRequest, UserLoginRequest, UserChangePasswordRequest, UserChangeNameRequest, UserFollowRequest, UserCheckFollowRequest, UserFollowingResponse, UserFollowerResponse, SessionUser
 
 @WebMvcTest(UserApiController.class)
 public class UserApiControllerTest {
@@ -340,6 +344,54 @@ public class UserApiControllerTest {
 		mockMvc.perform(get("/api/v1/user/follow?user=" + String.valueOf(following.getId())))
 			.andExpect(status().isOk())
 			.andExpect(content().string("true"));
+	}
+
+	@Test
+	public void testGetFollowings() throws Exception {
+		User follower = createUser("follwer");
+
+		int length = (int) (Math.random() * 10 + 1);
+
+		List<Follow> follows = new ArrayList<>();
+		for (int i = 0; i < length; i++) {
+			User following = createUser("following" + String.valueOf(i));
+			Follow follow = Follow.builder()
+				.follower(follower)
+				.following(following)
+				.build();
+			follows.add(follow);
+		}
+
+		when(followService.getFollowings(any(UserCheckFollowRequest.class)))
+			.thenReturn(new UserFollowingResponse(follows));
+
+		mockMvc.perform(get("/api/v1/user/followings?user=" + String.valueOf(follower.getId())))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.followings", hasSize(length)));
+	}
+
+	@Test
+	public void testGetFollowers() throws Exception {
+		User following = createUser("follwing");
+
+		int length = (int) (Math.random() * 10 + 1);
+
+		List<Follow> follows = new ArrayList<>();
+		for (int i = 0; i < length; i++) {
+			User follower = createUser("follower" + String.valueOf(i));
+			Follow follow = Follow.builder()
+				.follower(follower)
+				.following(following)
+				.build();
+			follows.add(follow);
+		}
+
+		when(followService.getFollowers(any(UserCheckFollowRequest.class)))
+			.thenReturn(new UserFollowerResponse(follows));
+
+		mockMvc.perform(get("/api/v1/user/followers?user=" + String.valueOf(following.getId())))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.followers", hasSize(length)));
 	}
 
 }

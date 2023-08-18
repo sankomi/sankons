@@ -62,7 +62,7 @@ public class FollowService {
 			.orElseThrow(() -> new Exception("Invalid user"));
 	}
 
-	public UserFollowingResponse getFollowing(UserFollowRequest request) throws Exception {
+	public UserFollowingResponse getFollowings(UserCheckFollowRequest request) throws Exception {
 		User follower = findUser(request.getUser());
 
 		List<Follow> follows = followRepository.findAllByFollower(follower);
@@ -72,7 +72,7 @@ public class FollowService {
 		return new UserFollowingResponse(follows);
 	}
 
-	public UserFollowerResponse getFollower(UserFollowRequest request) throws Exception {
+	public UserFollowerResponse getFollowers(UserCheckFollowRequest request) throws Exception {
 		User following = findUser(request.getUser());
 
 		List<Follow> follows = followRepository.findAllByFollowing(following);

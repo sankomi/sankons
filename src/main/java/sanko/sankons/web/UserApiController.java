@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 
 import sanko.sankons.domain.user.User;
 import sanko.sankons.service.*; //UserService, FollowService
-import sanko.sankons.web.dto.*; //SessionUser, UserCreateRequest, UserLoginRequest, UserChangePasswordRequest, UserChangeNameRequest, UserFollowRequest, UserCheckFollowRequest
+import sanko.sankons.web.dto.*; //SessionUser, UserCreateRequest, UserLoginRequest, UserChangePasswordRequest, UserChangeNameRequest, UserFollowRequest, UserCheckFollowRequest, UserFollowingResponse, UserFollowerResponse
 
 @RequiredArgsConstructor
 @RestController
@@ -81,6 +81,16 @@ public class UserApiController {
 		@LoginUser SessionUser sessionUser
 	) throws Exception {
 		return followService.checkFollow(request, sessionUser);
+	}
+
+	@GetMapping("/followers")
+	public UserFollowerResponse getFollowers(@Valid UserCheckFollowRequest request) throws Exception {
+		return followService.getFollowers(request);
+	}
+
+	@GetMapping("/followings")
+	public UserFollowingResponse getFollowings(@Valid UserCheckFollowRequest request) throws Exception {
+		return followService.getFollowings(request);
 	}
 
 }
