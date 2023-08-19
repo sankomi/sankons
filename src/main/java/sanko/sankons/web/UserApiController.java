@@ -84,13 +84,19 @@ public class UserApiController {
 	}
 
 	@GetMapping("/followers")
-	public UserFollowerResponse getFollowers(@Valid UserCheckFollowRequest request) throws Exception {
-		return followService.getFollowers(request);
+	public UserFollowerResponse getFollowers(
+		@Valid UserCheckFollowRequest request,
+		@LoginUser SessionUser sessionUser
+	) throws Exception {
+		return followService.getFollowers(request, sessionUser);
 	}
 
 	@GetMapping("/followings")
-	public UserFollowingResponse getFollowings(@Valid UserCheckFollowRequest request) throws Exception {
-		return followService.getFollowings(request);
+	public UserFollowingResponse getFollowings(
+		@Valid UserCheckFollowRequest request,
+		@LoginUser SessionUser sessionUser
+	) throws Exception {
+		return followService.getFollowings(request, sessionUser);
 	}
 
 }

@@ -62,8 +62,15 @@ public class FollowService {
 			.orElseThrow(() -> new Exception("Invalid user"));
 	}
 
-	public UserFollowingResponse getFollowings(UserCheckFollowRequest request) throws Exception {
-		User follower = findUser(request.getUser());
+	public UserFollowingResponse getFollowings(UserCheckFollowRequest request, SessionUser sessionUser) throws Exception {
+		Long userId = request.getUser();
+
+		if (userId == 0L) {
+			if (sessionUser == null) throw new Exception("Not logged in");
+			userId = sessionUser.getId();
+		}
+
+		User follower = findUser(userId);
 
 		List<Follow> follows = followRepository.findAllByFollower(follower);
 
@@ -72,8 +79,15 @@ public class FollowService {
 		return new UserFollowingResponse(follows);
 	}
 
-	public UserFollowerResponse getFollowers(UserCheckFollowRequest request) throws Exception {
-		User following = findUser(request.getUser());
+	public UserFollowerResponse getFollowers(UserCheckFollowRequest request, SessionUser sessionUser) throws Exception {
+		Long userId = request.getUser();
+
+		if (userId == 0L) {
+			if (sessionUser == null) throw new Exception("Not logged in");
+			userId = sessionUser.getId();
+		}
+
+		User following = findUser(userId);
 
 		List<Follow> follows = followRepository.findAllByFollowing(following);
 

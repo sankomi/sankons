@@ -159,6 +159,9 @@ const app = createApp({
 						<button class="button" @click.prevent="toggleNewPost(true)">new post</button>
 					</div>
 					<div class="form__row">
+						<button class="button" @click.prevent="toggleFollows(true)">follows</button>
+					</div>
+					<div class="form__row">
 						<button class="button" @click.prevent="toggleSetting(true)">setting</button>
 					</div>
 					<div class="form__row">
@@ -261,6 +264,32 @@ const app = createApp({
 		</Transition>
 
 		<Transition name="popup">
+			<div class="popup" v-if="showFollows">
+				<div class="popup__box">
+					<div class="popup__bar">
+						follows
+						<button class="popup__close" @click="toggleFollows(false)">
+							<span></span>
+							<span></span>
+						</button>
+					</div>
+					<div>
+						<p v-if="followings === null">fetching follows</p>
+						<p v-else-if="followings.length === 0">no follows</p>
+						<ul v-else class="follows">
+							<li v-for="following in followings" class="follows__follow">
+								{{following.username}}
+								<button class="follows__delete" @click="unfollow(following)">
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><g fill-rule="evenodd"><path d="M2.048.77l5.18 5.182L5.953 7.23.77 2.048 2.048.77z"/><path d="M5.952.77L7.23 2.05 2.048 7.23.77 5.952 5.953.772z"/></g></svg>
+								</button>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</Transition>
+
+		<Transition name="popup">
 			<div class="popup" v-if="showSetting">
 				<div class="popup__box">
 					<div class="popup__bar">
@@ -332,6 +361,7 @@ const app = createApp({
 			showLogin: false,
 			showCreate: false,
 			showNewPost: false,
+			showFollows: false,
 			showSetting: false,
 			loginCheck: false,
 			loginUser: null,
@@ -347,6 +377,8 @@ const app = createApp({
 
 			changingUsername: false,
 			changeUsernameNew: null,
+
+			followings: null,
 		};
 	},
 	mounted() {
@@ -616,6 +648,25 @@ const app = createApp({
 				})
 				.catch(console.error);
 		},
+		unfollow(user) {
+			fetch("/api/v1/user/follow", {
+				method: "DELETE",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					user: user.id,
+				}),
+			})
+				.then(res => res.json())
+				.then(json => {
+					if (json === true) {
+						this.showMessage("unfollowed");
+						this.fetchFollowings();
+					}
+				})
+				.catch(console.error);
+		},
 		viewPost(post) {
 			if (this.post) return;
 
@@ -749,6 +800,21 @@ const app = createApp({
 				.then(text => {
 					this.showMessage("logout success");
 					this.checkLogin();
+				})
+				.catch(console.error);
+		},
+		toggleFollows(show) {
+			this.showFollows = show;
+			if (show) this.fetchFollowings();
+		},
+		fetchFollowings() {
+			this.followings = null;
+			fetch("/api/v1/user/followings?" + new URLSearchParams({
+				user: 0,
+			}))
+				.then(res => res.json())
+				.then(json => {
+					this.followings = json.followings;
 				})
 				.catch(console.error);
 		},

@@ -206,6 +206,8 @@ public class FollowServiceTest {
 			follows.add(follow);
 		}
 
+		SessionUser sessionFollower = new SessionUser(follower);
+
 		UserCheckFollowRequest request = UserCheckFollowRequest.builder()
 			.user(follower.getId())
 			.build();
@@ -214,7 +216,7 @@ public class FollowServiceTest {
 			.thenReturn(follows);
 
 		//when
-		UserFollowingResponse response = followService.getFollowings(request);
+		UserFollowingResponse response = followService.getFollowings(request, sessionFollower);
 
 		//then
 		assertEquals(length, response.getFollowings().size());
@@ -236,6 +238,8 @@ public class FollowServiceTest {
 			follows.add(follow);
 		}
 
+		SessionUser sessionFollowing = new SessionUser(following);
+
 		UserCheckFollowRequest request = UserCheckFollowRequest.builder()
 			.user(following.getId())
 			.build();
@@ -244,7 +248,7 @@ public class FollowServiceTest {
 			.thenReturn(follows);
 
 		//when
-		UserFollowerResponse response = followService.getFollowers(request);
+		UserFollowerResponse response = followService.getFollowers(request, sessionFollowing);
 
 		//then
 		assertEquals(length, response.getFollowers().size());

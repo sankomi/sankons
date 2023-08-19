@@ -560,3 +560,24 @@ input::file-selector-button {
 .menu__form + .menu__form {
 	margin-top: 2rem;
 }
+
+.follows {
+	padding: 0;
+
+	list-style-type: none;
+}
+.follows__delete {
+	display: inline-block;
+	padding: 0;
+	margin: 0 0 0 auto;
+	border: none;
+
+	color: red;
+	background-color: transparent;
+}
+.follows__delete > svg {
+	display: block;
+	height: 1rem;
+
+	fill: currentcolor;
+}

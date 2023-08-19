@@ -362,7 +362,7 @@ public class UserApiControllerTest {
 			follows.add(follow);
 		}
 
-		when(followService.getFollowings(any(UserCheckFollowRequest.class)))
+		when(followService.getFollowings(any(UserCheckFollowRequest.class), any(SessionUser.class)))
 			.thenReturn(new UserFollowingResponse(follows));
 
 		mockMvc.perform(get("/api/v1/user/followings?user=" + String.valueOf(follower.getId())))
@@ -386,7 +386,7 @@ public class UserApiControllerTest {
 			follows.add(follow);
 		}
 
-		when(followService.getFollowers(any(UserCheckFollowRequest.class)))
+		when(followService.getFollowers(any(UserCheckFollowRequest.class), any(SessionUser.class)))
 			.thenReturn(new UserFollowerResponse(follows));
 
 		mockMvc.perform(get("/api/v1/user/followers?user=" + String.valueOf(following.getId())))
