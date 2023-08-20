@@ -507,7 +507,7 @@ const app = createApp({
 
 			fetch("/api/v1/user/follow?" + new URLSearchParams({user: post.poster.id}))
 				.then(res => res.json())
-				.then(json => post.following = json)
+				.then(json => post.following = json === true)
 				.catch(console.error);
 		},
 		fetchComments(post) {
@@ -544,9 +544,11 @@ const app = createApp({
 			})
 				.then(res => {
 					if (res.status === 200) return res.json();
+					else if (res.status === 500) return res.json();
 				})
 				.then(json => {
 					if (!json) return;
+					if (json.message) return this.showMessage(json.message);
 
 					post.like = json.liked;
 					post.likes = json.likes;
@@ -634,9 +636,9 @@ const app = createApp({
 					user: post.poster.id,
 				}),
 			})
-				.then(res => res.text())
-				.then(text => {
-					if (text === "true") {
+				.then(res => res.json())
+				.then(json => {
+					if (json === "true") {
 						if (following) {
 							this.showMessage("unfollowed");
 							post.following = false;
@@ -644,6 +646,8 @@ const app = createApp({
 							this.showMessage("followed");
 							post.following = true;
 						}
+					} else if (json.message) {
+						this.showMessage(json.message);
 					}
 				})
 				.catch(console.error);
