@@ -25,6 +25,9 @@ const app = createApp({
 					<div class="single__user post__user">
 						<svg class="post__visibility" v-if="post.visibility === 'SELF'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><path d="M103.88 45.208c0-24.193-19.683-43.875-43.875-43.875-24.193 0-43.875 19.682-43.875 43.875H5v69.75h110v-69.75h-11.12zm-69.754 0c0-14.268 11.607-25.875 25.875-25.875S85.88 30.94 85.88 45.208H34.13zm31.75 32.918v20.06h-11.89V78.12c-2.485-1.828-4.105-4.766-4.105-8.09 0-5.55 4.5-10.05 10.06-10.05s10.05 4.5 10.05 10.05c0 3.324-1.62 6.264-4.105 8.094z"/></svg>
 						{{post.poster.username}}
+						<button v-if="!post.login" class="post__follow" :class="{'post__follow--following': post.following}" @click="follow(post)">
+							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><path d="M41.504 39.537L60.062 0l18.556 39.538 41.502 6.34-30.032 30.775 7.088 43.457L60.06 99.593 22.947 120.11l7.09-43.457L.01 45.878z"/></svg>
+						</button>
 						<button class="single__close" @click="closePost">
 							<span></span>
 							<span></span>
@@ -159,6 +162,9 @@ const app = createApp({
 						<button class="button" @click.prevent="toggleNewPost(true)">new post</button>
 					</div>
 					<div class="form__row">
+						<button class="button" @click.prevent="toggleFollows(true)">follows</button>
+					</div>
+					<div class="form__row">
 						<button class="button" @click.prevent="toggleSetting(true)">setting</button>
 					</div>
 					<div class="form__row">
@@ -261,6 +267,7 @@ const app = createApp({
 		</Transition>
 
 		<Transition name="popup">
+<<<<<<< HEAD
 			<div class="popup" v-if="loginCheck && loginUser && showEditPost">
 				<div class="popup__box">
 					<div class="popup__bar">
@@ -286,6 +293,32 @@ const app = createApp({
 							<button class="button form__button">edit</button>
 						</div>
 					</form>
+				</div>
+			</div>
+		</Transition>
+
+		<Transition name="popup">
+			<div class="popup" v-if="showFollows">
+				<div class="popup__box">
+					<div class="popup__bar">
+						follows
+						<button class="popup__close" @click="toggleFollows(false)">
+							<span></span>
+							<span></span>
+						</button>
+					</div>
+					<div>
+						<p v-if="followings === null">fetching follows</p>
+						<p v-else-if="followings.length === 0">no follows</p>
+						<ul v-else class="follows">
+							<li v-for="following in followings" class="follows__follow">
+								{{following.username}}
+								<button class="follows__delete" @click="unfollow(following)">
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><g fill-rule="evenodd"><path d="M2.048.77l5.18 5.182L5.953 7.23.77 2.048 2.048.77z"/><path d="M5.952.77L7.23 2.05 2.048 7.23.77 5.952 5.953.772z"/></g></svg>
+								</button>
+							</li>
+						</ul>
+					</div>
 				</div>
 			</div>
 		</Transition>
@@ -363,6 +396,7 @@ const app = createApp({
 			showCreate: false,
 			showNewPost: false,
 			showEditPost: false,
+			showFollows: false,
 			showSetting: false,
 			loginCheck: false,
 			loginUser: null,
@@ -380,6 +414,8 @@ const app = createApp({
 
 			changingUsername: false,
 			changeUsernameNew: null,
+
+			followings: null,
 		};
 	},
 	mounted() {
@@ -444,6 +480,7 @@ const app = createApp({
 					this.moreComments = true;
 					this.fetchComments(this.post);
 					this.checkLike([this.post]);
+					this.checkFollow(this.post);
 
 					const p = this.posts.find(p => p.id === post.id);
 					p.views = json.views;
@@ -502,6 +539,14 @@ const app = createApp({
 				})
 				.catch(console.error);
 		},
+		checkFollow(post) {
+			if (!post) return;
+
+			fetch("/api/v1/user/follow?" + new URLSearchParams({user: post.poster.id}))
+				.then(res => res.json())
+				.then(json => post.following = json === true)
+				.catch(console.error);
+		},
 		fetchComments(post) {
 			if (this.fetchingComments) return;
 			this.fetchingComments = true;
@@ -536,9 +581,11 @@ const app = createApp({
 			})
 				.then(res => {
 					if (res.status === 200) return res.json();
+					else if (res.status === 500) return res.json();
 				})
 				.then(json => {
 					if (!json) return;
+					if (json.message) return this.showMessage(json.message);
 
 					post.like = json.liked;
 					post.likes = json.likes;
@@ -611,6 +658,52 @@ const app = createApp({
 						this.currentComment = 0;
 						this.moreComments = true;
 						this.fetchComments(post);
+					}
+				})
+				.catch(console.error);
+		},
+		follow(post) {
+			const following = post.following;
+			fetch("/api/v1/user/follow", {
+				method: following? "DELETE": "PUT",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					user: post.poster.id,
+				}),
+			})
+				.then(res => res.json())
+				.then(json => {
+					if (json === "true") {
+						if (following) {
+							this.showMessage("unfollowed");
+							post.following = false;
+						} else {
+							this.showMessage("followed");
+							post.following = true;
+						}
+					} else if (json.message) {
+						this.showMessage(json.message);
+					}
+				})
+				.catch(console.error);
+		},
+		unfollow(user) {
+			fetch("/api/v1/user/follow", {
+				method: "DELETE",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					user: user.id,
+				}),
+			})
+				.then(res => res.json())
+				.then(json => {
+					if (json === true) {
+						this.showMessage("unfollowed");
+						this.fetchFollowings();
 					}
 				})
 				.catch(console.error);
@@ -782,6 +875,21 @@ const app = createApp({
 				.then(text => {
 					this.showMessage("logout success");
 					this.checkLogin();
+				})
+				.catch(console.error);
+		},
+		toggleFollows(show) {
+			this.showFollows = show;
+			if (show) this.fetchFollowings();
+		},
+		fetchFollowings() {
+			this.followings = null;
+			fetch("/api/v1/user/followings?" + new URLSearchParams({
+				user: 0,
+			}))
+				.then(res => res.json())
+				.then(json => {
+					this.followings = json.followings;
 				})
 				.catch(console.error);
 		},

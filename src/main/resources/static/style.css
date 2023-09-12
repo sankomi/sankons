@@ -252,6 +252,26 @@ input::file-selector-button {
 	vertical-align: middle;
 	fill: currentcolor;
 }
+.post__follow {
+	display: inline-block;
+	padding: 0;
+	margin: 0;
+	border: none;
+
+	color: #888;
+	background-color: transparent;
+
+	transition: color 0.5s;
+}
+.post__follow > svg {
+	display: block;
+	height: 1rem;
+
+	fill: currentcolor;
+}
+.post__follow--following {
+	color: gold;
+}
 .post__image {
 	flex-shrink: 0;
 
@@ -552,4 +572,25 @@ input::file-selector-button {
 }
 .menu__form + .menu__form {
 	margin-top: 2rem;
+}
+
+.follows {
+	padding: 0;
+
+	list-style-type: none;
+}
+.follows__delete {
+	display: inline-block;
+	padding: 0;
+	margin: 0 0 0 auto;
+	border: none;
+
+	color: red;
+	background-color: transparent;
+}
+.follows__delete > svg {
+	display: block;
+	height: 1rem;
+
+	fill: currentcolor;
 }
